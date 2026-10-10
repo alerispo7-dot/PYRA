@@ -1,6 +1,14 @@
 #!/bin/bash
 # PYRA - installazione su macOS / installation on macOS
 cd "$(dirname "$0")"
+if [ ! -d PYRA.vst3 ] || [ ! -d PYRA.component ]; then
+  echo ""
+  echo "In questa cartella non c'e' un PYRA gia' compilato."
+  echo "Se hai scaricato il codice sorgente, usa invece 'build_mac.command' nella cartella PYRA principale."
+  echo ""
+  read -p "Premi Invio per chiudere..."
+  exit 1
+fi
 VST3="$HOME/Library/Audio/Plug-Ins/VST3"
 AU="$HOME/Library/Audio/Plug-Ins/Components"
 mkdir -p "$VST3" "$AU"
