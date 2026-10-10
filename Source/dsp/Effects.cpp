@@ -46,8 +46,9 @@ void Biquad::setHighShelf (float sr, float f, float db)
 }
 
 //==============================================================================
-void FxChain::init (juce::AudioProcessorValueTreeState& st)
+void FxChain::init (juce::AudioProcessorValueTreeState& st, GlitchPattern& gp)
 {
+    glitchPattern = &gp;
     auto p = [&st] (const char* id) { auto* v = st.getRawParameterValue (id); jassert (v != nullptr); return v; };
 
     for (int d = 0; d < FxDestCount; ++d) modParam[d] = st.getParameter (choices::fxDestParamId (d));
@@ -64,6 +65,10 @@ void FxChain::init (juce::AudioProcessorValueTreeState& st)
              p ("fx_rev_width"), p ("fx_rev_shim"), p ("fx_rev_mix") };
     pe   = { p ("fx_eq_on"), p ("fx_eq_lowf"), p ("fx_eq_lowg"), p ("fx_eq_midf"), p ("fx_eq_midg"), p ("fx_eq_midq"),
              p ("fx_eq_highf"), p ("fx_eq_highg") };
+    pg   = { p ("fx_glt_on"), p ("fx_glt_rate"), p ("fx_glt_steps"), p ("fx_glt_chance"), p ("fx_glt_smooth"), p ("fx_glt_mix") };
+    pgr  = { p ("fx_grn_on"), p ("fx_grn_size"), p ("fx_grn_density"), p ("fx_grn_spray"), p ("fx_grn_pitch"), p ("fx_grn_prand"),
+             p ("fx_grn_rev"), p ("fx_grn_freeze"), p ("fx_grn_width"), p ("fx_grn_mix") };
+    psh  = { p ("fx_shf_on"), p ("fx_shf_mode"), p ("fx_shf_freq"), p ("fx_shf_fb"), p ("fx_shf_width"), p ("fx_shf_mix") };
     pcmp = { p ("fx_comp_on"), p ("fx_comp_thresh"), p ("fx_comp_ratio"), p ("fx_comp_att"), p ("fx_comp_rel"),
              p ("fx_comp_makeup"), p ("fx_comp_mix") };
 }
@@ -94,6 +99,11 @@ void FxChain::prepare (double sampleRate, int maxBlock)
     maxChunk = std::max (64, std::min (maxBlock, 2048));
     tmpL.assign ((size_t) maxChunk, 0.0f);
     tmpR.assign ((size_t) maxChunk, 0.0f);
+    wetL.assign ((size_t) maxChunk, 0.0f);
+    wetR.assign ((size_t) maxChunk, 0.0f);
+    glitch.prepare (sr);
+    granular.prepare (sr);
+    shifter.prepare (sr);
 
     oversampler = std::make_unique<juce::dsp::Oversampling<float>> (2, 1, juce::dsp::Oversampling<float>::filterHalfBandPolyphaseIIR, true, true);
     oversampler->initProcessing ((size_t) maxChunk);
@@ -111,7 +121,7 @@ void FxChain::prepare (double sampleRate, int maxBlock)
     for (auto& d : revLine) d.prepare ((int) (sr * 0.25f));
     shimLine.prepare ((int) (sr * 0.2f));
 
-    for (auto* m : { &fdDist, &fdRes, &fdFlt, &fdCho, &fdFla, &fdPha, &fdTape, &fdDly, &fdRev, &fdEq, &fdComp })
+    for (auto* m : { &fdDist, &fdRes, &fdFlt, &fdCho, &fdFla, &fdPha, &fdTape, &fdDly, &fdRev, &fdEq, &fdComp, &fdGlt, &fdGrn, &fdShf })
         m->prepare (sr);
     rng.seed (0x5eed1234u);
     reset();
@@ -134,21 +144,26 @@ void FxChain::reset()
     eqLow.reset(); eqMid.reset(); eqHigh.reset();
     compEnvDb = 0.0f; shimFb = 0.0f; dlyTimeSmoothed = -1.0f;
     for (auto& r : resLp) r[0] = r[1] = 0.0f;
+    glitch.reset(); granular.reset(); shifter.reset();
 }
 
-void FxChain::process (float* l, float* r, int n, double bpm)
+void FxChain::process (float* l, float* r, int n, const FxTransport& tr)
 {
+    const double bpm = tr.bpm > 1.0 ? tr.bpm : 120.0;
     int done = 0;
     while (done < n)
     {
         const int len = std::min (maxChunk, n - done);
-        processChunk (l + done, r + done, len, bpm);
+        double beat;
+        if (tr.playing) { beat = tr.ppq + (double) done / sr * bpm / 60.0; freeBeat = beat + (double) len / sr * bpm / 60.0; }
+        else { beat = freeBeat; freeBeat += (double) len / sr * bpm / 60.0; }
+        processChunk (l + done, r + done, len, bpm, beat);
         done += len;
     }
 }
 
 //==============================================================================
-void FxChain::processChunk (float* l, float* r, int n, double bpm)
+void FxChain::processChunk (float* l, float* r, int n, double bpm, double beat)
 {
     float* tl = tmpL.data();
     float* tr = tmpR.data();
@@ -301,6 +316,34 @@ void FxChain::processChunk (float* l, float* r, int n, double bpm)
                 io[ch][s] = dry + (y - dry) * mix;
             }
     });
+
+    // ------------------------------------------------------------ Shifter (frequency shifter / ring mod)
+    run (fdShf, b (psh.on) || forced (FxShfMix), [&] (float* L, float* R)
+    {
+        ShifterFx::Params sp;
+        sp.mode = i (psh.mode); sp.freq = fo (FxShfFreq, psh.freq); sp.feedback = f (psh.fb); sp.width = f (psh.width);
+        const float mix = fmix (FxShfMix, psh.on, psh.mix);
+        std::copy (L, L + n, wetL.data()); std::copy (R, R + n, wetR.data());
+        shifter.process (wetL.data(), wetR.data(), n, sp);
+        for (int k = 0; k < n; ++k) { L[k] += (wetL[(size_t) k] - L[k]) * mix; R[k] += (wetR[(size_t) k] - R[k]) * mix; }
+    });
+
+    // ------------------------------------------------------------ Granular
+    {
+        const bool on = b (pgr.on) || forced (FxGrnMix);
+        if (! fdGrn.active (on)) granular.idle (l, r, n);
+        run (fdGrn, on, [&] (float* L, float* R)
+        {
+            GranularFx::Params gp;
+            gp.sizeMs = f (pgr.size); gp.density = f (pgr.density); gp.spray = fo (FxGrnSpray, pgr.spray);
+            gp.pitch = fo (FxGrnPitch, pgr.pitch); gp.pitchRand = f (pgr.prand); gp.reverse = f (pgr.rev);
+            gp.freeze = b (pgr.freeze) && b (pgr.on); gp.width = f (pgr.width);
+            const float mix = fmix (FxGrnMix, pgr.on, pgr.mix);
+            std::copy (L, L + n, wetL.data()); std::copy (R, R + n, wetR.data());
+            granular.process (wetL.data(), wetR.data(), n, gp);
+            for (int k = 0; k < n; ++k) { L[k] += (wetL[(size_t) k] - L[k]) * mix; R[k] += (wetR[(size_t) k] - R[k]) * mix; }
+        });
+    }
 
     // ------------------------------------------------------------ Chorus
     run (fdCho, b (pc.on), [&] (float* L, float* R)
@@ -572,6 +615,23 @@ void FxChain::processChunk (float* l, float* r, int n, double bpm)
             R[k] = in[1] * (1.0f - mix * 0.5f) + orr * mix;
         }
     });
+
+    // ------------------------------------------------------------ Glitch (step effects)
+    {
+        const bool on = b (pg.on) || forced (FxGltMix);
+        if (! fdGlt.active (on)) glitch.idle (l, r, n);
+        run (fdGlt, on, [&] (float* L, float* R)
+        {
+            GlitchFx::Params gp;
+            gp.rateIndex = i (pg.rate); gp.steps = i (pg.steps); gp.smooth = f (pg.smooth);
+            gp.patternOn = b (pg.on);
+            gp.chance = juce::jlimit (0.0f, 1.0f, b (pg.on) ? fo (FxGltChance, pg.chance) : offsets[FxGltChance]);
+            const float mix = fmix (FxGltMix, pg.on, pg.mix);
+            std::copy (L, L + n, wetL.data()); std::copy (R, R + n, wetR.data());
+            glitch.process (wetL.data(), wetR.data(), n, beat, bpm, gp, *glitchPattern);
+            for (int k = 0; k < n; ++k) { L[k] += (wetL[(size_t) k] - L[k]) * mix; R[k] += (wetR[(size_t) k] - R[k]) * mix; }
+        });
+    }
 
     // ------------------------------------------------------------ EQ
     run (fdEq, b (pe.on), [&] (float* L, float* R)

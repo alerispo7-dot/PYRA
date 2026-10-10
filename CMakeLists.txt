@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(PYRA VERSION 0.1.0 LANGUAGES C CXX)
+project(PYRA VERSION 0.6.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -52,12 +52,18 @@ set(PYRA_SOURCES
     Source/PluginEditor.cpp
     Source/Params.cpp
     Source/ParamsExtra.cpp
+    Source/ParamsPhase6.cpp
+    Source/History.cpp
+    Source/Randomizer.cpp
+    Source/dsp/Creative.cpp
+    Source/dsp/Chords.cpp
     Source/Presets.cpp
     Source/dsp/Effects.cpp
     Source/dsp/Arp.cpp
     Source/dsp/Movement.cpp
     Source/dsp/Samples.cpp
     Source/Lang.cpp
+    Source/LangExtra.cpp
     Source/dsp/Wavetables.cpp
     Source/dsp/Voice.cpp
     Source/dsp/Engine.cpp
@@ -66,7 +72,7 @@ set(PYRA_SOURCES
     Source/ui/Pages.cpp
     Source/ui/Pages3.cpp
     Source/ui/Pages5.cpp
-    Source/ui/PageSample.cpp
+    Source/ui/PageChords.cpp
     Source/ui/PresetUi.cpp)
 
 juce_add_binary_data(PyraData SOURCES Resources/FactoryPresets.json.gz)
@@ -110,7 +116,7 @@ if(PYRA_BUILD_TESTS)
     target_include_directories(PyraRenderTest PRIVATE Source)
     target_compile_definitions(PyraRenderTest PRIVATE ${PYRA_DEFINITIONS}
         JucePlugin_Name="PYRA" JucePlugin_IsSynth=1 JucePlugin_WantsMidiInput=1
-        JucePlugin_ProducesMidiOutput=0 JucePlugin_IsMidiEffect=0 JucePlugin_VersionString="0.1.0"
+        JucePlugin_ProducesMidiOutput=0 JucePlugin_IsMidiEffect=0 JucePlugin_VersionString="0.6.0"
         JUCE_STANDALONE_APPLICATION=1)
     target_link_libraries(PyraRenderTest PRIVATE
         PyraData juce::juce_audio_utils juce::juce_dsp

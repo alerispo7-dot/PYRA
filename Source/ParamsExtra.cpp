@@ -57,7 +57,8 @@ namespace choices
     }
 
     static const char* kFxDestIds[FxDestCount] = { "fx_dist_drive", "fx_dist_mix", "fx_res_mix", "fx_flt_cutoff", "fx_flt_res",
-        "fx_cho_mix", "fx_fla_mix", "fx_pha_mix", "fx_tape_wow", "fx_dly_mix", "fx_dly_fb", "fx_rev_mix", "fx_rev_size" };
+        "fx_cho_mix", "fx_fla_mix", "fx_pha_mix", "fx_tape_wow", "fx_dly_mix", "fx_dly_fb", "fx_rev_mix", "fx_rev_size",
+        "fx_glt_mix", "fx_glt_chance", "fx_grn_mix", "fx_grn_spray", "fx_grn_pitch", "fx_shf_mix", "fx_shf_freq" };
 
     const char* fxDestParamId (int d) { return kFxDestIds[juce::jlimit (0, FxDestCount - 1, d)]; }
 
@@ -68,7 +69,8 @@ namespace choices
             auto r = modDestinations();
             for (auto* n : { "FX Distortion Drive", "FX Distortion Mix", "FX Resonator Mix", "FX Filter Cutoff", "FX Filter Reso",
                              "FX Chorus Mix", "FX Flanger Mix", "FX Phaser Mix", "FX Tape Wow", "FX Delay Mix", "FX Delay Feedback",
-                             "FX Reverb Mix", "FX Reverb Size" })
+                             "FX Reverb Mix", "FX Reverb Size", "FX Glitch Mix", "FX Glitch Chance", "FX Granular Mix",
+                             "FX Granular Spray", "FX Granular Pitch", "FX Shifter Mix", "FX Shifter Freq" })
                 r.add (n);
             return r;
         }();

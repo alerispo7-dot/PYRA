@@ -3,6 +3,7 @@
 #include "../Lang.h"
 #include "../PluginProcessor.h"
 #include "../dsp/Wavetables.h"
+#include "../Randomizer.h"
 
 namespace pyra
 {
@@ -98,6 +99,7 @@ namespace
             fmSrc = b.combo (pid::osc (index, "fmSrc"));
             fmAmt = b.knob (pid::osc (index, "fmAmt"), "FM");
             route = b.combo (pid::osc (index, "route"));
+            enableDice ([pr = &ui.proc, index] (bool v) { randomizer::randomizeSection (*pr, "osc" + juce::String (index), v, (uint32_t) juce::Random::getSystemRandom().nextInt()); });
         }
 
         void step (int d)
@@ -121,9 +123,9 @@ namespace
         {
             const int w = getWidth();
             on->setBounds (9, 4, 22, 18);
-            wt->setBounds (96, 3, w - 96 - 64, 21);
-            prev.setBounds (w - 62, 3, 26, 21);
-            next.setBounds (w - 33, 3, 26, 21);
+            wt->setBounds (96, 3, w - 96 - 64 - diceSpace, 21);
+            prev.setBounds (w - 62 - diceSpace, 3, 26, 21);
+            next.setBounds (w - 33 - diceSpace, 3, 26, 21);
             view.setBounds (8, 30, w - 16, 82);
             rowOfKnobs ({ level, pan, pos, oct, semi, fine }, { 8, 115, w - 16, 58 });
             rowOfKnobs ({ voices, detune, blend, width, phase, rand }, { 8, 176, w - 16, 58 });
@@ -164,6 +166,7 @@ namespace
             noiseLevel = b.knob ("noise_level", "Level");
             noiseColor = b.knob ("noise_color", "Color");
             noisePan = b.knob ("noise_pan", "Pan", false);
+            enableDice ([pr = &ui.proc] (bool v) { randomizer::randomizeSection (*pr, "subnoise", v, (uint32_t) juce::Random::getSystemRandom().nextInt()); });
         }
 
         void paint (juce::Graphics& g) override
@@ -178,7 +181,7 @@ namespace
             const int w = getWidth();
             subOn->setBounds (8, 5, 70, 20);
             subShape->setBounds (80, 4, 96, 21);
-            subRoute->setBounds (182, 4, w - 190, 21);
+            subRoute->setBounds (182, 4, w - 190 - diceSpace, 21);
             rowOfKnobs ({ subOct, subLevel, subPan }, { 8, 31, w - 16, 60 });
 
             noiseOn->setBounds (8, 102, 70, 20);
@@ -328,6 +331,7 @@ namespace
             key = b.knob (pid::filt (index, "key"), "Key Track", false);
             env = b.knob (pid::filt (index, "env"), "Env 2");
             addAndMakeVisible (view);
+            enableDice ([pr = &ui.proc, index] (bool v) { randomizer::randomizeSection (*pr, "filter" + juce::String (index), v, (uint32_t) juce::Random::getSystemRandom().nextInt()); });
         }
 
         void resized() override
@@ -335,7 +339,7 @@ namespace
             const int w = getWidth();
             on->setBounds (9, 4, 22, 18);
             type->setBounds (120, 3, 120, 21);
-            if (routing != nullptr) routing->setBounds (w - 118, 3, 108, 21);
+            if (routing != nullptr) routing->setBounds (w - 118 - diceSpace, 3, 108, 21);
             cutoff->setBounds (8, 30, 104, 120);
             rowOfKnobs ({ res, drive, mix }, { 112, 30, 198, 72 });
             rowOfKnobs ({ key, env }, { 112, 106, 132, 72 });
@@ -377,6 +381,10 @@ namespace
             }
             addAndMakeVisible (view);
             select (0);
+            enableDice ([this, pr = &ui.proc] (bool v)
+            {
+                randomizer::randomizeSection (*pr, "env" + juce::String (current + 1), v, (uint32_t) juce::Random::getSystemRandom().nextInt());
+            });
         }
 
         void select (int e)
@@ -395,18 +403,22 @@ namespace
             Panel::paint (g);
             g.setColour (colours::textDim);
             g.setFont (PyraLookAndFeel::font (11.0f));
+            const int kx = viewW + 12, kw = (getWidth() - kx - 6) / 6;
             g.drawText (current == 0 ? tr ("Env 1 = volume") : tr ("Drag ENV onto a knob"),
-                        juce::Rectangle<int> (186 + 3 * 52, 120, getWidth() - 194 - 3 * 52, 40), juce::Justification::centred);
+                        juce::Rectangle<int> (kx + 4 * kw, 120, getWidth() - kx - 4 * kw - 8, 40), juce::Justification::centred);
         }
+
+        static constexpr int viewW = 150;
 
         void resized() override
         {
             for (int i = 0; i < kNumEnv; ++i) badges[i]->setBounds (8 + i * 64, 4, 60, 20);
-            view.setBounds (8, 30, 172, getHeight() - 38);
+            view.setBounds (8, 30, viewW, getHeight() - 38);
+            const int kx = viewW + 12, kw = (getWidth() - kx - 6) / 6;
             for (auto& s : sets)
             {
-                rowOfKnobs ({ s.k[0], s.k[1], s.k[2], s.k[3], s.k[4], s.k[5] }, { 184, 30, getWidth() - 190, 76 });
-                rowOfKnobs ({ s.k[6], s.k[7], s.k[8] }, { 184, 108, 3 * 52, 74 });
+                rowOfKnobs ({ s.k[0], s.k[1], s.k[2], s.k[3], s.k[4], s.k[5] }, { kx, 30, kw * 6, 76 });
+                rowOfKnobs ({ s.k[6], s.k[7], s.k[8] }, { kx, 108, kw * 4, 74 });
             }
         }
 
@@ -457,6 +469,10 @@ namespace
             }
             addAndMakeVisible (view);
             select (0);
+            enableDice ([this, pr = &ui.proc] (bool v)
+            {
+                randomizer::randomizeSection (*pr, "lfo" + juce::String (current + 1), v, (uint32_t) juce::Random::getSystemRandom().nextInt());
+            });
         }
 
         void select (int l)
@@ -478,15 +494,16 @@ namespace
         void resized() override
         {
             for (int i = 0; i < kNumLfo; ++i) badges[i]->setBounds (8 + i * 64, 4, 60, 20);
-            view.setBounds (8, 30, 172, getHeight() - 38);
+            view.setBounds (8, 30, 150, getHeight() - 38);
+            const int x = 164, w = getWidth() - x - 6 - diceSpace;
             for (auto& s : sets)
             {
-                s.shape->setBounds (186, 31, 116, 21);
-                s.mode->setBounds (306, 31, 96, 21);
-                s.uni->setBounds (408, 31, 88, 21);
-                s.sync->setBounds (186, 58, 66, 21);
-                s.div->setBounds (254, 58, 84, 21);
-                rowOfKnobs ({ s.rate, s.phase, s.delay, s.fade, s.smooth }, { 184, 88, getWidth() - 190, 92 });
+                s.shape->setBounds (x, 31, w * 40 / 100, 21);
+                s.mode->setBounds (x + w * 40 / 100 + 4, 31, w * 32 / 100, 21);
+                s.uni->setBounds (x + w * 72 / 100 + 8, 31, w - w * 72 / 100 - 8, 21);
+                s.sync->setBounds (x, 58, 66, 21);
+                s.div->setBounds (x + 70, 58, 84, 21);
+                rowOfKnobs ({ s.rate, s.phase, s.delay, s.fade, s.smooth }, { x - 2, 88, w + 2, 92 });
             }
         }
 
@@ -533,16 +550,18 @@ namespace
                 addAndMakeVisible (badge);
                 knobs[m] = b.knob (pid::macro (m), "Macro " + juce::String (m + 1), false);
             }
+            enableDice ([pr = &ui.proc] (bool v) { randomizer::randomizeSection (*pr, "macro", v, (uint32_t) juce::Random::getSystemRandom().nextInt()); });
         }
 
         void resized() override
         {
-            const int cw = (getWidth() - 16) / 2, ch = (getHeight() - 30) / 2;
+            // one row of four; the badges sit in the header
+            const int cw = (getWidth() - 16) / kNumMacros;
             for (int m = 0; m < kNumMacros; ++m)
             {
-                const int x = 8 + (m % 2) * cw, y = 28 + (m / 2) * ch;
-                badges[m]->setBounds (x + 4, y, 34, 18);
-                knobs[m]->setBounds (x, y + 14, cw, ch - 14);
+                const int x = 8 + m * cw;
+                badges[m]->setBounds (x + (cw - 32) / 2, getHeight() - 20, 32, 17);
+                knobs[m]->setBounds (x, 20, cw, getHeight() - 40);
             }
         }
 
@@ -552,11 +571,44 @@ namespace
     };
 
     //==========================================================================
+    /** Voice mode + portamento (glide), right on the main page. */
+    class VoicePanel : public Panel
+    {
+    public:
+        explicit VoicePanel (UiContext& ui) : Panel (tr ("VOICE & PORTAMENTO"))
+        {
+            Builder b { ui, *this, owned };
+            mode = b.combo ("voiceMode");
+            type = b.combo ("glide_type");
+            glide = b.knob ("glide", "Portamento", false);
+            legato = b.toggle ("glideLegato", tr ("Only legato"));
+            mode->setTooltip (tr ("Poly = chords. Mono = one note, retriggers. Legato = one note, slides without retriggering."));
+            type->setTooltip (tr ("Constant Time: every slide takes the same time. Constant Rate: bigger jumps take longer."));
+            glide->setTooltip (tr ("Portamento: notes slide into each other. 0 = off. Works in Poly, Mono and Legato."));
+            legato->setTooltip (tr ("Slide only when you play a note while another is still held"));
+            enableDice ([pr = &ui.proc] (bool v) { randomizer::randomizeSection (*pr, "voice", v, (uint32_t) juce::Random::getSystemRandom().nextInt()); });
+        }
+
+        void resized() override
+        {
+            const int w = getWidth(), cw = (w - 106 - diceSpace) / 2;
+            glide->setBounds (w - 90 - diceSpace, 4, 82, getHeight() - 6);
+            mode->setBounds (10, 30, cw, 22);
+            type->setBounds (14 + cw, 30, cw, 22);
+            legato->setBounds (10, 57, w - 110 - diceSpace, 20);
+        }
+
+        juce::OwnedArray<juce::Component> owned;
+        ParamCombo* mode, *type; Knob* glide; ParamToggle* legato;
+    };
+
+    //==========================================================================
     class SynthPage : public Page
     {
     public:
-        explicit SynthPage (UiContext& ui) : subNoise (ui), envs (ui), lfos (ui), macros (ui)
+        explicit SynthPage (UiContext& ui) : subNoise (ui), envs (ui), lfos (ui), macros (ui), voice (ui)
         {
+            addAndMakeVisible (voice);
             for (int o = 0; o < kNumOsc; ++o) addAndMakeVisible (oscs.add (new OscPanel (ui, o)));
             for (int f = 0; f < kNumFilters; ++f) addAndMakeVisible (filters.add (new FilterPanel (ui, f)));
             for (auto* c : std::initializer_list<juce::Component*> { &subNoise, &envs, &lfos, &macros }) addAndMakeVisible (c);
@@ -586,9 +638,13 @@ namespace
             filters[1]->setBounds (m + 300 + m + fw + m, y2, fw, h2);
 
             const int y3 = y2 + h2 + m, h3 = getHeight() - y3 - m - 26;
-            envs.setBounds (m, y3, 500, h3);
-            lfos.setBounds (m + 500 + m, y3, 500, h3);
-            macros.setBounds (m + 1000 + 2 * m, y3, w - (m + 1000 + 2 * m) - m, h3);
+            const int ew = 452;
+            envs.setBounds (m, y3, ew, h3);
+            lfos.setBounds (m + ew + m, y3, ew, h3);
+            const int rx = m + 2 * ew + 2 * m, rw = w - rx - m;
+            const int vh = 84;
+            voice.setBounds (rx, y3, rw, vh);
+            macros.setBounds (rx, y3 + vh + 6, rw, h3 - vh - 6);
 
             int x = m;
             for (auto* s : sources) { s->setBounds (x, getHeight() - 24, 62, 20); x += 66; }
@@ -616,6 +672,7 @@ namespace
         EnvPanel envs;
         LfoPanel lfos;
         MacroPanel macros;
+        VoicePanel voice;
         juce::OwnedArray<ModSourceBadge> sources;
     };
 
@@ -639,6 +696,12 @@ namespace
                 r.att = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (ui.st, pid::mod (s, "amt"), *r.amt);
                 r.amt->textFromValueFunction = [] (double v) { return juce::String (juce::roundToInt (v * 100.0)) + "%"; };
                 r.amt->updateText();
+                r.dice = std::make_unique<DiceButton>();
+                r.dice->onRoll = [pr = &ui.proc, s] (bool v)
+                {
+                    randomizer::randomizeSection (*pr, "mod" + juce::String (s + 1), v, (uint32_t) juce::Random::getSystemRandom().nextInt());
+                };
+                addAndMakeVisible (r.dice.get());
                 r.clear = std::make_unique<juce::TextButton> ("x");
                 r.clear->setTooltip (tr ("Clear this slot"));
                 r.clear->onClick = [this, s] { matrix.clearSlot (s); };
@@ -696,7 +759,9 @@ namespace
                 r.src->setBounds (b.removeFromLeft (150));
                 b.removeFromLeft (10);
                 r.clear->setBounds (b.removeFromRight (26));
-                b.removeFromRight (8);
+                b.removeFromRight (4);
+                r.dice->setBounds (b.removeFromRight (24));
+                b.removeFromRight (6);
                 r.dst->setBounds (b.removeFromRight (200));
                 b.removeFromRight (10);
                 r.amt->setBounds (b);
@@ -709,6 +774,7 @@ namespace
             std::unique_ptr<juce::Slider> amt;
             std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> att;
             std::unique_ptr<juce::TextButton> clear;
+            std::unique_ptr<DiceButton> dice;
         };
         ModMatrixAccess& matrix;
         std::vector<Row> rows;
@@ -729,6 +795,7 @@ namespace
             mode = bv.combo ("voiceMode");
             glide = bv.knob ("glide", "Glide", false);
             glideLegato = bv.toggle ("glideLegato", tr ("Glide only when legato"));
+            glideType = bv.combo ("glide_type");
             bendUp = bv.knob ("bendUp", "Bend Up", false);
             bendDown = bv.knob ("bendDown", "Bend Down", false);
             velAmp = bv.knob ("velAmp", "Vel > Amp", false);
@@ -736,6 +803,8 @@ namespace
             tune = bv.knob ("tune", "Tune", false);
             master = bv.knob ("master", "Volume", false);
 
+            voice.enableDice ([pr = &ui.proc] (bool v) { randomizer::randomizeSection (*pr, "voice", v, (uint32_t) juce::Random::getSystemRandom().nextInt()); });
+            mpePanel.enableDice ([pr = &ui.proc] (bool v) { randomizer::randomizeSection (*pr, "mpe", v, (uint32_t) juce::Random::getSystemRandom().nextInt()); });
             Builder bm { ui, mpePanel, owned };
             mpe = bm.toggle ("mpe", tr ("MPE on"));
             mpeRange = bm.knob ("mpeRange", "Bend Range", false);
@@ -759,7 +828,7 @@ namespace
             aboutText.setColour (juce::TextEditor::backgroundColourId, juce::Colours::transparentBlack);
             aboutText.setColour (juce::TextEditor::outlineColourId, juce::Colours::transparentBlack);
             aboutText.setFont (PyraLookAndFeel::font (13.5f));
-            aboutText.setText (tr ("ABOUT_TEXT"));
+            aboutText.setText (tr ("ABOUT_TEXT") + "\n\n" + tr ("SAMPLE_CREDITS"));
 
             voiceHelp = tr ("Poly = chords. Mono = one note, retriggers. Legato = one note, slides without retriggering.");
         }
@@ -790,7 +859,8 @@ namespace
 
             rowOfKnobs ({ poly, glide, bendUp, bendDown, velAmp, transpose, tune, master }, { 10, 34, 800, 90 });
             mode->setBounds (14, 140, 140, 24);
-            glideLegato->setBounds (170, 140, 260, 24);
+            glideLegato->setBounds (170, 140, 240, 24);
+            glideType->setBounds (420, 140, 170, 24);
 
             mpe->setBounds (14, 34, 120, 24);
             mpeRange->setBounds (14, 70, 90, 90);
@@ -806,7 +876,7 @@ namespace
         std::function<void()> onLanguageChanged;
         juce::OwnedArray<juce::Component> owned;
         Knob* poly, *glide, *bendUp, *bendDown, *velAmp, *transpose, *tune, *master, *mpeRange;
-        ParamCombo* mode; ParamToggle* glideLegato, *mpe;
+        ParamCombo* mode, *glideType; ParamToggle* glideLegato, *mpe;
         juce::TextButton en, it;
         juce::TextEditor aboutText;
         juce::String voiceHelp;

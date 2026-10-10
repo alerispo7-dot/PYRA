@@ -5,6 +5,9 @@
 #include "Lang.h"
 #include "Presets.h"
 #include "dsp/Samples.h"
+#include "Randomizer.h"
+#include <set>
+#include "ui/Widgets.h"
 
 using namespace pyra;
 
@@ -149,8 +152,32 @@ static void snapshots (pyra::lang::Language language, const juce::String& suffix
             "page" + juce::String (i) + "_" + tabs[i]->getButtonText().removeCharacters (" ") + suffix + ".png");
         f.getParentDirectory().createDirectory();
         f.deleteFile();
-        juce::FileOutputStream os (f);
-        juce::PNGImageFormat().writeImageToStream (img, os);
+        {
+            juce::FileOutputStream os (f);
+            juce::PNGImageFormat().writeImageToStream (img, os);
+        }
+
+        // the FX page has a second view
+        std::function<juce::TextButton* (juce::Component*)> findGlitchTab = [&] (juce::Component* c) -> juce::TextButton*
+        {
+            for (auto* ch : c->getChildren())
+            {
+                if (auto* b = dynamic_cast<juce::TextButton*> (ch))
+                    if (b->getButtonText().startsWith ("GLITCH /") && b->getParentComponent()->isVisible()) return b;
+                if (auto* r = findGlitchTab (ch)) return r;
+            }
+            return nullptr;
+        };
+        if (auto* gt = findGlitchTab (root))
+        {
+            p.glitchPattern.randomize (16, 5);
+            if (gt->onClick) gt->onClick();
+            auto img2 = ed->createComponentSnapshot (ed->getLocalBounds(), true, 1.0f);
+            auto f2 = f.getSiblingFile (f.getFileNameWithoutExtension() + "_creative.png");
+            f2.deleteFile();
+            juce::FileOutputStream os2 (f2);
+            juce::PNGImageFormat().writeImageToStream (img2, os2);
+        }
     }
     std::printf ("UI snapshots written (%s)\n", suffix.toRawUTF8());
 }
@@ -438,7 +465,7 @@ int main (int argc, char** argv)
 
     // ---- Phase 3: every FX module on a plucky chord
     {
-        const char* mods[] = { "dist", "res", "flt", "cho", "fla", "pha", "tape", "dly", "rev", "eq", "comp" };
+        const char* mods[] = { "dist", "res", "flt", "shf", "grn", "cho", "fla", "pha", "tape", "dly", "rev", "glt", "eq", "comp" };
         for (auto* m : mods)
         {
             resetAll (p);
@@ -471,7 +498,7 @@ int main (int argc, char** argv)
         for (auto* m : mods) set (p, juce::String ("fx_") + m + "_on", 1);
         set (p, "polyphony", 16);
         auto r2 = render (p, "23_all_fx_on", 4.0, chord (0.0, 2.0, { 36, 48, 55, 60, 64, 67, 72 }));
-        std::printf ("     (all 11 effects: %.1f%% CPU)\n", r2.cpuRatio * 100.0);
+        std::printf ("     (all 14 effects: %.1f%% CPU)\n", r2.cpuRatio * 100.0);
     }
 
     // ---- ANALOG: full AGE vs clean
@@ -630,6 +657,319 @@ int main (int argc, char** argv)
         pm.setPersonalTags (first.id, {});
         if (! ok) ++failures;
         std::printf ("  %-26s %s (%d presets)\n", "30_preset_system", ok ? "ok" : "FAIL", factoryCount);
+    }
+
+    // ---- Phase 6: GLITCH / GRANULAR / SHIFTER, MANGLE, CHORDS, RANDOM, UNDO, typed values
+    {
+        FakePlayHead ph; ph.bpm = 124.0;
+        transport = &ph; p.setPlayHead (&ph);
+
+        // every glitch effect on every step
+        for (int fx = 1; fx < GCount; ++fx)
+        {
+            resetAll (p);
+            set (p, "fx_glt_on", 1);
+            for (int k = 0; k < kMaxGlitchSteps; ++k) p.glitchPattern.steps[(size_t) k].fx = (fx == GGate && (k & 1)) ? (int) GOff : fx;
+            render (p, "60_glitch_" + choices::glitchEffects()[fx].replace (" ", ""), 2.0, chord (0.0, 1.9, { 48, 55, 60, 64 }));
+        }
+        p.glitchPattern.clear();
+        resetAll (p);
+        set (p, "fx_glt_on", 1); set (p, "fx_glt_chance", 1.0f); set (p, "fx_glt_rate", 16);
+        render (p, "61_glitch_all_random", 3.0, chord (0.0, 2.9, { 48, 55, 60, 64 }));
+
+        // granular
+        resetAll (p);
+        set (p, "fx_grn_on", 1); set (p, "fx_grn_mix", 1.0f);
+        render (p, "62_granular_default", 2.5, chord (0.0, 2.0, { 48, 60, 67 }));
+        set (p, "fx_grn_pitch", 12); set (p, "fx_grn_density", 60); set (p, "fx_grn_size", 500); set (p, "fx_grn_spray", 1.0f);
+        render (p, "62_granular_dense_up", 2.5, chord (0.0, 2.0, { 48, 60, 67 }));
+        set (p, "fx_grn_pitch", -24); set (p, "fx_grn_rev", 1.0f); set (p, "fx_grn_size", 10); set (p, "fx_grn_density", 1);
+        render (p, "62_granular_sparse_rev", 2.5, chord (0.0, 2.0, { 48, 60, 67 }));
+        set (p, "fx_grn_freeze", 1); set (p, "fx_grn_pitch", 0); set (p, "fx_grn_density", 20); set (p, "fx_grn_size", 120);
+        set (p, "fx_grn_rev", 0.0f); set (p, "fx_grn_spray", 0.5f);
+        render (p, "62_granular_freeze", 3.0, chord (0.0, 1.0, { 48, 60, 67 }));   // keeps sounding after the notes stop
+
+        // shifter
+        resetAll (p);
+        set (p, "fx_shf_on", 1); set (p, "fx_shf_mix", 1.0f); set (p, "fx_shf_freq", 300.0f); set (p, "fx_shf_fb", 0.9f);
+        render (p, "63_shifter_freq_fb", 3.0, chord (0.0, 2.5, { 48, 60 }));
+        set (p, "fx_shf_mode", 1); set (p, "fx_shf_freq", -700.0f);
+        render (p, "63_shifter_ring", 2.0, chord (0.0, 1.5, { 48, 60 }));
+
+        // CHAOS at the top with MANGLE: must change the sound a lot and stay bounded
+        auto renderBuf = [&] (juce::AudioBuffer<float>& outBuf, double seconds)
+        {
+            p.prepareToPlay (kSr, kBlock);
+            const int total = (int) (seconds * kSr);
+            outBuf.setSize (2, total); outBuf.clear();
+            juce::AudioBuffer<float> b (2, kBlock);
+            for (int pos = 0; pos < total; pos += kBlock)
+            {
+                juce::MidiBuffer m;
+                if (pos == 0) for (int nn : { 48, 55, 60, 64 }) m.addEvent (juce::MidiMessage::noteOn (1, nn, 0.8f), 0);
+                ph.ppq = pos / kSr * ph.bpm / 60.0;
+                p.processBlock (b, m);
+                for (int c = 0; c < 2; ++c) outBuf.copyFrom (c, pos, b, c, 0, std::min (kBlock, total - pos));
+            }
+        };
+        resetAll (p);
+        juce::AudioBuffer<float> calm, wild;
+        renderBuf (calm, 3.0);
+        set (p, "chaos_amt", 1.0f); set (p, "chaos_mangle", 1.0f); set (p, "chaos_seed", 7);
+        renderBuf (wild, 3.0);
+        double diff = 0, ref = 0; float pk = 0; bool fin = true;
+        for (int c = 0; c < 2; ++c)
+            for (int i = 0; i < calm.getNumSamples(); ++i)
+            {
+                const float a = calm.getSample (c, i), w = wild.getSample (c, i);
+                if (! std::isfinite (w)) fin = false;
+                pk = std::max (pk, std::abs (w));
+                diff += (a - w) * (a - w); ref += a * a;
+            }
+        const double ratio = std::sqrt (diff / std::max (1e-9, ref));
+        const bool mangleOk = fin && pk < 1.01f && ratio > 0.6;
+        if (! mangleOk) ++failures;
+        std::printf ("  %-26s %s (difference to the calm sound: %.0f%%, peak %.2f)\n", "64_chaos_mangle_full", mangleOk ? "ok" : "FAIL", ratio * 100.0, pk);
+        set (p, "chaos_mangle", 0.0f);
+        renderBuf (wild, 3.0);
+        diff = 0;
+        for (int c = 0; c < 2; ++c) for (int i = 0; i < calm.getNumSamples(); ++i) { const float d = calm.getSample (c, i) - wild.getSample (c, i); diff += d * d; }
+        std::printf ("     (same CHAOS with MANGLE at 0: difference %.0f%%)\n", std::sqrt (diff / std::max (1e-9, ref)) * 100.0);
+
+        // CHORDS: theory
+        {
+            ChordPattern cp;
+            ChordSettings cs; cs.key = 0; cs.scale = 1; cs.size = 0;
+            const int degs[] = { 0, 4, 5, 3 };
+            juce::StringArray names, romans;
+            for (int k = 0; k < 4; ++k) { cp.slots[(size_t) k].degree = degs[k]; names.add (chordName (cp, k, cs)); romans.add (chordRoman (cp, k, cs)); }
+            cs.scale = 2;   // C minor: i VI III VII
+            cp.clear();
+            juce::StringArray minorNames;
+            for (int k = 0; k < 4; ++k) minorNames.add (chordName (cp, k, cs));
+            cs.size = 1; cs.scale = 1;
+            ChordPattern seventh; seventh.slots[0].degree = 4;
+            const auto g7 = chordName (seventh, 0, cs);
+            const bool ok = names.joinIntoString (" ") == "C G Am F" && romans.joinIntoString (" ") == "I V vi IV"
+                            && minorNames.joinIntoString (" ") == "Cm Ab Eb Bb" && g7 == "G7";
+            if (! ok) ++failures;
+            std::printf ("  %-26s %s (%s | %s | %s | %s)\n", "65_chord_theory", ok ? "ok" : "FAIL", names.joinIntoString (" ").toRawUTF8(),
+                         romans.joinIntoString (" ").toRawUTF8(), minorNames.joinIntoString (" ").toRawUTF8(), g7.toRawUTF8());
+
+            // random progressions are always made of valid chords
+            int badRandom = 0;
+            for (uint32_t sd = 1; sd < 300; ++sd)
+            {
+                ChordPattern rp;
+                rp.randomize (1 + (int) (sd % 8), (int) (sd % 20), (float) (sd % 10) / 9.0f, 0, sd);
+                ChordSettings rs; rs.scale = (int) (sd % 20); rs.key = (int) (sd % 12); rs.size = (int) (sd % 6); rs.voicing = (int) (sd % 4);
+                rs.inversion = (int) (sd % 4); rs.count = 1 + (int) (sd % 8);
+                std::vector<int> prev;
+                for (int k = 0; k < rs.count; ++k)
+                {
+                    auto n = chordNotes (rp, k, rs, prev);
+                    if (n.size() < 2 || n.front() < 20 || n.back() > 110) ++badRandom;
+                    prev = n;
+                }
+            }
+            if (badRandom > 0) ++failures;
+            std::printf ("  %-26s %s (300 random progressions, %d bad chords)\n", "65_chord_random", badRandom == 0 ? "ok" : "FAIL", badRandom);
+        }
+
+        // CHORDS: progression with the DAW playing (one chord per bar at 124 BPM), counted at the MIDI level
+        {
+            resetAll (p);
+            p.chordPattern.clear();
+            set (p, "chord_on", 1); set (p, "chord_count", 4); set (p, "chord_len", 2);
+            set (p, "env1_rel", 0.05f);
+            int noteOns = 0, firstBarOns = 0;
+            p.prepareToPlay (kSr, kBlock);
+            juce::AudioBuffer<float> b (2, kBlock);
+            const double barSec = 4.0 * 60.0 / ph.bpm;
+            const int total = (int) (barSec * 4.0 * kSr);
+            std::set<int> chordStarts;
+            for (int pos = 0; pos < total; pos += kBlock)
+            {
+                juce::MidiBuffer m;
+                if (pos == 0) m.addEvent (juce::MidiMessage::noteOn (1, 60, 0.8f), 0);
+                ph.ppq = pos / kSr * ph.bpm / 60.0;
+                juce::MidiBuffer copy (m);
+                p.chords.process (copy, kBlock, HostInfo { ph.bpm, ph.ppq, true, true });
+                for (const auto meta : copy)
+                    if (meta.getMessage().isNoteOn())
+                    {
+                        ++noteOns;
+                        if (pos + meta.samplePosition < (int) (barSec * kSr)) ++firstBarOns;
+                        chordStarts.insert ((int) std::lround ((pos + meta.samplePosition) / (barSec * kSr) * 4.0));
+                    }
+            }
+            const bool ok = noteOns >= 4 * 4 && firstBarOns >= 4 && firstBarOns <= 6 && chordStarts.size() >= 4;
+            if (! ok) ++failures;
+            std::printf ("  %-26s %s (%d note-ons in 4 bars, %d in the first bar)\n", "66_chords_progression", ok ? "ok" : "FAIL", noteOns, firstBarOns);
+            p.chords.prepare (kSr);
+            render (p, "66_chords_audio", 4.0, chord (0.0, 3.9, { 60 }));
+            set (p, "chord_rhythm", 6); set (p, "chord_strum", 0.5f); set (p, "chord_human", 1.0f); set (p, "chord_size", 5);
+            render (p, "66_chords_stabs_strum", 4.0, chord (0.0, 3.9, { 48 }));
+            set (p, "chord_rhythm", 0); set (p, "chord_strum", 0.0f); set (p, "chord_human", 0.1f);
+            set (p, "arp_on", 1); set (p, "arp_mode", 2);
+            render (p, "67_chords_into_arp", 4.0, chord (0.0, 3.9, { 60 }));
+            set (p, "arp_on", 0);
+            set (p, "chord_mode", 1); set (p, "chord_scale", 1);
+            render (p, "68_chord_per_key", 3.0, { { 0.0, 0.8, 60, 0.8f }, { 0.9, 0.8, 62, 0.8f }, { 1.8, 0.8, 67, 0.8f } });
+            set (p, "chord_on", 0);
+        }
+        p.setPlayHead (nullptr); transport = nullptr;
+
+        // RANDOM on every page: always playable, never silent, never deafening
+        {
+            int bad = 0;
+            float loudest = 0;
+            for (int page = 0; page <= (int) randomizer::Settings; ++page)
+                for (uint32_t sd = 1; sd <= 6; ++sd)
+                {
+                    resetAll (p);
+                    randomizer::randomize (p, (randomizer::Page) page, false, sd * 977u + (uint32_t) page);
+                    if (page == randomizer::Chords) set (p, "chord_on", 1);
+                    if (page == randomizer::Arp) set (p, "arp_on", 1);
+                    randomizer::randomize (p, (randomizer::Page) page, true, sd);
+                    p.prepareToPlay (kSr, kBlock);
+                    juce::AudioBuffer<float> b (2, kBlock);
+                    float pk = 0; bool fin = true;
+                    for (int blk = 0; blk < (int) (2.0 * kSr / kBlock); ++blk)
+                    {
+                        juce::MidiBuffer m;
+                        if (blk == 0) for (int nn : { 48, 55, 60, 64 }) m.addEvent (juce::MidiMessage::noteOn (1, nn, 0.8f), 0);
+                        if (blk == (int) (1.5 * kSr / kBlock)) for (int nn : { 48, 55, 60, 64 }) m.addEvent (juce::MidiMessage::noteOff (1, nn), 0);
+                        p.processBlock (b, m);
+                        for (int c = 0; c < 2; ++c) for (int i = 0; i < kBlock; ++i) { const float v = b.getSample (c, i); if (! std::isfinite (v)) fin = false; pk = std::max (pk, std::abs (v)); }
+                    }
+                    loudest = std::max (loudest, pk);
+                    if (! fin || pk < 0.003f || pk > 1.01f) { ++bad; std::printf ("     random page %d seed %u: peak %.3f\n", page, sd, pk); }
+                }
+            set (p, "chord_on", 0); set (p, "arp_on", 0);
+            if (bad > 0) ++failures;
+            std::printf ("  %-26s %s (8 pages x 6 seeds, loudest %.2f)\n", "69_random_every_page", bad == 0 ? "ok" : "FAIL", loudest);
+        }
+
+        // section dice: only that section changes
+        {
+            const char* secs[] = { "osc0", "osc1", "osc2", "subnoise", "filter0", "filter1", "env1", "env2", "lfo1", "lfo4", "voice", "macro",
+                                   "fx:dist", "fx:res", "fx:flt", "fx:shf", "fx:grn", "fx:cho", "fx:fla", "fx:pha", "fx:tape", "fx:dly",
+                                   "fx:rev", "fx:glt", "fx:eq", "fx:comp", "chaos", "focus", "motion", "age", "movement", "circuit",
+                                   "noise", "converter", "mod1", "mod16", "mpe" };
+            int bad = 0;
+            for (auto* sec : secs)
+            {
+                resetAll (p);
+                std::vector<float> before;
+                for (auto* ap : p.getParameters()) before.push_back (ap->getValue());
+                randomizer::randomizeSection (p, sec, false, 1234u);
+                randomizer::randomizeSection (p, sec, true, 99u);
+                int changed = 0, outside = 0;
+                juce::String outsideId;
+                const juce::String sc (sec);
+                for (int i = 0; i < p.getParameters().size(); ++i)
+                {
+                    auto* q = dynamic_cast<juce::RangedAudioParameter*> (p.getParameters()[i]);
+                    if (std::abs (q->getValue() - before[(size_t) i]) < 1.0e-6f) continue;
+                    ++changed;
+                    const auto id = q->getParameterID();
+                    bool mine = false;
+                    if (sc.startsWith ("fx:")) mine = id.startsWith ("fx_" + sc.substring (3) + "_");
+                    else if (sc.startsWith ("osc")) mine = id.startsWith (pid::osc (sc.getTrailingIntValue(), ""));
+                    else if (sc.startsWith ("filter")) mine = id.startsWith (pid::filt (sc.getTrailingIntValue(), "")) || id == "filterRouting";
+                    else if (sc.startsWith ("env")) mine = id.startsWith (pid::env (sc.getTrailingIntValue() - 1, ""));
+                    else if (sc.startsWith ("lfo")) mine = id.startsWith (pid::lfo (sc.getTrailingIntValue() - 1, ""));
+                    else if (sc.startsWith ("mod")) mine = id.startsWith ("mod" + juce::String (sc.getTrailingIntValue()) + "_");
+                    else if (sc == "subnoise") mine = id.startsWith ("sub_") || id.startsWith ("noise_");
+                    else if (sc == "voice") mine = id == "voiceMode" || id.startsWith ("glide") || id.startsWith ("bend") || id == "velAmp";
+                    else if (sc == "macro") mine = id.startsWith ("macro");
+                    else if (sc == "chaos") mine = id.startsWith ("chaos_");
+                    else if (sc == "focus") mine = id.startsWith ("focus");
+                    else if (sc == "motion") mine = id.startsWith ("motion_");
+                    else if (sc == "mpe") mine = id == "mpeRange";
+                    else mine = id.startsWith ("an_") || id == "drift" || id == "spread";
+                    if (! mine) { ++outside; outsideId = id; }
+                }
+                if (changed == 0 || outside > 0) { ++bad; std::printf ("     dice %s: %d changed, %d outside (%s)\n", sec, changed, outside, outsideId.toRawUTF8()); }
+            }
+            p.glitchPattern.clear();
+            if (bad > 0) ++failures;
+            std::printf ("  %-26s %s (%d sections)\n", "69_section_dice", bad == 0 ? "ok" : "FAIL", (int) std::size (secs));
+        }
+
+        // UNDO / REDO
+        {
+            PyraAudioProcessor q;
+            auto& h = q.history;
+            h.tick();
+            h.noteUserActivity();
+            set (q, "f1_cutoff", 500.0f);
+            h.tick(); juce::Thread::sleep (420); h.tick();
+            h.noteUserActivity();
+            set (q, "f1_cutoff", 900.0f); set (q, "f1_res", 0.8f);
+            q.glitchPattern.steps[2].fx = GReverse; ++q.glitchPattern.changeCounter;
+            h.tick(); juce::Thread::sleep (420); h.tick();
+            auto cut = [&] { return q.apvts.getRawParameterValue ("f1_cutoff")->load(); };
+            const float c2 = cut();
+            h.undo();
+            const float c1 = cut(); const bool glitchUndone = q.glitchPattern.steps[2].fx.load() == GOff;
+            h.undo();
+            const float c0 = cut();
+            h.redo(); h.redo();
+            const float c3 = cut();
+            const bool ok = std::abs (c2 - 900.0f) < 1 && std::abs (c1 - 500.0f) < 1 && std::abs (c0 - 20000.0f) < 1 && std::abs (c3 - 900.0f) < 1
+                            && glitchUndone && q.glitchPattern.steps[2].fx.load() == GReverse;
+            if (! ok) ++failures;
+            std::printf ("  %-26s %s (%.0f -> undo %.0f -> undo %.0f -> redo x2 %.0f)\n", "70_undo_redo", ok ? "ok" : "FAIL", c2, c1, c0, c3);
+        }
+
+        // typed values
+        {
+            auto parse = [&] (const char* id, const char* text)
+            {
+                bool okp = false;
+                const float v = parseTypedValue (*p.apvts.getParameter (id), text, okp);
+                return okp ? v : -99999.0f;
+            };
+            const bool ok = std::abs (parse ("f1_cutoff", "2.5k") - 2500.0f) < 0.5f
+                            && std::abs (parse ("env1_att", "120 ms") - 0.12f) < 0.0001f
+                            && std::abs (parse ("env1_att", "1.5 s") - 1.5f) < 0.0001f
+                            && std::abs (parse ("oscA_level", "75") - 0.75f) < 0.0001f
+                            && std::abs (parse ("oscA_pan", "-50%") + 0.5f) < 0.0001f
+                            && std::abs (parse ("master", "-6 dB") + 6.0f) < 0.0001f
+                            && std::abs (parse ("f1_cutoff", "99999") - 20000.0f) < 0.5f
+                            && parse ("f1_cutoff", "abc") < -9999.0f
+                            && std::abs (parse ("oscA_semi", "7") - 7.0f) < 0.0001f;
+            auto* lvl = p.apvts.getParameter ("oscA_level");
+            lvl->setValueNotifyingHost (lvl->convertTo0to1 (0.75f));
+            auto* cf = p.apvts.getParameter ("f1_cutoff");
+            cf->setValueNotifyingHost (cf->convertTo0to1 (2500.0f));
+            const auto t1 = formatParamValue (*lvl), t2 = formatParamValue (*cf);
+            const bool ok2 = t1 == "75%" && t2 == "2.50 kHz";
+            if (! ok || ! ok2) ++failures;
+            std::printf ("  %-26s %s (shows %s, %s)\n", "71_typed_values", ok && ok2 ? "ok" : "FAIL", t1.toRawUTF8(), t2.toRawUTF8());
+        }
+
+        // state + presets keep the chord and glitch patterns
+        {
+            resetAll (p);
+            p.chordPattern.slots[2].degree = 4; p.chordPattern.slots[2].quality = QDom7; p.chordPattern.slots[1].lock = true;
+            p.glitchPattern.steps[5].fx = GTapeStop;
+            juce::MemoryBlock mb; p.getStateInformation (mb);
+            PyraAudioProcessor q; q.setStateInformation (mb.getData(), (int) mb.getSize());
+            bool ok = q.chordPattern.slots[2].degree.load() == 4 && q.chordPattern.slots[2].quality.load() == QDom7
+                      && q.chordPattern.slots[1].lock.load() && q.glitchPattern.steps[5].fx.load() == GTapeStop;
+            auto data = presetdata::capture (p);
+            q.chordPattern.clear(); q.glitchPattern.clear();
+            presetdata::apply (q, data);
+            ok = ok && q.chordPattern.slots[2].quality.load() == QDom7 && q.glitchPattern.steps[5].fx.load() == GTapeStop;
+            presetdata::apply (q, juce::var (new juce::DynamicObject()));
+            ok = ok && q.chordPattern.isDefault() && q.glitchPattern.isEmpty();
+            if (! ok) ++failures;
+            std::printf ("  %-26s %s\n", "72_patterns_saved", ok ? "ok" : "FAIL");
+            p.chordPattern.clear(); p.glitchPattern.clear();
+        }
     }
 
     std::printf ("\n%s (%d failures)\n", failures == 0 ? "ALL PASSED" : "FAILURES", failures);

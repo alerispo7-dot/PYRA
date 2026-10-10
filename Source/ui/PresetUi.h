@@ -14,7 +14,16 @@ struct PresetFilter
     juce::StringArray visibleIds;
 };
 
-/** Bar under the tabs: favourite star, previous / next, name, save. */
+/** Small button that draws an undo / redo arrow. */
+class ArrowButton : public juce::Button
+{
+public:
+    ArrowButton (bool redoArrow) : juce::Button (redoArrow ? "redo" : "undo"), redo (redoArrow) {}
+    void paintButton (juce::Graphics&, bool highlighted, bool down) override;
+    const bool redo;
+};
+
+/** Bar under the tabs: favourite star, name, undo / redo, RANDOM (for the page on screen), previous / next, save. */
 class PresetBar : public juce::Component, private juce::ChangeListener, private juce::Timer
 {
 public:
@@ -24,8 +33,15 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
     void mouseUp (const juce::MouseEvent&) override;
+    void mouseDown (const juce::MouseEvent& e) override { if (e.eventComponent == &random) randomRightClick = e.mods.isPopupMenu(); }
 
     std::function<void()> onOpenBrowser, onSave;
+    /** RANDOM for the page on screen; variation = small changes only. */
+    std::function<void (bool variation)> onRandom;
+    void setRandomLabel (const juce::String& pageName);
+    void updateUndoButtons();
+    /** Picks a random preset among the ones the browser shows. */
+    void loadRandomPreset();
 
 private:
     void changeListenerCallback (juce::ChangeBroadcaster*) override { repaint(); }
@@ -37,8 +53,9 @@ private:
     PyraAudioProcessor& proc;
     PresetManager& pm;
     PresetFilter& filter;
-    juce::TextButton prev { "<" }, next { ">" }, save, init;
-    bool modified = false;
+    juce::TextButton prev { "<" }, next { ">" }, save, init, random;
+    ArrowButton undo { false }, redo { true };
+    bool modified = false, randomRightClick = false;
 };
 
 /** Small window to save the current sound as a user preset. */

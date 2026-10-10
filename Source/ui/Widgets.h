@@ -8,6 +8,9 @@ class PyraAudioProcessor;
 
 namespace pyra
 {
+/** Set by the editor: tells the undo history that the user just did something in the window. */
+inline std::function<void()>& userActivityHook() { static std::function<void()> f; return f; }
+
 //==============================================================================
 /** Reads the modulation matrix so knobs can draw their modulation rings and
     so sources can be dropped onto knobs. */
@@ -45,6 +48,13 @@ public:
     void paint (juce::Graphics&) override;
     void paintOverChildren (juce::Graphics&) override;
     void mouseUp (const juce::MouseEvent&) override;
+    void mouseEnter (const juce::MouseEvent&) override { repaint(); }
+    void mouseExit (const juce::MouseEvent&) override  { repaint(); }
+
+    /** Opens a small text box to type an exact value. */
+    void showValueEditor();
+    /** Area under the knob that shows the name / value (click it to type a value). */
+    juce::Rectangle<int> labelArea() const { return getLocalBounds().removeFromBottom (15); }
 
     bool isInterestedInDragSource (const SourceDetails&) override;
     void itemDragEnter (const SourceDetails&) override { dragOver = true; repaint(); }
@@ -68,7 +78,15 @@ private:
     bool dragOver = false;
     juce::Array<ModMatrixAccess::Assignment> mods;
     float modSignature = 0.0f;
+    std::unique_ptr<juce::TextEditor> valueEditor;
 };
+
+/** Readable value text: "75%", "2.50 kHz", "120 ms", "-6.0 dB". */
+juce::String formatParamValue (const juce::RangedAudioParameter&);
+bool isPercentParam (const juce::RangedAudioParameter&);
+
+/** Turns typed text ("2.5k", "-6 dB", "350ms", "75%") into a parameter value. */
+float parseTypedValue (const juce::RangedAudioParameter&, const juce::String& text, bool& ok);
 
 //==============================================================================
 class ParamCombo : public juce::ComboBox
@@ -114,15 +132,39 @@ private:
 };
 
 //==============================================================================
-/** Section frame with a title. */
-class Panel : public juce::Component
+/** Small dice button: random values for one section. Right-click = small variation. */
+class DiceButton : public juce::Button
+{
+public:
+    DiceButton();
+    void paintButton (juce::Graphics&, bool highlighted, bool down) override;
+    void mouseDown (const juce::MouseEvent& e) override { rightClick = e.mods.isPopupMenu(); juce::Button::mouseDown (e); }
+    void clicked() override;
+    std::function<void (bool variation)> onRoll;
+
+private:
+    bool rightClick = false;
+};
+
+/** Section frame with a title (and optionally a dice in the top-right corner). */
+class Panel : public juce::Component, private juce::ComponentListener
 {
 public:
     explicit Panel (juce::String title = {}) : title (std::move (title)) {}
+    ~Panel() override { removeComponentListener (this); }
     void paint (juce::Graphics&) override;
     juce::String title;
     int titleX = 10;
     static constexpr int headerH = 26;
+
+    /** Shows the dice: `roll (variation)` randomizes this section only. */
+    void enableDice (std::function<void (bool variation)> roll);
+    static constexpr int diceSpace = 26;   // keep this much free at the right of the header
+
+private:
+    void componentMovedOrResized (juce::Component&, bool, bool) override { placeDice(); }
+    void placeDice() { if (dice != nullptr) { dice->setBounds (getWidth() - 25, 4, 20, 18); dice->toFront (false); } }
+    std::unique_ptr<DiceButton> dice;
 };
 
 //==============================================================================

@@ -3,6 +3,7 @@
 #include "PyraLookAndFeel.h"
 #include "../Lang.h"
 #include "../PluginProcessor.h"
+#include "../Randomizer.h"
 
 namespace pyra
 {
@@ -68,9 +69,14 @@ namespace
             {
                 const juce::String id (c);
                 if (id.endsWith ("_sync")) syncToggle = b.toggle (id, tr ("Sync"));
-                else combos.add (b.combo (id, ! id.endsWith ("_div")));
+                else if (id.endsWith ("_freeze")) syncToggle = b.toggle (id, tr ("Freeze"));
+                else combos.add (b.combo (id, ! id.endsWith ("_div") && ! id.endsWith ("_rate")));
             }
             for (auto& [id, label] : knobDefs) knobs.add (b.knob (id, label));
+            enableDice ([pr = &ui.proc, sec = "fx:" + prefix] (bool v)
+            {
+                randomizer::randomizeSection (*pr, sec, v, (uint32_t) juce::Random::getSystemRandom().nextInt());
+            });
         }
 
         void resized() override
@@ -81,7 +87,7 @@ namespace
             if (! combos.isEmpty() || syncToggle != nullptr)
             {
                 int x = 10;
-                if (syncToggle != nullptr) { syncToggle->setBounds (x, y, 64, 22); x += 68; }
+                if (syncToggle != nullptr) { syncToggle->setBounds (x, y, 74, 22); x += 78; }
                 const int cw = juce::jmin (130, (w - x - 10) / juce::jmax (1, combos.size()) - 6);
                 for (auto* c : combos) { c->setBounds (x, y, cw, 22); x += cw + 6; }
                 y += 30;
@@ -113,7 +119,7 @@ namespace
             FxPanel::paint (g);
             // gain reduction meter in the header
             const float gr = juce::jlimit (0.0f, 24.0f, proc.fx.gainReductionDb.load());
-            auto r = juce::Rectangle<float> ((float) getWidth() - 110.0f, 8.0f, 96.0f, 10.0f);
+            auto r = juce::Rectangle<float> ((float) getWidth() - 110.0f - diceSpace, 8.0f, 96.0f, 10.0f);
             g.setColour (colours::knobBody);
             g.fillRoundedRectangle (r, 3.0f);
             g.setColour (colours::mod);
@@ -126,7 +132,7 @@ namespace
         void tick()
         {
             const float gr = proc.fx.gainReductionDb.load();
-            if (std::abs (gr - lastGr) > 0.2f) { lastGr = gr; repaint (getWidth() - 140, 0, 140, 26); }
+            if (std::abs (gr - lastGr) > 0.2f) { lastGr = gr; repaint (getWidth() - 170, 0, 170, 26); }
         }
 
         PyraAudioProcessor& proc;
@@ -140,27 +146,260 @@ namespace
         void paint (juce::Graphics& g) override
         {
             Panel::paint (g);
-            const juce::StringArray names { "DISTORTION", "RESONATOR", "FILTER", "CHORUS", "FLANGER", "PHASER",
-                                            "TAPE", "DELAY", "REVERB", "EQ", "COMPRESSOR" };
-            auto r = getLocalBounds().reduced (14, 0).withTrimmedTop (34);
+            const juce::StringArray names { "DISTORTION", "RESONATOR", "FILTER", "SHIFTER", "GRANULAR", "CHORUS", "FLANGER",
+                                            "PHASER", "TAPE", "DELAY", "REVERB", "GLITCH", "EQ", "COMPRESSOR" };
+            auto r = getLocalBounds().reduced (12, 0).withTrimmedTop (30);
             const int colW = r.getWidth() / 2;
             for (int i = 0; i < names.size(); ++i)
             {
-                const int col = i / 6, row = i % 6;
-                auto cell = juce::Rectangle<int> (r.getX() + col * colW, r.getY() + row * 24, colW, 22);
-                drawText (g, juce::String (i + 1) + ".  " + tr (names[i]), cell, 13.0f, colours::text, juce::Justification::centredLeft);
+                const int col = i / 7, row = i % 7;
+                auto cell = juce::Rectangle<int> (r.getX() + col * colW, r.getY() + row * 20, colW, 19);
+                const bool creative = names[i] == "SHIFTER" || names[i] == "GRANULAR" || names[i] == "GLITCH";
+                drawText (g, juce::String (i + 1) + ".  " + tr (names[i]), cell, 12.0f, creative ? colours::accent2 : colours::text,
+                          juce::Justification::centredLeft, false, 1);
             }
-            drawText (g, tr ("Turn on only what you need: switched-off effects use no CPU."),
-                      r.withTrimmedTop (6 * 24 + 6), 11.5f, colours::textDim);
+            drawText (g, tr ("Orange = on the second FX page. Switched-off effects use no CPU."),
+                      r.withTrimmedTop (7 * 20 + 4), 11.0f, colours::textDim);
+        }
+    };
+
+    //==========================================================================
+    juce::Colour glitchColour (int fx)
+    {
+        switch (fx)
+        {
+            case GRepeat:   return colours::accent;
+            case GStutter:  return colours::accent2;
+            case GReverse:  return colours::mod;
+            case GTapeStop: return juce::Colour (0xffb07cff);
+            case GSlow:     return juce::Colour (0xff6c8cff);
+            case GPitchUp:  return juce::Colour (0xff5be3a0);
+            case GScratch:  return juce::Colour (0xffff5fa2);
+            case GGate:     return juce::Colour (0xff9a97a3);
+            case GCrush:    return colours::hot;
+            default:        return colours::knobBody;
+        }
+    }
+
+    /** GLITCH: a step sequencer of effects (repeat, reverse, tape stop...), like Gross Beat / Effectrix. */
+    class GlitchPanel : public Panel
+    {
+    public:
+        explicit GlitchPanel (UiContext& ui) : proc (ui.proc), pattern (ui.proc.glitchPattern)
+        {
+            title = tr ("GLITCH");
+            titleX = 34;
+            Builder b { ui, *this, owned };
+            on = b.toggle ("fx_glt_on");
+            rate = b.combo ("fx_glt_rate", false);
+            rate->setTooltip (tr ("Length of one step"));
+            steps = b.knob ("fx_glt_steps", "Steps");
+            chance = b.knob ("fx_glt_chance", "Random");
+            smooth = b.knob ("fx_glt_smooth", "Smooth");
+            mix = b.knob ("fx_glt_mix", "Mix");
+            chance->setTooltip (tr ("Random effects on top of the pattern: 0 = only your steps, 100% = every step can glitch"));
+            smooth->setTooltip (tr ("Crossfade between steps: low = hard cuts, high = smoother"));
+            stepsValue = ui.st.getRawParameterValue ("fx_glt_steps");
+
+            for (auto* btn : { &randomBtn, &clearBtn, &unlockBtn }) addAndMakeVisible (*btn);
+            randomBtn.setButtonText (tr ("RANDOM"));
+            clearBtn.setButtonText (tr ("CLEAR"));
+            unlockBtn.setButtonText (tr ("UNLOCK ALL"));
+            randomBtn.setColour (juce::TextButton::buttonColourId, colours::accent.darker (0.3f));
+            randomBtn.setTooltip (tr ("New random glitch pattern. Locked steps stay as they are."));
+            auto* pr = &ui.proc;
+            randomBtn.onClick = [this, pr]
+            {
+                if (auto& hook = userActivityHook()) hook();
+                pattern.randomize ((int) std::lround (stepsValue->load()), (uint32_t) juce::Random::getSystemRandom().nextInt(), 0.45f);
+                if (auto* p = pr->apvts.getParameter ("fx_glt_on"); p != nullptr && p->getValue() < 0.5f)
+                { p->beginChangeGesture(); p->setValueNotifyingHost (1.0f); p->endChangeGesture(); }
+                repaint();
+            };
+            clearBtn.onClick = [this]
+            {
+                if (auto& hook = userActivityHook()) hook();
+                for (auto& st : pattern.steps) if (! st.lock.load()) st.fx = GOff;
+                ++pattern.changeCounter; repaint();
+            };
+            unlockBtn.onClick = [this] { for (auto& st : pattern.steps) st.lock = false; ++pattern.changeCounter; repaint(); };
+            setRepaintsOnMouseActivity (false);
+            enableDice ([this, pr] (bool v)
+            {
+                randomizer::randomizeSection (*pr, "fx:glt", v, (uint32_t) juce::Random::getSystemRandom().nextInt());
+                repaint();
+            });
+        }
+
+        juce::Rectangle<int> paletteCell (int fx) const
+        {
+            const int col = fx % 2, row = fx / 2;
+            return { 12 + col * 100, 116 + row * 34, 96, 30 };
+        }
+        juce::Rectangle<int> gridArea() const { return { 232, 116, getWidth() - 244, getHeight() - 116 - 74 }; }
+        juce::Rectangle<int> lockArea() const { auto g = gridArea(); return { g.getX(), g.getBottom() + 6, g.getWidth(), 22 }; }
+        juce::Rectangle<float> cell (int c, juce::Rectangle<int> area) const
+        {
+            const float cw = (float) area.getWidth() / (float) kMaxGlitchSteps;
+            return { (float) area.getX() + cw * (float) c + 2.0f, (float) area.getY(), cw - 4.0f, (float) area.getHeight() };
+        }
+        int columnAt (int x) const
+        {
+            const auto g = gridArea();
+            return juce::jlimit (0, kMaxGlitchSteps - 1, (int) ((float) (x - g.getX()) / ((float) g.getWidth() / (float) kMaxGlitchSteps)));
+        }
+
+        void paint (juce::Graphics& g) override
+        {
+            Panel::paint (g);
+            const auto& names = choices::glitchEffects();
+            drawText (g, tr ("EFFECT TO PAINT"), { 12, 96, 200, 16 }, 10.5f, colours::textDim, juce::Justification::centredLeft, true, 1);
+            for (int fx = 0; fx < GCount; ++fx)
+            {
+                auto b = paletteCell (fx).toFloat();
+                const bool sel = fx == brush;
+                g.setColour (fx == GOff ? colours::knobBody : glitchColour (fx).withAlpha (sel ? 0.95f : 0.35f));
+                g.fillRoundedRectangle (b, 5.0f);
+                g.setColour (sel ? colours::text : colours::edge);
+                g.drawRoundedRectangle (b.reduced (0.5f), 5.0f, sel ? 2.0f : 1.0f);
+                drawText (g, tr (names[fx]), b.toNearestInt(), 12.0f, sel && fx != GOff ? juce::Colours::black : colours::text,
+                          juce::Justification::centred, sel, 1);
+            }
+
+            const int active = juce::jlimit (1, kMaxGlitchSteps, (int) std::lround (stepsValue->load()));
+            const int playing = proc.fx.glitch.uiStep.load();
+            const auto ga = gridArea(), la = lockArea();
+            for (int c = 0; c < kMaxGlitchSteps; ++c)
+            {
+                const int fx = pattern.steps[(size_t) c].fx.load();
+                const bool inUse = c < active;
+                auto cb = cell (c, ga);
+                g.setColour ((c / 4) % 2 == 0 ? colours::panelHi : colours::panel.brighter (0.04f));
+                g.fillRoundedRectangle (cb, 4.0f);
+                if (fx != GOff)
+                {
+                    g.setColour (glitchColour (fx).withAlpha (inUse ? 0.85f : 0.25f));
+                    g.fillRoundedRectangle (cb.reduced (2.0f), 4.0f);
+                }
+                if (c == playing && inUse)
+                {
+                    g.setColour (colours::text.withAlpha (0.9f));
+                    g.drawRoundedRectangle (cb.reduced (1.0f), 4.0f, 2.0f);
+                }
+                if (fx != GOff)
+                {
+                    juce::Graphics::ScopedSaveState ss (g);
+                    g.addTransform (juce::AffineTransform::rotation (-juce::MathConstants<float>::halfPi, cb.getCentreX(), cb.getCentreY()));
+                    auto rotated = juce::Rectangle<float> (cb.getHeight(), cb.getWidth()).withCentre (cb.getCentre());
+                    drawText (g, tr (names[fx]), rotated.toNearestInt(), 13.0f, juce::Colours::black.withAlpha (inUse ? 0.85f : 0.5f),
+                              juce::Justification::centred, true, 1);
+                }
+                drawText (g, juce::String (c + 1), cb.toNearestInt().translated (0, -16).withHeight (14), 10.0f,
+                          inUse ? colours::textDim : colours::textDim.withAlpha (0.4f), juce::Justification::centred, false, 1);
+
+                auto lk = cell (c, la).reduced (6.0f, 3.0f);
+                const bool locked = pattern.steps[(size_t) c].lock.load();
+                g.setColour (locked ? colours::accent2 : colours::edge);
+                g.fillRoundedRectangle (lk.withTrimmedTop (lk.getHeight() * 0.45f), 2.0f);
+                g.drawEllipse (lk.withTrimmedBottom (lk.getHeight() * 0.4f).reduced (lk.getWidth() * 0.25f, 1.0f), 1.5f);
+            }
+            drawText (g, tr ("Click or drag on the steps to paint the chosen effect. Right-click = Off. The lock row keeps steps when you press RANDOM."),
+                      { ga.getX(), la.getBottom() + 6, ga.getWidth(), 18 }, 11.0f, colours::textDim, juce::Justification::centredLeft, false, 1);
+            drawText (g, tr ("STEP"), { 232, 26, 120, 14 }, 10.5f, colours::textDim, juce::Justification::centredLeft, true, 1);
+        }
+
+        void resized() override
+        {
+            const int w = getWidth();
+            on->setBounds (9, 4, 22, 18);
+            rate->setBounds (232, 42, 110, 24);
+            const int kx = 360;
+            steps->setBounds (kx, 24, 74, 70);
+            chance->setBounds (kx + 78, 24, 74, 70);
+            smooth->setBounds (kx + 156, 24, 74, 70);
+            mix->setBounds (kx + 234, 24, 74, 70);
+            unlockBtn.setBounds (w - 12 - 120, 36, 120, 34);
+            clearBtn.setBounds (unlockBtn.getX() - 8 - 90, 36, 90, 34);
+            randomBtn.setBounds (clearBtn.getX() - 8 - 130, 36, 130, 34);
+        }
+
+        void mouseDown (const juce::MouseEvent& e) override
+        {
+            for (int fx = 0; fx < GCount; ++fx)
+                if (paletteCell (fx).contains (e.getPosition())) { brush = fx; repaint(); return; }
+            if (lockArea().contains (e.getPosition()))
+            {
+                auto& st = pattern.steps[(size_t) columnAt (e.x)];
+                st.lock = ! st.lock.load();
+                ++pattern.changeCounter;
+                repaint();
+                return;
+            }
+            painting = gridArea().contains (e.getPosition());
+            erase = e.mods.isPopupMenu();
+            paintAt (e);
+        }
+        void mouseDrag (const juce::MouseEvent& e) override { paintAt (e); }
+        void mouseUp (const juce::MouseEvent&) override { painting = false; }
+        void mouseDoubleClick (const juce::MouseEvent& e) override
+        {
+            if (gridArea().contains (e.getPosition())) { pattern.steps[(size_t) columnAt (e.x)].fx = GOff; ++pattern.changeCounter; repaint(); }
+        }
+
+        void paintAt (const juce::MouseEvent& e)
+        {
+            if (! painting) return;
+            auto& st = pattern.steps[(size_t) columnAt (e.x)];
+            const int v = erase ? (int) GOff : brush;
+            if (st.fx.load() != v) { st.fx = v; ++pattern.changeCounter; repaint(); }
+        }
+
+        void tick()
+        {
+            const int sig = pattern.changeCounter.load() * 64 + proc.fx.glitch.uiStep.load() + (int) std::lround (stepsValue->load()) * 4096;
+            if (sig != lastSig) { lastSig = sig; repaint(); }
+        }
+
+        PyraAudioProcessor& proc;
+        GlitchPattern& pattern;
+        juce::OwnedArray<juce::Component> owned;
+        ParamToggle* on; ParamCombo* rate; Knob* steps, *chance, *smooth, *mix;
+        std::atomic<float>* stepsValue;
+        juce::TextButton randomBtn, clearBtn, unlockBtn;
+        int brush = GRepeat, lastSig = -1;
+        bool painting = false, erase = false;
+    };
+
+    class CreativeInfo : public Panel
+    {
+    public:
+        CreativeInfo() : Panel (tr ("TIP")) {}
+        void paint (juce::Graphics& g) override
+        {
+            Panel::paint (g);
+            drawText (g, tr ("Turn CHAOS up to the top (with MANGLE) and these three effects come in by themselves: the sound gets cut, reversed, stretched and scattered."),
+                      getLocalBounds().withTrimmedTop (30).reduced (12, 4), 12.5f, colours::text, juce::Justification::topLeft, false, 8);
         }
     };
 
     class FxPage : public Page
     {
     public:
-        explicit FxPage (UiContext& ui)
+        explicit FxPage (UiContext& ui) : glitchPanel (ui)
         {
-            auto add = [this] (FxPanel* p) { panels.add (p); addAndMakeVisible (p); return p; };
+            addAndMakeVisible (mainView);
+            addChildComponent (creativeView);
+            for (auto* t : { &tabMain, &tabCreative })
+            {
+                addAndMakeVisible (*t);
+                t->setClickingTogglesState (false);
+            }
+            tabMain.setButtonText (tr ("MAIN EFFECTS"));
+            tabCreative.setButtonText (tr ("GLITCH / GRANULAR / SHIFTER"));
+            tabMain.onClick = [this] { showView (0); };
+            tabCreative.onClick = [this] { showView (1); };
+
+            auto add = [this] (FxPanel* p) { panels.add (p); mainView.addAndMakeVisible (p); return p; };
             add (new FxPanel (ui, tr ("DISTORTION"), "dist", { "fx_dist_type" },
                  { { "fx_dist_drive", "Drive" }, { "fx_dist_tone", "Tone" }, { "fx_dist_out", "Output" }, { "fx_dist_mix", "Mix" } }));
             add (new FxPanel (ui, tr ("RESONATOR"), "res", { "fx_res_chord" },
@@ -189,26 +428,71 @@ namespace
                    { "fx_eq_midq", "Mid Q" }, { "fx_eq_highf", "High Freq" }, { "fx_eq_highg", "High Gain" } }));
             comp = new CompPanel (ui);
             add (comp);
-            addAndMakeVisible (info);
+            mainView.addAndMakeVisible (info);
 
             delayPanel = panels[7];
             reverbPanel = panels[8];
+
+            // second page
+            creativeView.addAndMakeVisible (glitchPanel);
+            granular = std::make_unique<FxPanel> (ui, tr ("GRANULAR"), "grn", std::initializer_list<const char*> { "fx_grn_freeze" },
+                 std::initializer_list<std::pair<const char*, const char*>> {
+                   { "fx_grn_size", "Grain Size" }, { "fx_grn_density", "Density" }, { "fx_grn_spray", "Spray" }, { "fx_grn_pitch", "Pitch" },
+                   { "fx_grn_prand", "Rnd Pitch" }, { "fx_grn_rev", "Reverse" }, { "fx_grn_width", "Width" }, { "fx_grn_mix", "Mix" } });
+            shifter = std::make_unique<FxPanel> (ui, tr ("SHIFTER"), "shf", std::initializer_list<const char*> { "fx_shf_mode" },
+                 std::initializer_list<std::pair<const char*, const char*>> {
+                   { "fx_shf_freq", "Frequency" }, { "fx_shf_fb", "Feedback" }, { "fx_shf_width", "Stereo" }, { "fx_shf_mix", "Mix" } });
+            granular->syncToggle->setTooltip (tr ("Freeze: stops recording and keeps playing grains of what is in the buffer"));
+            creativeView.addAndMakeVisible (*granular);
+            creativeView.addAndMakeVisible (*shifter);
+            creativeView.addAndMakeVisible (creativeInfo);
+            showView (0);
+        }
+
+        void showView (int v)
+        {
+            view = v;
+            mainView.setVisible (v == 0);
+            creativeView.setVisible (v == 1);
+            tabMain.setToggleState (v == 0, juce::dontSendNotification);
+            tabCreative.setToggleState (v == 1, juce::dontSendNotification);
         }
 
         void resized() override
         {
-            const int m = 8, cols = 4, rows = 3;
-            const int w = (getWidth() - m * (cols + 1)) / cols, h = (getHeight() - m * (rows + 1)) / rows;
+            const int m = 8;
+            tabMain.setBounds (m, 6, 200, 26);
+            tabCreative.setBounds (m + 206, 6, 270, 26);
+            auto area = getLocalBounds().withTrimmedTop (36);
+            mainView.setBounds (area);
+            creativeView.setBounds (area);
+
+            const int cols = 4, rows = 3;
+            const int w = (area.getWidth() - m * (cols + 1)) / cols, h = (area.getHeight() - m * (rows + 1)) / rows;
             for (int i = 0; i < 12; ++i)
             {
                 juce::Component* c = i < panels.size() ? (juce::Component*) panels[i] : (juce::Component*) &info;
-                c->setBounds (m + (i % cols) * (w + m), m + (i / cols) * (h + m), w, h);
+                c->setBounds (m + (i % cols) * (w + m), m / 2 + (i / cols) * (h + m), w, h);
             }
+
+            const int gh = 380;
+            glitchPanel.setBounds (m, m / 2, area.getWidth() - 2 * m, gh);
+            const int y2 = m / 2 + gh + m, h2 = area.getHeight() - y2 - m;
+            granular->setBounds (m, y2, 640, h2);
+            shifter->setBounds (m + 640 + m, y2, 370, h2);
+            creativeInfo.setBounds (m + 640 + m + 370 + m, y2, area.getWidth() - (m + 640 + m + 370 + m) - m, h2);
+        }
+
+        void paint (juce::Graphics& g) override
+        {
+            // a little indicator on the tab: is any creative effect on?
+            (void) g;
         }
 
         void tick() override
         {
             comp->tick();
+            glitchPanel.tick();
             // delay: show the time knob or the musical division depending on Sync
             if (delayPanel->syncToggle != nullptr)
             {
@@ -220,10 +504,16 @@ namespace
             reverbPanel->knobs[5]->setAlpha (shimmer ? 1.0f : 0.35f);
         }
 
+        juce::Component mainView, creativeView;
+        juce::TextButton tabMain, tabCreative;
+        int view = 0;
         juce::OwnedArray<FxPanel> panels;
         CompPanel* comp = nullptr;
         FxPanel* delayPanel = nullptr, *reverbPanel = nullptr;
         ChainInfo info;
+        GlitchPanel glitchPanel;
+        std::unique_ptr<FxPanel> granular, shifter;
+        CreativeInfo creativeInfo;
     };
 
     //==========================================================================
@@ -242,6 +532,13 @@ namespace
             Builder bn { ui, noise, owned };      noiseK = bn.knob ("an_noise", "Noise Floor"); hum = bn.knob ("an_hum", "Hum");
                                                   humFreq = bn.combo ("an_humfreq", false);
             Builder bv { ui, converter, owned };  bits = bv.knob ("an_bits", "Bits"); rate = bv.knob ("an_rate", "Sample Rate");
+            const std::pair<Panel*, const char*> dice[] = { { &agePanel, "age" }, { &movement, "movement" }, { &character, "circuit" },
+                                                            { &noise, "noise" }, { &converter, "converter" } };
+            for (auto& [panel, sec] : dice)
+                panel->enableDice ([pr = &ui.proc, sec = juce::String (sec)] (bool v)
+                {
+                    randomizer::randomizeSection (*pr, sec, v, (uint32_t) juce::Random::getSystemRandom().nextInt());
+                });
         }
 
         void paintOverChildren (juce::Graphics& g) override

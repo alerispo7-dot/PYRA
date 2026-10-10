@@ -9,8 +9,9 @@ PyraAudioProcessor::PyraAudioProcessor()
     pyra::Wavetables::get();   // build the wavetable bank now, never on the audio thread
     pyra::SampleBank::get();   // start the background sample loader
     refs.init (apvts);
-    fx.init (apvts);
+    fx.init (apvts, glitchPattern);
     arp.init (apvts, arpPattern);
+    chords.init (apvts, chordPattern);
 }
 
 void PyraAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
@@ -18,6 +19,7 @@ void PyraAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     engine.prepare (sampleRate, samplesPerBlock);
     fx.prepare (sampleRate, samplesPerBlock);
     arp.prepare (sampleRate);
+    chords.prepare (sampleRate);
     outputGain.reset (sampleRate, 0.02);
     outputGain.setCurrentAndTargetValue (juce::Decibels::decibelsToGain (apvts.getRawParameterValue ("master")->load(), -48.0f));
     keyboardState.reset();
@@ -48,20 +50,22 @@ void PyraAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
         }
 
     hostBpm = host.bpm;
+    chords.process (midi, buffer.getNumSamples(), host);   // chords first, so the ARP can arpeggiate them
     arp.process (midi, buffer.getNumSamples(), host);
     const float masterGain = settings.masterGain;
     settings.masterGain = 1.0f;   // the output volume is applied after the FX chain (below)
     engine.process (buffer, midi, settings, host);
 
     fx.setOffsets (engine.fxOffsets);
+    pyra::FxTransport transport { host.bpm, host.ppq, host.playing && host.ppqValid };
     if (buffer.getNumChannels() >= 2)
-        fx.process (buffer.getWritePointer (0), buffer.getWritePointer (1), buffer.getNumSamples(), host.bpm);
+        fx.process (buffer.getWritePointer (0), buffer.getWritePointer (1), buffer.getNumSamples(), transport);
     else
     {
         // mono host: run the FX on a stereo copy and fold back down
         tmpRight.setSize (1, buffer.getNumSamples(), false, false, true);
         tmpRight.copyFrom (0, 0, buffer, 0, 0, buffer.getNumSamples());
-        fx.process (buffer.getWritePointer (0), tmpRight.getWritePointer (0), buffer.getNumSamples(), host.bpm);
+        fx.process (buffer.getWritePointer (0), tmpRight.getWritePointer (0), buffer.getNumSamples(), transport);
         buffer.addFrom (0, 0, tmpRight, 0, 0, buffer.getNumSamples());
         buffer.applyGain (0.5f);
     }
@@ -99,8 +103,11 @@ void PyraAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     auto state = apvts.copyState();
     state.setProperty ("pyraVersion", JucePlugin_VersionString, nullptr);
-    state.removeChild (state.getChildWithName ("ARP_PATTERN"), nullptr);
+    for (auto* name : { "ARP_PATTERN", "CHORD_PATTERN", "GLITCH_PATTERN" })
+        state.removeChild (state.getChildWithName (name), nullptr);
     state.appendChild (arpPattern.toTree(), nullptr);
+    state.appendChild (chordPattern.toTree(), nullptr);
+    state.appendChild (glitchPattern.toTree(), nullptr);
     state.setProperty ("presetId", presetId, nullptr);
     state.setProperty ("presetName", presetName, nullptr);
     if (auto xml = state.createXml())
@@ -114,6 +121,8 @@ void PyraAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
         {
             auto tree = juce::ValueTree::fromXml (*xml);
             arpPattern.fromTree (tree.getChildWithName ("ARP_PATTERN"));
+            chordPattern.fromTree (tree.getChildWithName ("CHORD_PATTERN"));
+            glitchPattern.fromTree (tree.getChildWithName ("GLITCH_PATTERN"));
             presetId = tree.getProperty ("presetId").toString();
             presetName = tree.getProperty ("presetName", "Init").toString();
             apvts.replaceState (tree);

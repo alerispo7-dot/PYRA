@@ -5,23 +5,29 @@ namespace pyra
 {
 namespace lang
 {
+    const std::map<juce::String, const char*>& italianExtra();
+
     namespace
     {
         const char* aboutEn =
             "PYRA - wavetable synthesizer\n\n"
-            "This build: all 5 phases (sound engine, modulation, FX, ANALOG, ARP, 500 presets, CHAOS / FOCUS / MOTION).\n"
-            "Next: the visual style, then sample-based realistic sounds.\n\n"
+            "Wavetable oscillators, filters, envelopes, LFOs, mod matrix, MPE, 14 effects (including GLITCH, GRANULAR and SHIFTER), "
+            "ANALOG section, ARP, CHORDS generator, CHAOS / FOCUS / MOTION, sampled instruments and 540 presets.\n\n"
             "Quick tips\n"
-            "- Double-click a knob to reset it, right-click for options.\n"
+            "- Click the number under a knob to type an exact value. Double-click a knob to reset it, right-click for options.\n"
+            "- The arrows next to the preset name undo / redo your changes.\n"
+            "- RANDOM (next to the arrows) works on the page you are looking at. Right-click it for a small variation.\n"
             "- Drag ENV / LFO / MACRO badges onto knobs to modulate them.\n"
             "- Drag the window corner to resize.";
 
         const char* aboutIt =
             "PYRA - sintetizzatore wavetable\n\n"
-            "Questa versione: tutte e 5 le fasi (motore sonoro, modulazione, FX, ANALOG, ARP, 500 preset, CHAOS / FOCUS / MOTION).\n"
-            "Prossimi passi: lo stile grafico, poi i suoni realistici con campioni.\n\n"
+            "Oscillatori wavetable, filtri, inviluppi, LFO, matrice di modulazione, MPE, 14 effetti (compresi GLITCH, GRANULARE e SHIFTER), "
+            "sezione ANALOG, ARP, generatore di ACCORDI, CHAOS / FOCUS / MOTION, strumenti campionati e 540 preset.\n\n"
             "Consigli rapidi\n"
-            "- Doppio clic su una manopola per azzerarla, clic destro per le opzioni.\n"
+            "- Clicca il numero sotto una manopola per scrivere un valore preciso. Doppio clic per azzerarla, clic destro per le opzioni.\n"
+            "- Le frecce accanto al nome del preset annullano / ripetono le modifiche.\n"
+            "- RANDOM (accanto alle frecce) agisce sulla pagina che stai guardando. Clic destro per una piccola variazione.\n"
             "- Trascina i badge ENV / LFO / MACRO sulle manopole per modularle.\n"
             "- Trascina l'angolo della finestra per ridimensionarla.";
 
@@ -274,7 +280,10 @@ namespace lang
         if (current() == English) return english;
         const auto& m = italian();
         auto it = m.find (english);
-        return it != m.end() ? juce::String::fromUTF8 (it->second) : english;
+        if (it != m.end()) return juce::String::fromUTF8 (it->second);
+        const auto& m2 = italianExtra();
+        auto it2 = m2.find (english);
+        return it2 != m2.end() ? juce::String::fromUTF8 (it2->second) : english;
     }
 }
 }

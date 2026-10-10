@@ -2,6 +2,7 @@
 #include "PyraLookAndFeel.h"
 #include "../Lang.h"
 #include "../PluginProcessor.h"
+#include "../dsp/Samples.h"
 
 namespace pyra
 {
@@ -32,6 +33,7 @@ namespace
         {
             if (f.category == "*fav" && ! pm.isFavourite (p.id)) continue;
             if (f.category == "*user" && p.factory) continue;
+            if (f.category == "*smp" && p.sampleInstrument <= 0) continue;
             if (f.category.startsWith ("#") && ! pm.getPersonalTags (p.id).contains (f.category.substring (1))) continue;
             if (f.category.isNotEmpty() && ! f.category.startsWith ("*") && ! f.category.startsWith ("#") && p.category != f.category) continue;
             if (f.subCategory.isNotEmpty() && p.subCategory != f.subCategory) continue;
@@ -55,10 +57,49 @@ namespace
 }
 
 //==============================================================================
+void ArrowButton::paintButton (juce::Graphics& g, bool highlighted, bool down)
+{
+    auto r = getLocalBounds().toFloat().reduced (1.0f);
+    g.setColour (down ? colours::panelHi.brighter (0.15f) : (highlighted ? colours::panelHi.brighter (0.06f) : colours::knobBody));
+    g.fillRoundedRectangle (r, 4.0f);
+    g.setColour (colours::edge);
+    g.drawRoundedRectangle (r, 4.0f, 1.0f);
+
+    const auto c = r.getCentre();
+    const float rad = std::min (r.getWidth(), r.getHeight()) * 0.26f;
+    juce::Path arc;
+    // a curved arrow: arc over the top, head pointing left (undo) or right (redo)
+    const float a0 = redo ? -2.3f : 2.3f, a1 = redo ? 1.1f : -1.1f;
+    arc.addCentredArc (c.x, c.y + rad * 0.25f, rad, rad, 0.0f, a0, a1, true);
+    const auto colour = isEnabled() ? (highlighted ? colours::accent2 : colours::text) : colours::textDim.withAlpha (0.4f);
+    g.setColour (colour);
+    g.strokePath (arc, juce::PathStrokeType (1.8f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+    const auto tip = arc.getCurrentPosition();
+    juce::Path head;
+    const float h = rad * 0.75f, dir = redo ? 1.0f : -1.0f;
+    head.addTriangle (tip.x + dir * h * 0.9f, tip.y, tip.x - dir * h * 0.25f, tip.y - h * 0.75f, tip.x - dir * h * 0.25f, tip.y + h * 0.75f);
+    g.fillPath (head);
+}
+
+//==============================================================================
 PresetBar::PresetBar (PyraAudioProcessor& p, PresetFilter& f) : proc (p), pm (p.getPresetManager()), filter (f)
 {
     pm.addChangeListener (this);
-    for (auto* b : { &prev, &next, &save, &init }) addAndMakeVisible (b);
+    for (auto* b : { &prev, &next, &save, &init, &random }) addAndMakeVisible (b);
+    addAndMakeVisible (undo);
+    addAndMakeVisible (redo);
+    undo.setTooltip (tr ("Undo (go back one change)"));
+    redo.setTooltip (tr ("Redo (go forward again)"));
+    undo.onClick = [this] { proc.history.undo(); updateUndoButtons(); };
+    redo.onClick = [this] { proc.history.redo(); updateUndoButtons(); };
+    random.setColour (juce::TextButton::buttonColourId, colours::accent.darker (0.45f));
+    random.onClick = [this]
+    {
+        if (randomRightClick) return;   // right-click opens the menu instead
+        if (juce::ModifierKeys::currentModifiers.isShiftDown()) { if (onRandom) onRandom (true); return; }
+        if (onRandom) onRandom (false);
+    };
+    random.addMouseListener (this, false);
     save.setButtonText (tr ("SAVE"));
     init.setButtonText ("INIT");
     prev.setTooltip (tr ("Previous preset"));
@@ -80,6 +121,28 @@ void PresetBar::timerCallback()
     if (m != modified) { modified = m; repaint(); }
 }
 
+void PresetBar::setRandomLabel (const juce::String& pageName)
+{
+    random.setButtonText (tr ("RANDOM") + " " + pageName);
+    random.setTooltip (tr ("New random values for this page. Right-click (or Shift-click) for a small variation instead. Undo goes back."));
+}
+
+void PresetBar::updateUndoButtons()
+{
+    undo.setEnabled (proc.history.canUndo());
+    redo.setEnabled (proc.history.canRedo());
+}
+
+void PresetBar::loadRandomPreset()
+{
+    if (filter.visibleIds.isEmpty()) visiblePresets (pm, filter);
+    const auto& ids = filter.visibleIds;
+    if (ids.isEmpty()) return;
+    auto id = ids[juce::Random::getSystemRandom().nextInt (ids.size())];
+    if (id == pm.getCurrentId() && ids.size() > 1) id = ids[(ids.indexOf (id) + 1) % ids.size()];
+    pm.load (id);
+}
+
 void PresetBar::step (int delta)
 {
     if (filter.visibleIds.isEmpty()) visiblePresets (pm, filter);
@@ -92,7 +155,7 @@ void PresetBar::step (int delta)
 
 juce::Rectangle<int> PresetBar::nameArea() const
 {
-    return { 40, 3, prev.getX() - 46, getHeight() - 6 };
+    return { 40, 3, undo.getX() - 52, getHeight() - 6 };
 }
 
 void PresetBar::paint (juce::Graphics& g)
@@ -135,10 +198,31 @@ void PresetBar::resized()
     next.setBounds (r.removeFromRight (30));
     r.removeFromRight (4);
     prev.setBounds (r.removeFromRight (30));
+    r.removeFromRight (14);
+    random.setBounds (r.removeFromRight (172));
+    r.removeFromRight (14);
+    redo.setBounds (r.removeFromRight (32));
+    r.removeFromRight (4);
+    undo.setBounds (r.removeFromRight (32));
 }
 
 void PresetBar::mouseUp (const juce::MouseEvent& e)
 {
+    if (e.eventComponent == &random)
+    {
+        if (e.mods.isPopupMenu() && onRandom)
+        {
+            juce::PopupMenu m;
+            m.addItem (1, tr ("New random values"));
+            m.addItem (2, tr ("Small variation (keeps the character)"));
+            juce::Component::SafePointer<PresetBar> safe (this);
+            m.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (&random), [safe] (int r)
+            {
+                if (safe != nullptr && r > 0 && safe->onRandom) safe->onRandom (r == 2);
+            });
+        }
+        return;
+    }
     if (starArea().contains (e.getPosition()))
     {
         const auto id = pm.getCurrentId();
@@ -233,13 +317,100 @@ void SaveDialog::resized()
 //==============================================================================
 namespace
 {
+    /** The sampled-instrument layer (was the SAMPLE page): choose a recorded instrument to play with the synth. */
+    class SampleLayerPanel : public Panel
+    {
+    public:
+        explicit SampleLayerPanel (UiContext& ui) : Panel (tr ("SAMPLE LAYER"))
+        {
+            titleX = 34;
+            on = std::make_unique<ParamToggle> (ui.st, "smp_on");
+            inst = std::make_unique<ParamCombo> (ui.st, "smp_inst");
+            route = std::make_unique<ParamCombo> (ui.st, "smp_route");
+            for (juce::Component* c : { (juce::Component*) on.get(), (juce::Component*) inst.get(), (juce::Component*) route.get() })
+                addAndMakeVisible (c);
+            on->setTooltip (tr ("Plays a recorded instrument together with the oscillators"));
+            inst->setTooltip (tr ("Recorded instrument (sample bank)"));
+            instParam = ui.st.getParameter ("smp_inst");
+            onParam = ui.st.getParameter ("smp_on");
+            inst->onChange = [this]
+            {
+                const int idx = (int) std::lround (instParam->convertFrom0to1 (instParam->getValue()));
+                if (idx > 0)
+                {
+                    SampleBank::get().acquire (idx);   // start loading right away
+                    if (onParam->getValue() < 0.5f) { onParam->beginChangeGesture(); onParam->setValueNotifyingHost (1.0f); onParam->endChangeGesture(); }
+                }
+            };
+            auto knob = [this, &ui] (const juce::String& id, const juce::String& label)
+            {
+                auto* k = new Knob (ui.st, id, label, nullptr);
+                owned.add (k); addAndMakeVisible (k); ui.knobs.add (k);
+                return k;
+            };
+            level = knob ("smp_level", "Level"); pan = knob ("smp_pan", "Pan"); oct = knob ("smp_oct", "Octave");
+            semi = knob ("smp_semi", "Semi"); fine = knob ("smp_fine", "Fine"); start = knob ("smp_start", "Start");
+            vel = knob ("smp_vel", "Vel Layers");
+            vel->setTooltip (tr ("How much your playing strength picks soft or loud recordings"));
+            start->setTooltip (tr ("Skips the beginning of the recording (softer, slower attack when lower)"));
+        }
+
+        void paint (juce::Graphics& g) override
+        {
+            Panel::paint (g);
+            g.setColour (colours::textDim);
+            g.setFont (PyraLookAndFeel::font (10.5f, true));
+            g.drawText (tr ("Output").toUpperCase(), 12, 60, 80, 22, juce::Justification::centredLeft);
+
+            auto& bank = SampleBank::get();
+            const int current = (int) std::lround (instParam->convertFrom0to1 (instParam->getValue()));
+            juce::String status;
+            juce::Colour c = colours::textDim;
+            if (! bank.isInstalled()) { status = tr ("Samples not found. Reinstall PYRA with the included installer."); c = colours::hot; }
+            else if (current > 0 && bank.getStatus (current) == SampleBank::Loading) { status = tr ("Loading the recordings into memory..."); c = colours::accent2; }
+            else if (current == 0 || onParam->getValue() < 0.5f) status = tr ("Pick an instrument to layer it with the synth. Presets marked SAMPLE use it.");
+            else status = tr ("The sample layer goes through the same filters, envelopes and effects as the oscillators.");
+            g.setColour (c);
+            g.setFont (PyraLookAndFeel::font (11.5f));
+            g.drawFittedText (status, getLocalBounds().removeFromBottom (40).reduced (12, 4), juce::Justification::centredLeft, 2);
+        }
+
+        void resized() override
+        {
+            const int w = getWidth();
+            on->setBounds (9, 4, 22, 18);
+            inst->setBounds (12, 30, w - 24, 24);
+            route->setBounds (96, 60, w - 108, 22);
+            const int kw = (w - 16) / 4;
+            juce::Component* row1[] = { level, pan, oct, semi };
+            juce::Component* row2[] = { fine, start, vel };
+            for (int i = 0; i < 4; ++i) row1[i]->setBounds (8 + i * kw, 88, kw, 84);
+            for (int i = 0; i < 3; ++i) row2[i]->setBounds (8 + i * kw, 176, kw, 84);
+        }
+
+        void tick()
+        {
+            juce::int64 sig = (juce::int64) std::lround (instParam->getValue() * 1000.0f) * 10 + (onParam->getValue() > 0.5f ? 1 : 0);
+            for (int i = 1; i < SampleBank::ids().size(); ++i) sig = sig * 5 + (int) SampleBank::get().getStatus (i);
+            if (sig != lastSig) { lastSig = sig; repaint(); }
+        }
+
+        std::unique_ptr<ParamToggle> on;
+        std::unique_ptr<ParamCombo> inst, route;
+        juce::RangedAudioParameter* instParam = nullptr, *onParam = nullptr;
+        juce::OwnedArray<juce::Component> owned;
+        Knob* level, *pan, *oct, *semi, *fine, *start, *vel;
+        juce::int64 lastSig = -1;
+    };
+
     class PresetPage : public Page, private juce::ChangeListener, private juce::ListBoxModel
     {
     public:
         PresetPage (UiContext& ui, PresetFilter& f, std::function<void()> onSaveFn)
-            : proc (ui.proc), pm (ui.proc.getPresetManager()), filter (f), onSave (std::move (onSaveFn))
+            : proc (ui.proc), pm (ui.proc.getPresetManager()), filter (f), onSave (std::move (onSaveFn)), sampleLayer (ui)
         {
             pm.addChangeListener (this);
+            addAndMakeVisible (sampleLayer);
             addAndMakeVisible (search);
             search.setTextToShowWhenEmpty (tr ("Search presets, categories, tags..."), colours::textDim);
             search.setFont (PyraLookAndFeel::font (15.0f));
@@ -278,11 +449,12 @@ namespace
         std::vector<SideItem> sideItems() const
         {
             std::vector<SideItem> items;
-            int fav = 0, user = 0;
-            for (auto& p : pm.getAll()) { if (pm.isFavourite (p.id)) ++fav; if (! p.factory) ++user; }
+            int fav = 0, user = 0, smp = 0;
+            for (auto& p : pm.getAll()) { if (pm.isFavourite (p.id)) ++fav; if (! p.factory) ++user; if (p.sampleInstrument > 0) ++smp; }
             items.push_back ({ "", tr ("All Presets"), pm.getAll().size() });
             items.push_back ({ "*fav", juce::String (juce::CharPointer_UTF8 ("\xe2\x98\x85 ")) + tr ("Favourites"), fav });
             items.push_back ({ "*user", tr ("My Presets"), user });
+            items.push_back ({ "*smp", tr ("Sample Bank"), smp });
             items.push_back ({ "-", tr ("CATEGORIES"), 0, true });
             for (auto& c : PresetManager::getCategories())
             {
@@ -344,6 +516,8 @@ namespace
             g.fillRoundedRectangle (info.toFloat(), 7.0f);
             g.setColour (colours::edge);
             g.drawRoundedRectangle (info.toFloat().reduced (0.5f), 7.0f, 1.0f);
+            juce::Graphics::ScopedSaveState clip (g);
+            g.reduceClipRegion (info.reduced (2));
             if (auto* p = selectedPreset())
             {
                 auto r = info.reduced (16, 14);
@@ -357,6 +531,12 @@ namespace
                 g.setColour (colours::textDim);
                 g.drawText ((p->factory ? tr ("Factory preset") : tr ("Your preset")) + (p->author.isNotEmpty() ? "  -  " + p->author : juce::String()),
                             r.removeFromTop (22), juce::Justification::centredLeft);
+                if (p->sampleInstrument > 0)
+                {
+                    g.setColour (colours::mod);
+                    g.drawText (tr ("From the sample bank:") + " " + tr (SampleBank::displayNames()[p->sampleInstrument]),
+                                r.removeFromTop (22), juce::Justification::centredLeft);
+                }
                 r.removeFromTop (10);
                 auto drawTags = [&] (const juce::StringArray& tagList, juce::Colour c, const juce::String& title)
                 {
@@ -390,7 +570,8 @@ namespace
             }
         }
 
-        juce::Rectangle<int> infoArea() const { return { getWidth() - 8 - 300, 8, 300, getHeight() - 16 - 150 }; }
+        juce::Rectangle<int> infoArea() const { return { getWidth() - 8 - 300, 8, 300, 222 }; }
+        void tick() override { sampleLayer.tick(); }
 
         void resized() override
         {
@@ -398,7 +579,8 @@ namespace
             search.setBounds (x, 8, right - x, 34);
             list.setBounds (x, 50, right - x, getHeight() - 58);
             auto info = infoArea();
-            auto bottom = juce::Rectangle<int> (info.getX(), info.getBottom() + 8, info.getWidth(), getHeight() - info.getBottom() - 16);
+            sampleLayer.setBounds (info.getX(), info.getBottom() + 8, info.getWidth(), 300);
+            auto bottom = juce::Rectangle<int> (info.getX(), sampleLayer.getBottom() + 8, info.getWidth(), getHeight() - sampleLayer.getBottom() - 16);
             auto row1 = bottom.removeFromTop (34);
             const int w = (row1.getWidth() - 12) / 3;
             addTag.setBounds (row1.removeFromLeft (w)); row1.removeFromLeft (6);
@@ -443,10 +625,23 @@ namespace
             g.setFont (PyraLookAndFeel::font (12.0f));
             g.drawText (catLabel (p->category) + "  /  " + (p->subCategory.isNotEmpty() ? p->subCategory : tr ("User")),
                         w / 2, 0, w / 2 - 10, h, juce::Justification::centredLeft, true);
+            int right = w - 10;
             if (! p->factory)
             {
                 g.setColour (colours::mod);
-                g.drawText (tr ("user"), 0, 0, w - 10, h, juce::Justification::centredRight);
+                g.drawText (tr ("user"), 0, 0, right, h, juce::Justification::centredRight);
+                right -= 44;
+            }
+            if (p->sampleInstrument > 0)
+            {
+                const auto t = tr ("SAMPLE") + "  " + tr (SampleBank::displayNames()[p->sampleInstrument]);
+                g.setFont (PyraLookAndFeel::font (11.0f, true));
+                const int bw = juce::GlyphArrangement::getStringWidthInt (g.getCurrentFont(), t) + 16;
+                auto badge = juce::Rectangle<float> ((float) (right - bw), (float) h * 0.5f - 9.0f, (float) bw, 18.0f);
+                g.setColour (colours::mod.withAlpha (0.16f));
+                g.fillRoundedRectangle (badge, 9.0f);
+                g.setColour (colours::mod);
+                g.drawText (t, badge.toNearestInt(), juce::Justification::centred);
             }
         }
 
@@ -559,6 +754,7 @@ namespace
         juce::TextButton addTag, rename, remove, saveBtn, openFolder, rescan;
         juce::Array<const PresetInfo*> rows;
         juce::String selectedId;
+        SampleLayerPanel sampleLayer;
     };
 }
 

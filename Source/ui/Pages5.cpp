@@ -3,6 +3,7 @@
 #include "PyraLookAndFeel.h"
 #include "../Lang.h"
 #include "../PluginProcessor.h"
+#include "../Randomizer.h"
 
 namespace pyra
 {
@@ -81,7 +82,7 @@ namespace
     public:
         explicit ChaosPage (UiContext& u)
             : ui (u), proc (u.proc),
-              chaosPanel ("CHAOS", tr ("Random movement inside safe ranges. Every turn makes the sound alive and never the same.")),
+              chaosPanel ("CHAOS", tr ("Random movement. Up to half it keeps the sound alive; towards the top it tears it apart (see MANGLE).")),
               focusPanel ("FOCUS", tr ("One knob, many targets: you choose what it moves, how far and with which curve.")),
               motionPanel ("MOTION", tr ("Rhythmic movement locked to the tempo of your DAW.")),
               chaosKnob (u, "chaos_amt", "CHAOS", colours::hot),
@@ -102,6 +103,8 @@ namespace
             speed = knob (chaosPanel, "chaos_speed", "Speed");
             bite = knob (chaosPanel, "chaos_bite", "Bite");
             space = knob (chaosPanel, "chaos_space", "Space");
+            mangle = knob (chaosPanel, "chaos_mangle", "Mangle");
+            mangle->setTooltip (tr ("How hard the top of the CHAOS knob breaks the sound: glitch repeats, reverse, tape stops, grains, octave jumps. At 0 chaos stays gentle."));
             speed->setTooltip (tr ("How fast the chaos moves"));
             bite->setTooltip (tr ("How much chaos touches grit: warp, FM, resonance, drive, distortion"));
             space->setTooltip (tr ("How much chaos touches space: stereo, width, reverb, delay"));
@@ -149,6 +152,12 @@ namespace
             motionPanel.addAndMakeVisible (rate.get());
             smooth = knob (motionPanel, "motion_smooth", "Smooth");
             shapeParam = ui.st.getRawParameterValue ("motion_shape");
+            const std::pair<Panel*, const char*> dice[] = { { &chaosPanel, "chaos" }, { &focusPanel, "focus" }, { &motionPanel, "motion" } };
+            for (auto& [panel, sec] : dice)
+                panel->enableDice ([pr = &proc, sec = juce::String (sec)] (bool v)
+                {
+                    randomizer::randomizeSection (*pr, sec, v, (uint32_t) juce::Random::getSystemRandom().nextInt());
+                });
         }
 
         void resized() override
@@ -164,10 +173,11 @@ namespace
 
             // chaos
             const int ky = 66 + big + 34;
-            const int kw = (w - 24) / 3;
+            const int kw = (w - 24) / 4;
             speed->setBounds (12, ky, kw, 92);
             bite->setBounds (12 + kw, ky, kw, 92);
             space->setBounds (12 + 2 * kw, ky, kw, 92);
+            mangle->setBounds (12 + 3 * kw, ky, kw, 92);
             roll.setBounds (w / 2 - 70, ky + 106, 140, 36);
 
             // focus rows
@@ -301,7 +311,7 @@ namespace
         MacroPanel chaosPanel, focusPanel, motionPanel;
         BigKnob chaosKnob, focusKnob, motionKnob;
         juce::OwnedArray<juce::Component> owned;
-        Knob* speed, *bite, *space, *smooth;
+        Knob* speed, *bite, *space, *mangle, *smooth;
         juce::TextButton roll;
         juce::RangedAudioParameter* seedParam = nullptr;
         std::vector<Row> rows;

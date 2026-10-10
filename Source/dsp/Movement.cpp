@@ -1,4 +1,5 @@
 #include "Movement.h"
+#include <juce_core/juce_core.h>
 
 namespace pyra
 {
@@ -127,6 +128,23 @@ void Movement::compute (const Settings& s, double beat, double bpm, int n, float
         // bite also pushes the distortion, space opens the delay feedback a little
         fxOff[FxDistDrive] += chaosSmoothed * mv.bite * 0.5f;
         fxOff[FxDlyFb] += chaosSmoothed * mv.space * 0.15f;
+
+        // MANGLE: the top of the CHAOS range tears the sound apart, like Scorch at full:
+        // glitch steps (repeat, reverse, tape stop...), grains, octave jumps and frequency shifting
+        const float wild = juce::jlimit (0.0f, 1.6f, smoothstep ((chaosSmoothed - 0.4f) / 0.6f) * (0.2f + 1.6f * mv.mangle));
+        if (wild > 0.0f)
+        {
+            fxOff[FxGltMix]    += std::min (1.0f, wild * 1.2f);
+            fxOff[FxGltChance] += std::min (0.9f, wild * 0.75f);
+            fxOff[FxGrnMix]    += std::min (0.8f, wild * 0.6f * (0.45f + 0.55f * (0.5f + 0.5f * genVal[3])));
+            fxOff[FxGrnSpray]  += wild * 0.3f;
+            if (wild > 0.5f)
+                fxOff[FxGrnPitch] += (genVal[5] > 0.35f ? 12.0f : (genVal[5] < -0.45f ? -12.0f : (genVal[5] > 0.1f ? 7.0f : 0.0f))) / 48.0f;
+            fxOff[FxShfMix]    += wild * 0.4f * std::max (0.0f, genVal[6]);
+            fxOff[FxShfFreq]   += wild * 0.12f * genVal[7];
+            fxOff[FxDistMix]   += wild * 0.15f * mv.bite * 2.0f;
+            fxOff[FxRevMix]    += wild * 0.12f * mv.space * 2.0f;
+        }
     }
 
     // ---------------- FOCUS

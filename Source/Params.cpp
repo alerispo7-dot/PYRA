@@ -272,6 +272,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     addPhase3Parameters (l);
     addPhase5Parameters (l);
     addSamplerParameters (l);
+    addPhase6Parameters (l);
     return l;
 }
 
@@ -286,7 +287,7 @@ void ParamRefs::init (juce::AudioProcessorValueTreeState& st)
     };
 
     master = p ("master"); polyphony = p ("polyphony"); voiceMode = p ("voiceMode");
-    glide = p ("glide"); glideLegato = p ("glideLegato");
+    glide = p ("glide"); glideLegato = p ("glideLegato"); glideType = p ("glide_type"); mvMangle = p ("chaos_mangle");
     bendUp = p ("bendUp"); bendDown = p ("bendDown"); mpe = p ("mpe"); mpeRange = p ("mpeRange");
     velAmp = p ("velAmp"); transpose = p ("transpose"); tune = p ("tune");
     drift = p ("drift"); spread = p ("spread"); filterRouting = p ("filterRouting");
@@ -357,7 +358,7 @@ void ParamRefs::fill (Settings& s) const
     s.masterGain = juce::Decibels::decibelsToGain (f (master), -48.0f);
     s.polyphony = juce::jlimit (1, kMaxVoices, i (polyphony));
     s.voiceMode = i (voiceMode);
-    s.glide = f (glide); s.glideLegato = b (glideLegato);
+    s.glide = f (glide); s.glideLegato = b (glideLegato); s.glideType = i (glideType);
     s.bendUp = i (bendUp); s.bendDown = i (bendDown);
     s.mpe = b (mpe); s.mpeRange = i (mpeRange);
     s.velAmp = f (velAmp); s.transpose = i (transpose); s.tune = f (tune);
@@ -439,7 +440,7 @@ void ParamRefs::fill (Settings& s) const
 
     // ---- CHAOS / FOCUS / MOTION
     auto& mv = s.move;
-    mv.chaos = f (mvChaos); mv.speed = f (mvSpeed); mv.bite = f (mvBite); mv.space = f (mvSpace); mv.seed = i (mvSeed);
+    mv.chaos = f (mvChaos); mv.speed = f (mvSpeed); mv.bite = f (mvBite); mv.space = f (mvSpace); mv.seed = i (mvSeed); mv.mangle = f (mvMangle);
     mv.focus = f (mvFocus); mv.motion = f (mvMotion); mv.shape = i (mvShape); mv.rate = i (mvRate); mv.smooth = f (mvSmooth);
     for (int k = 0; k < kNumFocusSlots; ++k)
         mv.slots[k] = { i (focusRefs[k].dst), f (focusRefs[k].depth), f (focusRefs[k].curve) };

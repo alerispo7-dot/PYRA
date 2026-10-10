@@ -28,7 +28,7 @@ std::unique_ptr<Page> createFxPage (UiContext&);
 std::unique_ptr<Page> createAnalogPage (UiContext&);
 std::unique_ptr<Page> createArpPage (UiContext&);
 std::unique_ptr<Page> createChaosPage (UiContext&);
-std::unique_ptr<Page> createSamplePage (UiContext&);
+std::unique_ptr<Page> createChordsPage (UiContext&);
 std::unique_ptr<Page> createComingSoonPage (const juce::String& title, const juce::StringArray& lines);
 
 } // namespace pyra

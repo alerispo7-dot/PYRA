@@ -75,7 +75,8 @@ void Voice::start (int midiNote, int midiChannel, float vel, float glideFrom, co
     if (glideFrom >= 0.0f && s.glide > 0.0f)
     {
         noteCur = glideFrom;
-        glideStep = std::abs (noteTarget - noteCur) / (s.glide * sr);
+        glideStep = s.glideType == 1 ? 12.0f / (s.glide * sr)   // constant rate: 'glide' seconds per octave
+                                       : std::abs (noteTarget - noteCur) / (s.glide * sr);
     }
     else { noteCur = noteTarget; glideStep = 0.0f; }
 
@@ -112,7 +113,8 @@ void Voice::legatoTo (int midiNote, float vel, bool retriggerEnvelopes, bool gli
     noteTarget = (float) midiNote;
     keyDown = true; sustained = false;
     if (glide && s.glide > 0.0f)
-        glideStep = std::abs (noteTarget - noteCur) / (s.glide * sr);
+        glideStep = s.glideType == 1 ? 12.0f / (s.glide * sr)   // constant rate: 'glide' seconds per octave
+                                       : std::abs (noteTarget - noteCur) / (s.glide * sr);
     else { noteCur = noteTarget; glideStep = 0.0f; }
 
     if (retriggerEnvelopes)

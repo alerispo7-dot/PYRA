@@ -32,6 +32,8 @@ namespace presetdata
             steps.add (st);
         }
         if (patternUsed) obj->setProperty ("arp", steps);
+        if (! p.chordPattern.isDefault()) obj->setProperty ("chords", p.chordPattern.toVar());
+        if (! p.glitchPattern.isEmpty()) obj->setProperty ("glitch", p.glitchPattern.toVar());
         return juce::var (obj);
     }
 
@@ -66,7 +68,28 @@ namespace presetdata
         }
         else
             pat.clear();
+
+        if (data.hasProperty ("chords")) p.chordPattern.fromVar (data["chords"]); else p.chordPattern.clear();
+        p.glitchPattern.fromVar (data["glitch"]);
     }
+}
+
+namespace
+{
+    int sampleOf (const juce::var& preset)
+    {
+        const auto params = preset["params"];
+        if ((float) params.getProperty ("smp_on", 0.0f) < 0.5f) return 0;
+        return juce::jmax (0, (int) std::lround ((float) params.getProperty ("smp_inst", 0.0f)));
+    }
+}
+
+void PresetManager::restoreCurrent (const juce::String& id, const juce::String& name, const std::vector<float>& snapshot)
+{
+    proc.presetId = id;
+    proc.presetName = name;
+    loadedSnapshot = snapshot;
+    sendChangeMessage();
 }
 
 //==============================================================================
@@ -112,6 +135,7 @@ void PresetManager::loadFactory()
             if (auto* t = v["tags"].getArray()) for (auto& tag : *t) info.tags.add (tag.toString());
             info.factory = true;
             info.factoryIndex = i;
+            info.sampleInstrument = sampleOf (v);
             presets.add (info);
         }
 }
@@ -142,6 +166,7 @@ void PresetManager::scanUser()
         if (auto* t = v["tags"].getArray()) for (auto& tag : *t) info.tags.add (tag.toString());
         info.factory = false;
         info.file = entry.getFile();
+        info.sampleInstrument = sampleOf (v);
         presets.add (info);
     }
 }

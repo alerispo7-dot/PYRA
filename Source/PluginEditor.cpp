@@ -1,12 +1,13 @@
 #include "PluginEditor.h"
 #include "Lang.h"
+#include "Randomizer.h"
 
 using pyra::lang::tr;
 namespace colours = pyra::colours;
 
 namespace
 {
-    enum PageIndex { PageSynth, PageSample, PageChaos, PageMatrix, PageFx, PageArp, PageAnalog, PagePresets, PageSettings, PageCount };
+    enum PageIndex { PageSynth, PagePresets, PageFx, PageArp, PageChords, PageMatrix, PageChaos, PageAnalog, PageSettings, PageCount };
 }
 
 PyraAudioProcessorEditor::PyraAudioProcessorEditor (PyraAudioProcessor& p)
@@ -29,12 +30,16 @@ PyraAudioProcessorEditor::PyraAudioProcessorEditor (PyraAudioProcessor& p)
     const int w = juce::jlimit (baseW * 6 / 10, baseW * 2, savedW);
     setSize (w, juce::roundToInt ((float) w * (float) baseH / (float) baseW));
 
+    root.addMouseListener (this, true);
+    pyra::userActivityHook() = [&p] { p.history.noteUserActivity(); };
     startTimerHz (30);
 }
 
 PyraAudioProcessorEditor::~PyraAudioProcessorEditor()
 {
     stopTimer();
+    pyra::userActivityHook() = nullptr;
+    root.removeMouseListener (this);
     pages.clear();
     setLookAndFeel (nullptr);
 }
@@ -48,7 +53,8 @@ void PyraAudioProcessorEditor::buildUi()
 
     ui.reset (new pyra::UiContext { proc, proc.apvts, matrix, {} });
 
-    const juce::StringArray names { "SYNTH", "SAMPLE", "CHAOS", "MATRIX", "FX", "ARP", "ANALOG", tr ("PRESETS"), tr ("SETTINGS") };
+    const juce::StringArray names { "SYNTH", tr ("PRESETS"), "FX", "ARP", tr ("CHORDS"), tr ("MATRIX"), "CHAOS", "ANALOG", tr ("SETTINGS") };
+    tabNames = names;
     for (int i = 0; i < names.size(); ++i)
     {
         auto* t = tabs.add (new juce::TextButton (names[i]));
@@ -58,13 +64,13 @@ void PyraAudioProcessorEditor::buildUi()
     }
 
     pages.push_back (pyra::createSynthPage (*ui));
-    pages.push_back (pyra::createSamplePage (*ui));
-    pages.push_back (pyra::createChaosPage (*ui));
-    pages.push_back (pyra::createMatrixPage (*ui));
+    pages.push_back (pyra::createPresetPage (*ui, presetFilter, [this] { openSaveDialog(); }));
     pages.push_back (pyra::createFxPage (*ui));
     pages.push_back (pyra::createArpPage (*ui));
+    pages.push_back (pyra::createChordsPage (*ui));
+    pages.push_back (pyra::createMatrixPage (*ui));
+    pages.push_back (pyra::createChaosPage (*ui));
     pages.push_back (pyra::createAnalogPage (*ui));
-    pages.push_back (pyra::createPresetPage (*ui, presetFilter, [this] { openSaveDialog(); }));
     pages.push_back (pyra::createGlobalPage (*ui, [this] { buildUi(); resized(); }));
 
     for (auto& pg : pages) root.addChildComponent (*pg);
@@ -75,6 +81,7 @@ void PyraAudioProcessorEditor::buildUi()
     presetBar = std::make_unique<pyra::PresetBar> (proc, presetFilter);
     presetBar->onOpenBrowser = [this] { showPage (PagePresets); };
     presetBar->onSave = [this] { openSaveDialog(); };
+    presetBar->onRandom = [this] (bool variation) { randomizeCurrentPage (variation); };
     root.addAndMakeVisible (*presetBar);
 
     langButton.setButtonText (pyra::lang::current() == pyra::lang::English ? "EN" : "IT");
@@ -111,9 +118,35 @@ void PyraAudioProcessorEditor::openSaveDialog()
     saveDialog->toFront (true);
 }
 
+void PyraAudioProcessorEditor::randomizeCurrentPage (bool variation)
+{
+    proc.history.noteUserActivity();
+    const auto seed = (uint32_t) juce::Random::getSystemRandom().nextInt();
+    using namespace pyra::randomizer;
+    switch (currentPage)
+    {
+        case PagePresets:  if (presetBar != nullptr) presetBar->loadRandomPreset(); break;
+        case PageFx:       randomize (proc, Fx, variation, seed); break;
+        case PageArp:      randomize (proc, Arp, variation, seed); break;
+        case PageChords:   randomize (proc, Chords, variation, seed); break;
+        case PageMatrix:   randomize (proc, Matrix, variation, seed); break;
+        case PageChaos:    randomize (proc, Chaos, variation, seed); break;
+        case PageAnalog:   randomize (proc, Analog, variation, seed); break;
+        case PageSettings: randomize (proc, Settings, variation, seed); break;
+        default:           randomize (proc, Synth, variation, seed); break;
+    }
+}
+
+void PyraAudioProcessorEditor::mouseDown (const juce::MouseEvent&)       { proc.history.noteUserActivity(); }
+void PyraAudioProcessorEditor::mouseUp (const juce::MouseEvent&)         { proc.history.noteUserActivity(); }
+void PyraAudioProcessorEditor::mouseDrag (const juce::MouseEvent&)       { proc.history.noteUserActivity(); }
+void PyraAudioProcessorEditor::mouseWheelMove (const juce::MouseEvent&, const juce::MouseWheelDetails&) { proc.history.noteUserActivity(); }
+
 void PyraAudioProcessorEditor::showPage (int index)
 {
     currentPage = index;
+    if (presetBar != nullptr && juce::isPositiveAndBelow (index, tabNames.size()))
+        presetBar->setRandomLabel (index == PagePresets ? tr ("PRESET") : tabNames[index]);
     for (int i = 0; i < (int) pages.size(); ++i)
         pages[(size_t) i]->setVisible (i == index);
     for (int i = 0; i < tabs.size(); ++i)
@@ -142,6 +175,13 @@ void PyraAudioProcessorEditor::timerCallback()
 
     const int v = proc.engine.uiVoices.load();
     if (v != lastVoices) { lastVoices = v; root.repaint (baseW - 330, 0, 140, topH); }
+
+    if (++historyCounter >= 3)
+    {
+        historyCounter = 0;
+        proc.history.tick();
+        if (presetBar != nullptr) presetBar->updateUndoButtons();
+    }
 }
 
 //==============================================================================

@@ -13,6 +13,7 @@ struct PresetInfo
     juce::String name, category, subCategory, author;
     juce::StringArray tags;   // tags written in the preset itself
     bool factory = true;
+    int sampleInstrument = 0; // > 0: the preset plays a sampled instrument (index in SampleBank::ids())
     int factoryIndex = -1;    // position in the built-in bank
     juce::File file;          // user presets only
 };
@@ -72,6 +73,11 @@ private:
     juce::StringArray favourites;
     std::map<juce::String, juce::StringArray> personalTags;
     std::vector<float> loadedSnapshot;
+
+public:
+    /** For undo / redo: the "loaded" reference used by isModified(). */
+    std::vector<float> getLoadedSnapshot() const { return loadedSnapshot; }
+    void restoreCurrent (const juce::String& id, const juce::String& name, const std::vector<float>& snapshot);
 };
 
 } // namespace pyra

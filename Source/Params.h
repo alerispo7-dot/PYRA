@@ -61,19 +61,36 @@ namespace choices
 void addPhase3Parameters (juce::AudioProcessorValueTreeState::ParameterLayout&);
 void addPhase5Parameters (juce::AudioProcessorValueTreeState::ParameterLayout&);
 void addSamplerParameters (juce::AudioProcessorValueTreeState::ParameterLayout&);
+void addPhase6Parameters (juce::AudioProcessorValueTreeState::ParameterLayout&);
 
 constexpr int kNumFocusSlots = 8;
 
 /** FX parameters that CHAOS / FOCUS / MOTION can move (append-only). */
 enum FxDest { FxDistDrive, FxDistMix, FxResMix, FxFltCutoff, FxFltRes, FxChoMix, FxFlaMix, FxPhaMix,
-              FxTapeWow, FxDlyMix, FxDlyFb, FxRevMix, FxRevSize, FxDestCount };
+              FxTapeWow, FxDlyMix, FxDlyFb, FxRevMix, FxRevSize,
+              FxGltMix, FxGltChance, FxGrnMix, FxGrnSpray, FxGrnPitch, FxShfMix, FxShfFreq, FxDestCount };
 
 namespace choices
 {
     const juce::StringArray& motionShapes();
     const juce::StringArray& focusDestinations();   // synth destinations, then FX destinations
     const char* fxDestParamId (int fxDest);
+
+    // phase 6
+    const juce::StringArray& glideTypes();
+    const juce::StringArray& glitchEffects();     // step effects of the GLITCH module (not a parameter)
+    const juce::StringArray& shifterModes();
+    const juce::StringArray& chordModes();
+    const juce::StringArray& chordTriggers();
+    const juce::StringArray& chordLengths();
+    double chordLengthBeats (int index);
+    const juce::StringArray& chordSizes();
+    const juce::StringArray& chordVoicings();
+    const juce::StringArray& chordInversions();
+    const juce::StringArray& chordRhythms();
 }
+
+enum GlitchEffect { GOff, GRepeat, GStutter, GReverse, GTapeStop, GSlow, GPitchUp, GScratch, GGate, GCrush, GCount };
 
 enum WarpMode   { WarpOff, WarpSync, WarpBendPlus, WarpBendMinus, WarpPwm, WarpAsym, WarpMirror, WarpFold, WarpQuantize, WarpCount };
 enum FmSource   { FmOff, FmOscA, FmOscB, FmOscC, FmSub, FmNoise };
@@ -159,7 +176,7 @@ struct DestConv
 
 struct MovementSettings
 {
-    float chaos = 0, speed = 0.6f, bite = 0.5f, space = 0.5f; int seed = 1;
+    float chaos = 0, speed = 0.6f, bite = 0.5f, space = 0.5f, mangle = 0.5f; int seed = 1;
     float focus = 0;
     struct FocusSlot { int dst = 0; float depth = 0, curve = 0; } slots[kNumFocusSlots];
     float motion = 0; int shape = 0, rate = 7; float smooth = 0.2f;
@@ -169,7 +186,7 @@ struct Settings
 {
     // global
     float masterGain = 1; int polyphony = 16; int voiceMode = 0;
-    float glide = 0; bool glideLegato = false;
+    float glide = 0; bool glideLegato = false; int glideType = 0;
     int bendUp = 2, bendDown = 2; bool mpe = false; int mpeRange = 48;
     float velAmp = 0.5f; int transpose = 0; float tune = 0;
     float drift = 0, spread = 0; int filterRouting = 0;
@@ -215,6 +232,7 @@ private:
         *bendUp {}, *bendDown {}, *mpe {}, *mpeRange {}, *velAmp {}, *transpose {}, *tune {},
         *drift {}, *spread {}, *filterRouting {}, *age {}, *tolerance {}, *circuit {},
         *anNoise {}, *anHum {}, *anHumFreq {}, *anBits {}, *anRate {};
+    std::atomic<float>* glideType {}, *mvMangle {};
     std::atomic<float>* mvChaos {}, *mvSpeed {}, *mvBite {}, *mvSpace {}, *mvSeed {}, *mvFocus {}, *mvMotion {},
         *mvShape {}, *mvRate {}, *mvSmooth {};
     struct FocusRefs { std::atomic<float>* dst, *depth, *curve; } focusRefs[kNumFocusSlots] {};

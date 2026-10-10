@@ -16,6 +16,10 @@ public:
 
     void paint (juce::Graphics&) override;
     void resized() override;
+    void mouseDown (const juce::MouseEvent&) override;
+    void mouseUp (const juce::MouseEvent&) override;
+    void mouseDrag (const juce::MouseEvent&) override;
+    void mouseWheelMove (const juce::MouseEvent&, const juce::MouseWheelDetails&) override;
 
     static constexpr int baseW = 1280, baseH = 880;
     static constexpr int topH = 46, presetH = 38;
@@ -35,6 +39,7 @@ private:
     void buildUi();
     void showPage (int index);
     void openSaveDialog();
+    void randomizeCurrentPage (bool variation);
 
     PyraAudioProcessor& proc;
     pyra::PyraLookAndFeel lnf;
@@ -53,7 +58,8 @@ private:
     juce::TextButton langButton;
     juce::MidiKeyboardComponent keyboard;
     juce::TooltipWindow tooltips { this, 600 };
-    int lastVoices = -1;
+    int lastVoices = -1, historyCounter = 0;
+    juce::StringArray tabNames;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PyraAudioProcessorEditor)
 };

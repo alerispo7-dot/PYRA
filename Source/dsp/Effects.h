@@ -4,6 +4,7 @@
 #include <juce_dsp/juce_dsp.h>
 #include "DspUtil.h"
 #include "../Params.h"
+#include "Creative.h"
 #include <vector>
 
 namespace pyra
@@ -80,14 +81,16 @@ struct ModuleFade
 
 //==============================================================================
 /** The global effect chain (fixed order):
-    Distortion > Resonator > Filter > Chorus > Flanger > Phaser > Tape > Delay > Reverb > EQ > Compressor */
+    Distortion > Resonator > Filter > Shifter > Granular > Chorus > Flanger > Phaser > Tape > Delay > Reverb > Glitch > EQ > Compressor */
 class FxChain
 {
 public:
-    void init (juce::AudioProcessorValueTreeState& state);
+    void init (juce::AudioProcessorValueTreeState& state, GlitchPattern& glitchPattern);
     void prepare (double sampleRate, int maxBlock);
     void reset();
-    void process (float* l, float* r, int n, double bpm);
+    void process (float* l, float* r, int n, const FxTransport& transport);
+
+    GlitchFx glitch;
 
     /** Normalised offsets from CHAOS / FOCUS / MOTION (FxDestCount values). */
     void setOffsets (const float* offsets);
@@ -95,7 +98,8 @@ public:
     std::atomic<float> gainReductionDb { 0.0f };
 
 private:
-    void processChunk (float* l, float* r, int n, double bpm);
+    void processChunk (float* l, float* r, int n, double bpm, double beat);
+    double freeBeat = 0.0;
 
     using P = std::atomic<float>*;
     static bool b (P p) { return p->load (std::memory_order_relaxed) > 0.5f; }
@@ -174,6 +178,18 @@ private:
     ModuleFade fdEq;
     Biquad eqLow, eqMid, eqHigh;
     float eqCache[7] { -1, -1, -1, -1, -1, -1, -1 };
+
+    // ---- glitch / granular / shifter
+    struct { P on, rate, steps, chance, smooth, mix; } pg {};
+    ModuleFade fdGlt;
+    GlitchPattern* glitchPattern = nullptr;
+    struct { P on, size, density, spray, pitch, prand, rev, freeze, width, mix; } pgr {};
+    ModuleFade fdGrn;
+    GranularFx granular;
+    struct { P on, mode, freq, fb, width, mix; } psh {};
+    ModuleFade fdShf;
+    ShifterFx shifter;
+    std::vector<float> wetL, wetR;
 
     // ---- compressor
     struct { P on, thresh, ratio, att, rel, makeup, mix; } pcmp {};
