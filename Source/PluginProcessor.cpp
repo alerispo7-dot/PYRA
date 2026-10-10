@@ -7,6 +7,7 @@ PyraAudioProcessor::PyraAudioProcessor()
       apvts (*this, nullptr, "PYRA", pyra::createParameterLayout())
 {
     pyra::Wavetables::get();   // build the wavetable bank now, never on the audio thread
+    pyra::SampleBank::get();   // start the background sample loader
     refs.init (apvts);
     fx.init (apvts);
     arp.init (apvts, arpPattern);

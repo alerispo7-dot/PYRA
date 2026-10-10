@@ -4,6 +4,7 @@
 #include "dsp/Wavetables.h"
 #include "Lang.h"
 #include "Presets.h"
+#include "dsp/Samples.h"
 
 using namespace pyra;
 
@@ -171,6 +172,12 @@ static int normalizeBank (const juce::File& in, const juce::File& out, const juc
         auto& preset = arr->getReference (idx);
         const auto cat = preset["category"].toString();
         presetdata::apply (p, preset);
+        if (p.apvts.getRawParameterValue ("smp_on")->load() > 0.5f)
+        {
+            const int k = (int) std::lround (p.apvts.getRawParameterValue ("smp_inst")->load());
+            SampleBank::get().acquire (k);
+            for (int w = 0; w < 1000 && SampleBank::get().getStatus (k) != SampleBank::Ready; ++w) juce::Thread::sleep (10);
+        }
 
         // test performance by category
         std::vector<Note> notes; double len = 2.5;
@@ -267,9 +274,48 @@ static int normalizeBank (const juce::File& in, const juce::File& out, const juc
     return problems == 0 ? 0 : 2;
 }
 
+// Converts every audio file listed in a text file ("in<TAB>out" per line). Output format from the extension:
+// .wav = 32-bit float, .ogg = Ogg Vorbis (quality index argv[3], default 6).
+static int convertList (const juce::File& list, int oggQuality)
+{
+    juce::AudioFormatManager fm;
+    fm.registerBasicFormats();
+    juce::StringArray lines;
+    list.readLines (lines);
+    int done = 0, failed = 0;
+    for (auto& line : lines)
+    {
+        if (line.trim().isEmpty()) continue;
+        const juce::File in (line.upToFirstOccurrenceOf ("\t", false, false));
+        const juce::File out (line.fromFirstOccurrenceOf ("\t", false, false));
+        std::unique_ptr<juce::AudioFormatReader> reader (fm.createReaderFor (in));
+        if (reader == nullptr) { std::printf ("cannot read %s\n", in.getFullPathName().toRawUTF8()); ++failed; continue; }
+        juce::AudioBuffer<float> buf ((int) reader->numChannels, (int) reader->lengthInSamples);
+        reader->read (&buf, 0, (int) reader->lengthInSamples, 0, true, true);
+
+        out.getParentDirectory().createDirectory();
+        out.deleteFile();
+        std::unique_ptr<juce::AudioFormat> format;
+        int bits = 32;
+        if (out.hasFileExtension ("ogg")) { format = std::make_unique<juce::OggVorbisAudioFormat>(); bits = 16; }
+        else format = std::make_unique<juce::WavAudioFormat>();
+        auto stream = std::make_unique<juce::FileOutputStream> (out);
+        std::unique_ptr<juce::AudioFormatWriter> writer (format->createWriterFor (stream.get(), reader->sampleRate,
+                                                           (unsigned int) buf.getNumChannels(), bits, {}, oggQuality));
+        if (writer == nullptr) { ++failed; continue; }
+        stream.release();
+        writer->writeFromAudioSampleBuffer (buf, 0, buf.getNumSamples());
+        ++done;
+    }
+    std::printf ("converted %d files, %d failed\n", done, failed);
+    return failed == 0 ? 0 : 1;
+}
+
 int main (int argc, char** argv)
 {
     juce::ScopedJuceInitialiser_GUI init;
+    if (argc > 2 && juce::String (argv[1]) == "--convert")
+        return convertList (juce::File (argv[2]), argc > 3 ? juce::String (argv[3]).getIntValue() : 6);
     if (argc > 3 && juce::String (argv[1]) == "--normalize")
     {
         juce::File audition;
@@ -484,6 +530,29 @@ int main (int argc, char** argv)
                         && std::abs (q.apvts.getRawParameterValue ("an_age")->load() - 0.4f) < 0.001f;
         if (! ok) ++failures;
         std::printf ("  %-26s %s (cutoff %.1f, amount %.3f)\n", "09_state_roundtrip", ok ? "ok" : "FAIL", c, a);
+    }
+
+    // ---- Sampler
+    {
+        auto& bank = SampleBank::get();
+        std::printf ("  samples folder: %s (%s)\n", bank.getFolder().getFullPathName().toRawUTF8(), bank.isInstalled() ? "found" : "MISSING");
+        for (int k = 1; k < SampleBank::ids().size(); ++k)
+        {
+            resetAll (p);
+            set (p, pid::osc (0, "on"), 0);
+            set (p, "smp_on", 1); set (p, "smp_inst", (float) k);
+            set (p, "env1_rel", 0.4f);
+            bank.acquire (k);
+            for (int w = 0; w < 400 && bank.getStatus (k) != SampleBank::Ready && bank.getStatus (k) != SampleBank::Failed; ++w)
+                juce::Thread::sleep (10);
+            render (p, "50_sample_" + SampleBank::ids()[k], 4.0, chord (0.0, 3.0, { 48, 55, 60, 64 }));
+        }
+        // one long note to check the loops
+        resetAll (p);
+        set (p, pid::osc (0, "on"), 0); set (p, "smp_on", 1); set (p, "smp_inst", 3);
+        render (p, "51_violins_long_A4", 9.0, chord (0.0, 8.5, { 69 }));
+        set (p, "smp_inst", 1);
+        render (p, "52_piano_A4", 4.0, chord (0.0, 3.5, { 69 }));
     }
 
     // ---- Phase 5: CHAOS / FOCUS / MOTION

@@ -60,6 +60,7 @@ namespace choices
 
 void addPhase3Parameters (juce::AudioProcessorValueTreeState::ParameterLayout&);
 void addPhase5Parameters (juce::AudioProcessorValueTreeState::ParameterLayout&);
+void addSamplerParameters (juce::AudioProcessorValueTreeState::ParameterLayout&);
 
 constexpr int kNumFocusSlots = 8;
 
@@ -123,6 +124,7 @@ struct OscSettings
 };
 
 struct SubSettings    { bool on = false; int shape = 0; int oct = -1; int route = 0; float pan = 0; };
+struct SampleSettings { bool on = false; int inst = 0; float level = 0.8f, pan = 0; int oct = 0, semi = 0; float fine = 0, start = 0, velLayers = 1; int route = 0; };
 struct NoiseSettings  { bool on = false; int type = 0; int route = 0; float pan = 0; };
 struct FilterSettings { bool on = false; int type = 0; float key = 0; };
 
@@ -178,6 +180,7 @@ struct Settings
     OscSettings    osc[kNumOsc];
     SubSettings    sub;
     NoiseSettings  noise;
+    SampleSettings smp;
     FilterSettings filt[kNumFilters];
     EnvSettings    env[kNumEnv];
     LfoSettings    lfo[kNumLfo];
@@ -215,6 +218,8 @@ private:
     std::atomic<float>* mvChaos {}, *mvSpeed {}, *mvBite {}, *mvSpace {}, *mvSeed {}, *mvFocus {}, *mvMotion {},
         *mvShape {}, *mvRate {}, *mvSmooth {};
     struct FocusRefs { std::atomic<float>* dst, *depth, *curve; } focusRefs[kNumFocusSlots] {};
+    std::atomic<float>* smpOn {}, *smpInst {}, *smpLevel {}, *smpPan {}, *smpOct {}, *smpSemi {}, *smpFine {}, *smpStart {},
+        *smpVel {}, *smpRoute {};
     std::atomic<float>* macros[kNumMacros] {};
     std::atomic<float>* subOn {}, *subShape {}, *subOct {}, *subRoute {}, *subPan {};
     std::atomic<float>* noiseOn {}, *noiseType {}, *noiseRoute {}, *noisePan {};

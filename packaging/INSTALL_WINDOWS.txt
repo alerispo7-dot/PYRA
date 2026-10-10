@@ -4,6 +4,8 @@ PYRA - INSTALLAZIONE SU WINDOWS
 1. Copia la cartella "PYRA.vst3" in:
       C:\Program Files\Common Files\VST3
    (se Windows chiede i permessi di amministratore, conferma).
+   Dentro PYRA.vst3 ci sono anche i suoni campionati (pianoforte, archi, fiati...):
+   copia la cartella intera, non solo una parte.
 2. Apri la DAW e fai una nuova scansione dei plugin:
    - FL Studio: Options > Manage plugins > Find installed plugins, poi cerca PYRA.
    - Ableton: Impostazioni > Plug-in > attiva "Usa cartella VST3 di sistema" > Rescan.

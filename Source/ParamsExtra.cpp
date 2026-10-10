@@ -1,5 +1,6 @@
 // Parameters for phase 3: FX chain, ANALOG section, ARP.
 #include "Params.h"
+#include "dsp/Samples.h"
 
 namespace pyra
 {
@@ -276,5 +277,22 @@ void addPhase5Parameters (juce::AudioProcessorValueTreeState::ParameterLayout& l
     C (l, "motion_shape", "Motion Shape", choices::motionShapes(), 0);
     C (l, "motion_rate", "Motion Rate", choices::syncDivisions(), 7);
     F (l, "motion_smooth", "Motion Smooth", unit, 0.2f);
+}
+}
+
+namespace pyra
+{
+void addSamplerParameters (juce::AudioProcessorValueTreeState::ParameterLayout& l)
+{
+    B (l, "smp_on", "Sample On", false);
+    C (l, "smp_inst", "Sample Instrument", SampleBank::displayNames(), 0);
+    F (l, "smp_level", "Sample Level", { 0.0f, 1.0f }, 0.8f);
+    F (l, "smp_pan", "Sample Pan", { -1.0f, 1.0f }, 0.0f);
+    I (l, "smp_oct", "Sample Octave", -3, 3, 0);
+    I (l, "smp_semi", "Sample Semi", -12, 12, 0);
+    F (l, "smp_fine", "Sample Fine", { -100.0f, 100.0f }, 0.0f, "ct");
+    F (l, "smp_start", "Sample Start", { 0.0f, 1.0f }, 0.0f);
+    F (l, "smp_vel", "Sample Velocity Layers", { 0.0f, 1.0f }, 1.0f);
+    C (l, "smp_route", "Sample Output", choices::routes(), 0);
 }
 }

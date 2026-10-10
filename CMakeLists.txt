@@ -56,6 +56,7 @@ set(PYRA_SOURCES
     Source/dsp/Effects.cpp
     Source/dsp/Arp.cpp
     Source/dsp/Movement.cpp
+    Source/dsp/Samples.cpp
     Source/Lang.cpp
     Source/dsp/Wavetables.cpp
     Source/dsp/Voice.cpp
@@ -65,6 +66,7 @@ set(PYRA_SOURCES
     Source/ui/Pages.cpp
     Source/ui/Pages3.cpp
     Source/ui/Pages5.cpp
+    Source/ui/PageSample.cpp
     Source/ui/PresetUi.cpp)
 
 juce_add_binary_data(PyraData SOURCES Resources/FactoryPresets.json.gz)

@@ -1,0 +1,220 @@
+{
+ "id": "french_horn",
+ "name": "French Horn",
+ "category": "Brass & Winds",
+ "sampleRate": 44100,
+ "sustained": true,
+ "attack": 0.05,
+ "release": 0.3,
+ "zones": [
+  {
+   "file": "21_1.ogg",
+   "root": 21,
+   "tune": 12.8,
+   "loopStart": 185535,
+   "loopEnd": 203175,
+   "lo": 9,
+   "hi": 22,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "24_1.ogg",
+   "root": 24,
+   "tune": 1.9,
+   "loopStart": 156312,
+   "loopEnd": 196002,
+   "lo": 23,
+   "hi": 25,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "24_3.ogg",
+   "root": 24,
+   "tune": -0.7,
+   "loopStart": 104802,
+   "loopEnd": 144492,
+   "lo": 23,
+   "hi": 25,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "27_1.ogg",
+   "root": 27,
+   "tune": 8.1,
+   "loopStart": 156700,
+   "loopEnd": 196390,
+   "lo": 26,
+   "hi": 29,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "27_3.ogg",
+   "root": 27,
+   "tune": -2.8,
+   "loopStart": 161625,
+   "loopEnd": 179265,
+   "lo": 26,
+   "hi": 29,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "31_1.ogg",
+   "root": 31,
+   "tune": -34.9,
+   "loopStart": 162423,
+   "loopEnd": 202113,
+   "lo": 30,
+   "hi": 32,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "31_3.ogg",
+   "root": 31,
+   "tune": 46.2,
+   "loopStart": 178526,
+   "loopEnd": 189551,
+   "lo": 30,
+   "hi": 32,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "34_1.ogg",
+   "root": 34,
+   "tune": -3.7,
+   "loopStart": 200497,
+   "loopEnd": 211522,
+   "lo": 33,
+   "hi": 36,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "34_3.ogg",
+   "root": 34,
+   "tune": 5.1,
+   "loopStart": 212376,
+   "loopEnd": 218991,
+   "lo": 33,
+   "hi": 36,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "38_1.ogg",
+   "root": 38,
+   "tune": -4.6,
+   "loopStart": 187641,
+   "loopEnd": 194256,
+   "lo": 37,
+   "hi": 39,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "38_3.ogg",
+   "root": 38,
+   "tune": 2.2,
+   "loopStart": 179786,
+   "loopEnd": 219476,
+   "lo": 37,
+   "hi": 39,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "41_1.ogg",
+   "root": 41,
+   "tune": 6.0,
+   "loopStart": 193785,
+   "loopEnd": 211425,
+   "lo": 40,
+   "hi": 43,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "41_3.ogg",
+   "root": 41,
+   "tune": 6.4,
+   "loopStart": 154857,
+   "loopEnd": 194547,
+   "lo": 40,
+   "hi": 43,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "45_1.ogg",
+   "root": 45,
+   "tune": 0.4,
+   "loopStart": 179533,
+   "loopEnd": 205993,
+   "lo": 44,
+   "hi": 46,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "45_3.ogg",
+   "root": 45,
+   "tune": 2.6,
+   "loopStart": 193016,
+   "loopEnd": 219476,
+   "lo": 44,
+   "hi": 46,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "48_1.ogg",
+   "root": 48,
+   "tune": 0.6,
+   "loopStart": 190785,
+   "loopEnd": 217245,
+   "lo": 47,
+   "hi": 55,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "48_3.ogg",
+   "root": 48,
+   "tune": 3.3,
+   "loopStart": 169445,
+   "loopEnd": 195905,
+   "lo": 47,
+   "hi": 55,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "62_1.ogg",
+   "root": 62,
+   "tune": -5.6,
+   "loopStart": 202967,
+   "loopEnd": 209582,
+   "lo": 56,
+   "hi": 63,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "65_1.ogg",
+   "root": 65,
+   "tune": 0.2,
+   "loopStart": 174392,
+   "loopEnd": 200852,
+   "lo": 64,
+   "hi": 77,
+   "velLo": 0,
+   "velHi": 64
+  }
+ ]
+}

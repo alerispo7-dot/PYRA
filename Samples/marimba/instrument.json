@@ -1,0 +1,121 @@
+{
+ "id": "marimba",
+ "name": "Marimba",
+ "category": "Keys",
+ "sampleRate": 44100,
+ "sustained": false,
+ "attack": 0.0,
+ "release": 0.3,
+ "zones": [
+  {
+   "file": "29_6.ogg",
+   "root": 29,
+   "tune": 1.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 17,
+   "hi": 32,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "36_6.ogg",
+   "root": 36,
+   "tune": -4.8,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 33,
+   "hi": 39,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "43_6.ogg",
+   "root": 43,
+   "tune": -1.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 40,
+   "hi": 45,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "47_6.ogg",
+   "root": 47,
+   "tune": -2.2,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 46,
+   "hi": 50,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "53_6.ogg",
+   "root": 53,
+   "tune": 0.4,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 51,
+   "hi": 56,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "60_6.ogg",
+   "root": 60,
+   "tune": -4.5,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 57,
+   "hi": 63,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "67_6.ogg",
+   "root": 67,
+   "tune": 2.4,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 64,
+   "hi": 69,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "71_6.ogg",
+   "root": 71,
+   "tune": -0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 70,
+   "hi": 74,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "77_6.ogg",
+   "root": 77,
+   "tune": 2.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 75,
+   "hi": 80,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "84_6.ogg",
+   "root": 84,
+   "tune": -5.3,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 81,
+   "hi": 96,
+   "velLo": 0,
+   "velHi": 127
+  }
+ ]
+}

@@ -1,0 +1,253 @@
+{
+ "id": "violins",
+ "name": "Violins",
+ "category": "Strings",
+ "sampleRate": 44100,
+ "sustained": true,
+ "attack": 0.08,
+ "release": 0.5,
+ "zones": [
+  {
+   "file": "43_1.ogg",
+   "root": 43,
+   "tune": -2.2,
+   "loopStart": 245276,
+   "loopEnd": 256301,
+   "lo": 31,
+   "hi": 44,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "43_2.ogg",
+   "root": 43,
+   "tune": 0.7,
+   "loopStart": 232763,
+   "loopEnd": 243788,
+   "lo": 31,
+   "hi": 44,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "45_1.ogg",
+   "root": 45,
+   "tune": 0.3,
+   "loopStart": 219424,
+   "loopEnd": 259114,
+   "lo": 45,
+   "hi": 46,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "45_2.ogg",
+   "root": 45,
+   "tune": -0.6,
+   "loopStart": 217619,
+   "loopEnd": 244079,
+   "lo": 45,
+   "hi": 46,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "47_1.ogg",
+   "root": 47,
+   "tune": -0.5,
+   "loopStart": 245709,
+   "loopEnd": 252324,
+   "lo": 47,
+   "hi": 48,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "47_2.ogg",
+   "root": 47,
+   "tune": 2.0,
+   "loopStart": 225282,
+   "loopEnd": 251742,
+   "lo": 47,
+   "hi": 48,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "50_1.ogg",
+   "root": 50,
+   "tune": -0.4,
+   "loopStart": 250656,
+   "loopEnd": 257271,
+   "lo": 49,
+   "hi": 52,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "50_2.ogg",
+   "root": 50,
+   "tune": -1.1,
+   "loopStart": 246634,
+   "loopEnd": 257659,
+   "lo": 49,
+   "hi": 52,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "54_1.ogg",
+   "root": 54,
+   "tune": -5.4,
+   "loopStart": 233617,
+   "loopEnd": 251257,
+   "lo": 53,
+   "hi": 55,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "54_2.ogg",
+   "root": 54,
+   "tune": 2.6,
+   "loopStart": 242172,
+   "loopEnd": 253197,
+   "lo": 53,
+   "hi": 55,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "57_1.ogg",
+   "root": 57,
+   "tune": -9.7,
+   "loopStart": 221880,
+   "loopEnd": 239520,
+   "lo": 56,
+   "hi": 58,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "57_2.ogg",
+   "root": 57,
+   "tune": 1.6,
+   "loopStart": 227525,
+   "loopEnd": 238550,
+   "lo": 56,
+   "hi": 58,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "60_1.ogg",
+   "root": 60,
+   "tune": -3.2,
+   "loopStart": 252454,
+   "loopEnd": 263479,
+   "lo": 59,
+   "hi": 62,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "60_2.ogg",
+   "root": 60,
+   "tune": -2.7,
+   "loopStart": 227622,
+   "loopEnd": 238647,
+   "lo": 59,
+   "hi": 62,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "64_1.ogg",
+   "root": 64,
+   "tune": 1.0,
+   "loopStart": 216611,
+   "loopEnd": 256301,
+   "lo": 63,
+   "hi": 65,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "64_2.ogg",
+   "root": 64,
+   "tune": -0.7,
+   "loopStart": 256864,
+   "loopEnd": 263479,
+   "lo": 63,
+   "hi": 65,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "67_1.ogg",
+   "root": 67,
+   "tune": 1.3,
+   "loopStart": 230908,
+   "loopEnd": 257368,
+   "lo": 66,
+   "hi": 69,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "67_2.ogg",
+   "root": 67,
+   "tune": 0.5,
+   "loopStart": 222760,
+   "loopEnd": 249220,
+   "lo": 66,
+   "hi": 69,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "71_1.ogg",
+   "root": 71,
+   "tune": -4.0,
+   "loopStart": 241105,
+   "loopEnd": 252130,
+   "lo": 70,
+   "hi": 72,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "71_2.ogg",
+   "root": 71,
+   "tune": 1.0,
+   "loopStart": 247119,
+   "loopEnd": 258144,
+   "lo": 70,
+   "hi": 72,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "74_1.ogg",
+   "root": 74,
+   "tune": -5.6,
+   "loopStart": 223141,
+   "loopEnd": 240781,
+   "lo": 73,
+   "hi": 86,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "74_2.ogg",
+   "root": 74,
+   "tune": 3.6,
+   "loopStart": 253857,
+   "loopEnd": 260472,
+   "lo": 73,
+   "hi": 86,
+   "velLo": 65,
+   "velHi": 127
+  }
+ ]
+}

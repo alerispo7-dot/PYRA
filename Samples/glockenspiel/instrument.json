@@ -1,0 +1,77 @@
+{
+ "id": "glockenspiel",
+ "name": "Glockenspiel",
+ "category": "Keys",
+ "sampleRate": 44100,
+ "sustained": false,
+ "attack": 0.0,
+ "release": 0.5,
+ "zones": [
+  {
+   "file": "67_4.ogg",
+   "root": 67,
+   "tune": 38.5,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 55,
+   "hi": 69,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "72_4.ogg",
+   "root": 72,
+   "tune": 1.5,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 70,
+   "hi": 75,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "79_4.ogg",
+   "root": 79,
+   "tune": -10.9,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 76,
+   "hi": 81,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "84_4.ogg",
+   "root": 84,
+   "tune": -12.9,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 82,
+   "hi": 87,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "91_4.ogg",
+   "root": 91,
+   "tune": -19.8,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 88,
+   "hi": 93,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "96_4.ogg",
+   "root": 96,
+   "tune": -25.5,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 94,
+   "hi": 108,
+   "velLo": 0,
+   "velHi": 127
+  }
+ ]
+}

@@ -106,6 +106,26 @@ namespace lang
                 { "One-click save of your own sounds, like Serum", "Salvataggio dei tuoi suoni con un clic, come su Serum" },
 
 
+
+                // ---- sampler
+                { "INSTRUMENTS", "STRUMENTI" }, { "SAMPLE LAYER", "LIVELLO CAMPIONI" }, { "ABOUT THE SAMPLES", "INFORMAZIONI SUI CAMPIONI" },
+                { "SAMPLE ON", "CAMPIONI ATTIVI" }, { "Vel Layers", "Strati vel." }, { "Start", "Inizio" },
+                { "How much your playing strength picks soft or loud recordings",
+                  "Quanto la forza con cui suoni sceglie le registrazioni piano o forte" },
+                { "Skips the beginning of the recording (softer, slower attack when lower)",
+                  "Salta l'inizio della registrazione (attacco pi\xc3\xb9 morbido)" },
+                { "KEYS", "TASTIERE" }, { "STRINGS", "ARCHI" }, { "BRASS & WINDS", "OTTONI E FIATI" }, { "loading...", "caricamento..." },
+                { "Samples not found. Reinstall PYRA with the included installer, or copy the \"Samples\" folder to:",
+                  "Campioni non trovati. Reinstalla PYRA con l'installer incluso, oppure copia la cartella \"Samples\" in:" },
+                { "Click an instrument to switch the sample layer on.", "Clicca uno strumento per attivare i campioni." },
+                { "Loading the recordings into memory...", "Caricamento delle registrazioni in memoria..." },
+                { "The sample layer goes through the same filters, envelopes and effects as the oscillators.",
+                  "I campioni passano dagli stessi filtri, inviluppi ed effetti degli oscillatori." },
+                { "Grand Piano", "Pianoforte a coda" }, { "Upright Piano", "Pianoforte verticale" }, { "Violins", "Violini" },
+                { "Violas", "Viole" }, { "Cellos", "Violoncelli" }, { "Contrabass", "Contrabbasso" }, { "Solo Violin", "Violino solo" },
+                { "Pizzicato Strings", "Archi pizzicato" }, { "Harp", "Arpa" }, { "Trumpet", "Tromba" }, { "French Horn", "Corno" },
+                { "Trombone", "Trombone" }, { "Tuba", "Tuba" }, { "Flute", "Flauto" }, { "Clarinet", "Clarinetto" }, { "Oboe", "Oboe" },
+                { "Bassoon", "Fagotto" }, { "Marimba", "Marimba" }, { "Glockenspiel", "Glockenspiel" },
                 // ---- phase 5
                 { "Random movement inside safe ranges. Every turn makes the sound alive and never the same.",
                   "Movimento casuale entro limiti sicuri. Ogni giro rende il suono vivo e mai uguale." },
@@ -247,6 +267,8 @@ namespace lang
 
     juce::String tr (const juce::String& english)
     {
+        if (english == "SAMPLE_CREDITS")
+            return juce::String::fromUTF8 (current() == Italian ? "Gli strumenti campionati di PYRA vengono da due librerie gratuite che ne permettono la distribuzione:\n\nPianoforte a coda: Salamander Grand Piano di Alexander Holm, licenza CC-BY 3.0.\n\nTutti gli altri strumenti: VS Chamber Orchestra: Community Edition di Versilian Studios (Sam Gossner) e Ivy Audio (Simon Dalzell) - vis.versilstudios.net/vsco-community.html\n\nGrazie agli autori. I campioni sono stati adattati per PYRA (tagliati, accordati, messi in loop, bilanciati)." : "PYRA's sampled instruments come from two free libraries that allow redistribution:\n\nGrand Piano: Salamander Grand Piano by Alexander Holm, licensed CC-BY 3.0.\n\nAll other instruments: VS Chamber Orchestra: Community Edition by Versilian Studios (Sam Gossner) and Ivy Audio (Simon Dalzell) - vis.versilstudios.net/vsco-community.html\n\nThank you to the authors. The samples were edited for PYRA (trimmed, tuned, looped, levelled).");
         if (english == "ABOUT_TEXT")
             return juce::String::fromUTF8 (current() == Italian ? aboutIt : aboutEn);
         if (current() == English) return english;

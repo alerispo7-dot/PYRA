@@ -1,0 +1,121 @@
+{
+ "id": "flute",
+ "name": "Flute",
+ "category": "Brass & Winds",
+ "sampleRate": 44100,
+ "sustained": true,
+ "attack": 0.04,
+ "release": 0.25,
+ "zones": [
+  {
+   "file": "48_1.ogg",
+   "root": 48,
+   "tune": -0.7,
+   "loopStart": 187868,
+   "loopEnd": 205508,
+   "lo": 36,
+   "hi": 50,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "52_1.ogg",
+   "root": 52,
+   "tune": -0.4,
+   "loopStart": 168534,
+   "loopEnd": 208224,
+   "lo": 51,
+   "hi": 54,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "57_1.ogg",
+   "root": 57,
+   "tune": -5.5,
+   "loopStart": 199411,
+   "loopEnd": 217051,
+   "lo": 55,
+   "hi": 58,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "60_1.ogg",
+   "root": 60,
+   "tune": 0.7,
+   "loopStart": 173093,
+   "loopEnd": 212783,
+   "lo": 59,
+   "hi": 62,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "64_1.ogg",
+   "root": 64,
+   "tune": -1.1,
+   "loopStart": 164072,
+   "loopEnd": 203762,
+   "lo": 63,
+   "hi": 66,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "69_1.ogg",
+   "root": 69,
+   "tune": 1.3,
+   "loopStart": 173190,
+   "loopEnd": 212880,
+   "lo": 67,
+   "hi": 70,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "72_1.ogg",
+   "root": 72,
+   "tune": -0.4,
+   "loopStart": 188942,
+   "loopEnd": 215402,
+   "lo": 71,
+   "hi": 74,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "76_1.ogg",
+   "root": 76,
+   "tune": -1.2,
+   "loopStart": 175168,
+   "loopEnd": 201628,
+   "lo": 75,
+   "hi": 78,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "81_1.ogg",
+   "root": 81,
+   "tune": -1.7,
+   "loopStart": 171717,
+   "loopEnd": 182742,
+   "lo": 79,
+   "hi": 82,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "84_1.ogg",
+   "root": 84,
+   "tune": 2.6,
+   "loopStart": 128766,
+   "loopEnd": 168456,
+   "lo": 83,
+   "hi": 96,
+   "velLo": 0,
+   "velHi": 127
+  }
+ ]
+}

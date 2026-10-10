@@ -5,6 +5,7 @@
 #include "Filters.h"
 #include "Envelope.h"
 #include "Wavetables.h"
+#include "Samples.h"
 
 namespace pyra
 {
@@ -81,6 +82,15 @@ private:
     float pink[7] {}, brown = 0, noiseLp = 0, noiseOut = 0, noiseHold = 0;
     int noiseCounter = 0;
     float noiseGainL = 0, noiseGainR = 0;
+
+    // sampler layer
+    void startSample (const Settings& s);
+    const SampleInstrument* smpInst = nullptr;
+    const SampleZone* smpZone = nullptr;
+    int smpInstIndex = 0;
+    double smpPos = 0;
+    float smpGainL = 0, smpGainR = 0;
+    bool smpDone = true;
 
     MultiFilter filters[kNumFilters];
     Envelope ampEnv, modEnv[kNumEnv - 1];

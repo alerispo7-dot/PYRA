@@ -52,6 +52,9 @@ jobs:
           ART=build/PYRA_artefacts/Release
           mkdir -p dist/PYRA
           cp -R "$ART/VST3/PYRA.vst3" dist/PYRA/
+          mkdir -p dist/PYRA/PYRA.vst3/Contents/Resources
+          cp -R Samples dist/PYRA/PYRA.vst3/Contents/Resources/Samples
+          cp packaging/CREDITS.txt dist/PYRA/
           cp -R "$ART/AU/PYRA.component" dist/PYRA/
           cp -R "$ART/Standalone/PYRA.app" dist/PYRA/
           # Apple Silicon only loads signed code: give everything an ad-hoc signature
@@ -70,6 +73,9 @@ jobs:
           $art = "build/PYRA_artefacts/Release"
           New-Item -ItemType Directory -Force -Path dist/PYRA | Out-Null
           Copy-Item -Recurse "$art/VST3/PYRA.vst3" dist/PYRA/
+          New-Item -ItemType Directory -Force -Path dist/PYRA/PYRA.vst3/Contents/Resources | Out-Null
+          Copy-Item -Recurse Samples dist/PYRA/PYRA.vst3/Contents/Resources/Samples
+          Copy-Item packaging/CREDITS.txt dist/PYRA/
           Copy-Item "$art/Standalone/PYRA.exe" dist/PYRA/
           Copy-Item packaging/INSTALL_WINDOWS.txt dist/PYRA/
           Compress-Archive -Path dist/PYRA -DestinationPath dist/PYRA-Windows.zip

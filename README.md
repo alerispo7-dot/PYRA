@@ -24,18 +24,20 @@ di installazione (INSTALL_MAC.txt / INSTALL_WINDOWS.txt).
   ronzio, convertitore vintage (tutto a 0 = suono digitale pulito)
 - **ARP**: 8 modalità (incluso Sequencer), 20 scale, editor a 32 step (nota, velocity, gate, on, legato,
   blocco), RANDOM che rispetta gli step bloccati, swing, latch, sync con la DAW, trascinamento MIDI nella DAW
-- **500 preset** in 13 categorie e 70 sottocategorie (bassi, lead, pad, tastiere, pluck, archi, ottoni e fiati,
+- **540 preset** in 13 categorie e 70 sottocategorie (bassi, lead, pad, tastiere, pluck, archi, ottoni e fiati,
   chitarre, arpeggi, sequenze, accordi, batteria, FX), con volume già bilanciato
 - **Preferiti** (stellina), **tag personali**, ricerca, salvataggio dei tuoi suoni con un clic
   (Documenti/PYRA/Presets). Rinominare un preset non cambia mai i progetti già salvati.
 - **CHAOS / FOCUS / MOTION** (pagina CHAOS): caos casuale con Speed, Bite, Space e ROLL; una macro con 8 bersagli
   (anche effetti) con quantità e curva; movimento ritmico a tempo con 9 forme (pump, gate, trance gate, sweep,
   wobble, auto-pan, stutter, passi casuali, crescendo). Tutte e tre sono anche sorgenti nella matrice.
+- **SAMPLE**: 19 strumenti campionati veri (pianoforte a coda e verticale, archi, ottoni, fiati, arpa, marimba,
+  glockenspiel) che passano da filtri, inviluppi ed effetti del synth; 40 preset dedicati. Crediti in packaging/CREDITS.txt
 - Limitatore di sicurezza in uscita: mai oltre 0 dBFS
 - Interfaccia ridimensionabile, inglese / italiano
 
 ## In arrivo
-Stile grafico definitivo, suoni realistici con campioni.
+Stile grafico definitivo.
 
 ## Compilare da sé
 ```

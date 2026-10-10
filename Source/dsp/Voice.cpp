@@ -97,6 +97,7 @@ void Voice::start (int midiNote, int midiChannel, float vel, float glideFrom, co
         subGainL = subGainR = noiseGainL = noiseGainR = 0.0f;
     }
 
+    startSample (s);
     ampEnv.noteOn();
     for (auto& e : modEnv) e.noteOn();
     for (int l = 0; l < kNumLfo; ++l)
@@ -117,12 +118,30 @@ void Voice::legatoTo (int midiNote, float vel, bool retriggerEnvelopes, bool gli
     if (retriggerEnvelopes)
     {
         velocity = vel;
+        startSample (s);
         ampEnv.noteOn();
         for (auto& e : modEnv) e.noteOn();
         for (int l = 0; l < kNumLfo; ++l)
             if (s.lfo[l].mode != LfoFree)
                 lfos[l].noteOn (s.lfo[l], rng.next());
     }
+}
+
+void Voice::startSample (const Settings& s)
+{
+    smpDone = true;
+    smpZone = nullptr;
+    if (! s.smp.on || s.smp.inst <= 0) return;
+    smpInstIndex = s.smp.inst;
+    smpInst = SampleBank::get().acquire (s.smp.inst);
+    if (smpInst == nullptr) return;   // still loading: the next notes will have it
+    const int vel = juce::jlimit (1, 127, (int) std::lround (100.0f + (velocity * 127.0f - 100.0f) * s.smp.velLayers));
+    smpZone = smpInst->find (note, vel);
+    if (smpZone == nullptr) return;
+    smpPos = (double) s.smp.start * 0.3 * smpInst->sampleRate;   // up to 300 ms into the sample
+    if (smpPos >= smpZone->length - 4) smpPos = 0;
+    smpDone = false;
+    smpGainL = smpGainR = 0.0f;
 }
 
 void Voice::release()
@@ -310,6 +329,19 @@ void Voice::render (float* outL, float* outR, int n, const VoiceContext& ctx)
         r.stepR = (lvl * pr - osc[o].gainR) / (float) n;
     }
 
+    // ---- sampler setup
+    const bool smpActive = s.smp.on && ! smpDone && smpZone != nullptr && smpInst != nullptr && smpInstIndex == s.smp.inst;
+    double smpInc = 0.0; float smpStepL = 0, smpStepR = 0;
+    if (smpActive)
+    {
+        const float pitch = basePitch + (float) (12 * s.smp.oct + s.smp.semi) + s.smp.fine * 0.01f + smpZone->tune * 0.01f
+                          - (float) smpZone->root;
+        smpInc = std::exp2 ((double) pitch / 12.0) * smpInst->sampleRate / (double) sr;
+        float pl, pr; panGains (s.smp.pan, pl, pr);
+        smpStepL = (s.smp.level * pl - smpGainL) / (float) n;
+        smpStepR = (s.smp.level * pr - smpGainR) / (float) n;
+    }
+
     // ---- sub + noise setup
     const float subInc = std::min (midiToHz (basePitch + 12.0f * (float) s.sub.oct) / sr, 0.49f);
     float subStepL = 0, subStepR = 0;
@@ -430,6 +462,29 @@ void Voice::render (float* outL, float* outR, int n, const VoiceContext& ctx)
             route (s.sub.route, x * subGainL, x * subGainR);
         }
         else subOut = 0.0f;
+
+        if (smpActive && ! smpDone)
+        {
+            const auto& z = *smpZone;
+            const int i1 = (int) smpPos;
+            const float t = (float) (smpPos - (double) i1);
+            const int i0 = std::max (0, i1 - 1), i2 = std::min (z.length - 1, i1 + 1), i3 = std::min (z.length - 1, i1 + 2);
+            auto hermite = [t] (float y0, float y1, float y2, float y3)
+            {
+                const float c1 = 0.5f * (y2 - y0), c2 = y0 - 2.5f * y1 + 2.0f * y2 - 0.5f * y3, c3 = 0.5f * (y3 - y0) + 1.5f * (y1 - y2);
+                return ((c3 * t + c2) * t + c1) * t + y1;
+            };
+            const float xl = hermite (z.frameL (i0), z.frameL (i1), z.frameL (i2), z.frameL (i3));
+            const float xr = hermite (z.frameR (i0), z.frameR (i1), z.frameR (i2), z.frameR (i3));
+            smpGainL += smpStepL; smpGainR += smpStepR;
+            route (s.smp.route, xl * smpGainL, xr * smpGainR);
+            smpPos += smpInc;
+            if (z.loopEnd > z.loopStart)
+            {
+                while (smpPos >= (double) z.loopEnd) smpPos -= (double) (z.loopEnd - z.loopStart);
+            }
+            else if (smpPos >= (double) (z.length - 2)) smpDone = true;
+        }
 
         if (s.noise.on)
         {

@@ -6,7 +6,7 @@ namespace colours = pyra::colours;
 
 namespace
 {
-    enum PageIndex { PageSynth, PageChaos, PageMatrix, PageFx, PageArp, PageAnalog, PagePresets, PageSettings, PageCount };
+    enum PageIndex { PageSynth, PageSample, PageChaos, PageMatrix, PageFx, PageArp, PageAnalog, PagePresets, PageSettings, PageCount };
 }
 
 PyraAudioProcessorEditor::PyraAudioProcessorEditor (PyraAudioProcessor& p)
@@ -48,7 +48,7 @@ void PyraAudioProcessorEditor::buildUi()
 
     ui.reset (new pyra::UiContext { proc, proc.apvts, matrix, {} });
 
-    const juce::StringArray names { "SYNTH", "CHAOS", "MATRIX", "FX", "ARP", "ANALOG", tr ("PRESETS"), tr ("SETTINGS") };
+    const juce::StringArray names { "SYNTH", "SAMPLE", "CHAOS", "MATRIX", "FX", "ARP", "ANALOG", tr ("PRESETS"), tr ("SETTINGS") };
     for (int i = 0; i < names.size(); ++i)
     {
         auto* t = tabs.add (new juce::TextButton (names[i]));
@@ -58,6 +58,7 @@ void PyraAudioProcessorEditor::buildUi()
     }
 
     pages.push_back (pyra::createSynthPage (*ui));
+    pages.push_back (pyra::createSamplePage (*ui));
     pages.push_back (pyra::createChaosPage (*ui));
     pages.push_back (pyra::createMatrixPage (*ui));
     pages.push_back (pyra::createFxPage (*ui));
@@ -187,7 +188,7 @@ void PyraAudioProcessorEditor::Root::resized()
     int x = 186;
     for (auto* t : e.tabs)
     {
-        const int w = t->getButtonText().length() > 6 ? 98 : 78;
+        const int w = t->getButtonText().length() > 7 ? 96 : (t->getButtonText().length() > 6 ? 86 : 70);
         t->setBounds (x, 9, w, 28);
         x += w + 4;
     }

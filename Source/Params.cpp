@@ -271,6 +271,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 
     addPhase3Parameters (l);
     addPhase5Parameters (l);
+    addSamplerParameters (l);
     return l;
 }
 
@@ -298,6 +299,8 @@ void ParamRefs::init (juce::AudioProcessorValueTreeState& st)
         const auto n = "focus" + juce::String (k + 1) + "_";
         focusRefs[k] = { p (n + "dst"), p (n + "depth"), p (n + "curve") };
     }
+    smpOn = p ("smp_on"); smpInst = p ("smp_inst"); smpLevel = p ("smp_level"); smpPan = p ("smp_pan"); smpOct = p ("smp_oct");
+    smpSemi = p ("smp_semi"); smpFine = p ("smp_fine"); smpStart = p ("smp_start"); smpVel = p ("smp_vel"); smpRoute = p ("smp_route");
     anNoise = p ("an_noise"); anHum = p ("an_hum"); anHumFreq = p ("an_humfreq"); anBits = p ("an_bits"); anRate = p ("an_rate");
     for (int m = 0; m < kNumMacros; ++m) macros[m] = p (pid::macro (m));
 
@@ -376,6 +379,7 @@ void ParamRefs::fill (Settings& s) const
 
     s.sub = { b (subOn), i (subShape), i (subOct), i (subRoute), f (subPan) };
     s.noise = { b (noiseOn), i (noiseType), i (noiseRoute), f (noisePan) };
+    s.smp = { b (smpOn), i (smpInst), f (smpLevel), f (smpPan), i (smpOct), i (smpSemi), f (smpFine), f (smpStart), f (smpVel), i (smpRoute) };
 
     for (int o = 0; o < kNumOsc; ++o)
     {

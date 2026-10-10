@@ -26,6 +26,9 @@ WARP = {n: i for i, n in enumerate(["Off", "Sync", "Bend+", "Bend-", "PWM", "Asy
 F1, F2, BOTH, DIRECT = range(4)
 POLY, MONO, LEGATO = range(3)
 
+SMP = {n: i for i, n in enumerate(["Off", "Grand Piano", "Upright Piano", "Violins", "Violas", "Cellos", "Contrabass", "Solo Violin",
+                                   "Pizzicato", "Harp", "Trumpet", "French Horn", "Trombone", "Tuba", "Flute", "Clarinet", "Oboe",
+                                   "Bassoon", "Marimba", "Glockenspiel"])}
 SRC = {n: i for i, n in enumerate(["None", "Env1", "Env2", "Env3", "Env4", "Lfo1", "Lfo2", "Lfo3", "Lfo4", "Velocity",
                                    "Note", "Random", "ModWheel", "Pressure", "PitchBend", "Slide",
                                    "Macro1", "Macro2", "Macro3", "Macro4"])}
@@ -85,6 +88,12 @@ class Preset:
     def noise(self, **kw):
         self.p["noise_on"] = 1
         for k, v in kw.items(): self.p[f"noise_{k}"] = v
+        return self
+    def sample(self, inst, **kw):
+        self.p["smp_on"] = 1
+        self.p["smp_inst"] = SMP[inst]
+        for k, v in kw.items(): self.p[f"smp_{k}"] = v
+        self.tags = list(dict.fromkeys(self.tags + ["Sampled", "Realistic"]))
         return self
     def analog(self, age=None, **kw):
         if age is not None: self.p["an_age"] = age
@@ -930,6 +939,87 @@ def _(p, i, r):
     p.analog(bits=round(r.uniform(0.0, 0.4), 2))
     space(p, r, 1.0, "both")
 
+
+
+
+# ============================== SAMPLED INSTRUMENTS (40)
+def sampled_base(p, inst, att=0.0, rel=0.4, sustained=True, level=0.85):
+    p.osc(0, on=0)
+    p.sample(inst, level=level)
+    p.filt(0, type=LP12, cutoff=20000, res=0.0)
+    p.env(0, att=att, dec=8.0 if not sustained else 1.0, sus=1.0, rel=rel)
+
+@recipe("Keys", "Sampled Piano", 10, ["Acoustic"], ["Concert Grand", "Bright Concert Grand", "Warm Grand", "Felt Grand", "Hall Grand",
+                                                     "Lo-Fi Grand", "Grand & Pad", "Upright Real", "Upright Room", "Honky Upright"])
+def _(p, i, r):
+    sampled_base(p, "Grand Piano" if i < 7 else "Upright Piano", rel=0.45, sustained=False)
+    p.set(velAmp=0.75)
+    if i == 1: p.fx("eq", highf=5000, highg=4, lowg=-1)
+    if i == 2: p.filt(0, cutoff=3500); p.fx("eq", lowf=150, lowg=2)
+    if i == 3: p.filt(0, cutoff=1800, type=LP12); p.set(smp_start=0.08); p.analog(age=0.2)
+    if i == 4: p.fx("rev", type=1, size=0.8, decay=3.2, mix=0.28)
+    if i == 5: p.fx("tape", wow=0.45, flutter=0.3, sat=0.35, tone=0.4); p.analog(age=0.6, noise=0.4, bits=0.15); p.filt(0, cutoff=4000)
+    if i == 6:
+        p.osc(0, on=1, wt="Analog Saw", voices=5, detune=0.2, level=0.18)
+        p.filt(1, type=LP24, cutoff=1500); p.osc(0, route=F2); p.set(filterRouting=1)
+        p.fx("rev", type=1, decay=4, mix=0.3)
+    if i == 8: p.fx("rev", type=0, size=0.4, decay=1.0, mix=0.18)
+    if i == 9: p.fx("cho", depth=0.25, rate=4.5, mix=0.35); p.set(smp_fine=8)
+    if i in (0, 7): p.fx("rev", type=0, size=0.5, decay=1.6, mix=0.15)
+    p.mod("Velocity", D_filt(0, "cutoff"), 0.12)
+    macros(p)
+
+@recipe("Keys", "Sampled Mallets", 4, ["Percussive"], ["Marimba Real", "Glockenspiel Real", "Marimba Echo", "Glock Dream"])
+def _(p, i, r):
+    sampled_base(p, "Marimba" if i % 2 == 0 else "Glockenspiel", rel=0.4, sustained=False)
+    if i >= 2: p.fx("dly", mode=2, div=DIV["1/8 D"], fb=0.4, mix=0.22); p.fx("rev", type=1, decay=3, mix=0.25)
+    else: p.fx("rev", type=0, size=0.4, decay=1.2, mix=0.15)
+    macros(p)
+
+@recipe("Strings", "Sampled Strings", 12, ["Orchestral"], ["Violin Section", "Viola Section", "Cello Section", "Double Bass",
+        "Solo Violin Real", "Pizzicato Real", "Harp Real", "Cinematic Violins", "Dark Cellos", "Strings & Synth", "Harp Arp", "Pizz Delay"])
+def _(p, i, r):
+    inst = ["Violins", "Violas", "Cellos", "Contrabass", "Solo Violin", "Pizzicato", "Harp", "Violins", "Cellos", "Violins", "Harp", "Pizzicato"][i]
+    sus = inst not in ("Pizzicato", "Harp")
+    sampled_base(p, inst, att=0.08 if sus else 0.0, rel=0.6 if sus else 0.5, sustained=sus)
+    p.fx("rev", type=1, size=0.75, decay=2.8, mix=0.25)
+    if i == 4: p.set(voiceMode=LEGATO, glide=0.05, polyphony=1)
+    if i == 7: p.env(0, att=0.5, rel=1.5); p.fx("rev", type=1, size=0.9, decay=5, mix=0.35)
+    if i == 8: p.filt(0, cutoff=1200); p.env(0, att=0.3, rel=1.2)
+    if i == 9:
+        p.osc(0, on=1, wt="Strings", pos=0.5, voices=5, detune=0.15, level=0.25)
+        p.env(0, att=0.25, rel=1.0)
+    if i == 10: p.arpeggio(mode=2, rate="1/16", oct=2, gate=0.8)
+    if i == 11: p.fx("dly", mode=2, div=DIV["1/8 D"], fb=0.45, mix=0.25)
+    if sus:
+        p.mod("ModWheel", D_filt(0, "cutoff"), 0.0)
+        p.filt(0, cutoff=p.p.get("f1_cutoff", 20000) if i == 8 else 9000)
+        p.mod("Velocity", D_filt(0, "cutoff"), 0.15)
+    macros(p)
+
+@recipe("Brass & Winds", "Sampled Brass & Winds", 10, ["Orchestral"], ["Trumpet Real", "French Horn Real", "Trombone Real", "Tuba Real",
+        "Flute Real", "Clarinet Real", "Oboe Real", "Bassoon Real", "Horn Section Pad", "Woodwind Dream"])
+def _(p, i, r):
+    inst = ["Trumpet", "French Horn", "Trombone", "Tuba", "Flute", "Clarinet", "Oboe", "Bassoon", "French Horn", "Flute"][i]
+    sampled_base(p, inst, att=0.04, rel=0.35)
+    if i < 8: p.set(voiceMode=LEGATO, glide=0.04, polyphony=1) if inst in ("Trumpet", "Flute", "Oboe", "Clarinet") else None
+    if i == 8: p.env(0, att=0.6, rel=1.6); p.fx("rev", type=1, size=0.9, decay=5, mix=0.35); p.fx("cho", depth=0.3, mix=0.25)
+    elif i == 9: p.env(0, att=0.3, rel=1.5); p.fx("rev", type=2, decay=6, shim=0.4, mix=0.35); p.fx("dly", div=DIV["1/4 D"], fb=0.4, mix=0.18)
+    else: p.fx("rev", type=1, size=0.6, decay=2.2, mix=0.2)
+    p.mod("Velocity", D_filt(0, "cutoff"), 0.12)
+    p.filt(0, cutoff=10000)
+    macros(p)
+
+@recipe("Pad", "Hybrid", 4, ["Cinematic", "Hybrid"], ["Orchestra Haze", "Cello Nebula", "Ghost Violins", "Brass Horizon"])
+def _(p, i, r):
+    inst = ["Violins", "Cellos", "Violins", "French Horn"][i]
+    sampled_base(p, inst, att=0.8, rel=2.5, level=0.7)
+    p.osc(0, on=1, wt=["Harmonic Sweep", "Analog Saw", "Glass", "Brass"][i], voices=5, detune=0.25, level=0.3)
+    p.lfo(0, shape=SINE, sync=0, rate=0.08, mode=FREE); p.mod("Lfo1", D_osc(0, "pos"), 0.4)
+    p.filt(0, type=LP24, cutoff=3000, res=0.1)
+    p.fx("rev", type=2 if i == 2 else 1, size=0.9, decay=6, shim=0.4, mix=0.4)
+    p.set(chaos_amt=0.15) if i == 0 else None
+    macros(p)
 
 # ----------------------------------------------------------------------------- build
 def main(out):

@@ -1,0 +1,253 @@
+{
+ "id": "clarinet",
+ "name": "Clarinet",
+ "category": "Brass & Winds",
+ "sampleRate": 44100,
+ "sustained": true,
+ "attack": 0.03,
+ "release": 0.2,
+ "zones": [
+  {
+   "file": "38_1.ogg",
+   "root": 38,
+   "tune": -1.4,
+   "loopStart": 161250,
+   "loopEnd": 167865,
+   "lo": 26,
+   "hi": 39,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "38_3.ogg",
+   "root": 38,
+   "tune": -4.8,
+   "loopStart": 179398,
+   "loopEnd": 219088,
+   "lo": 26,
+   "hi": 39,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "41_1.ogg",
+   "root": 41,
+   "tune": -0.2,
+   "loopStart": 154372,
+   "loopEnd": 194062,
+   "lo": 40,
+   "hi": 43,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "41_3.ogg",
+   "root": 41,
+   "tune": -3.0,
+   "loopStart": 173869,
+   "loopEnd": 213559,
+   "lo": 40,
+   "hi": 43,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "46_1.ogg",
+   "root": 46,
+   "tune": -0.8,
+   "loopStart": 187447,
+   "loopEnd": 194062,
+   "lo": 44,
+   "hi": 48,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "46_3.ogg",
+   "root": 46,
+   "tune": -1.1,
+   "loopStart": 206459,
+   "loopEnd": 213074,
+   "lo": 44,
+   "hi": 48,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "50_1.ogg",
+   "root": 50,
+   "tune": -1.5,
+   "loopStart": 211309,
+   "loopEnd": 217924,
+   "lo": 49,
+   "hi": 51,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "50_3.ogg",
+   "root": 50,
+   "tune": -2.5,
+   "loopStart": 157767,
+   "loopEnd": 197457,
+   "lo": 49,
+   "hi": 51,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "53_1.ogg",
+   "root": 53,
+   "tune": -1.7,
+   "loopStart": 154663,
+   "loopEnd": 194353,
+   "lo": 52,
+   "hi": 55,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "53_3.ogg",
+   "root": 53,
+   "tune": -2.2,
+   "loopStart": 154469,
+   "loopEnd": 194159,
+   "lo": 52,
+   "hi": 55,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "58_1.ogg",
+   "root": 58,
+   "tune": -4.1,
+   "loopStart": 179689,
+   "loopEnd": 219379,
+   "lo": 56,
+   "hi": 60,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "58_3.ogg",
+   "root": 58,
+   "tune": -3.8,
+   "loopStart": 204034,
+   "loopEnd": 210649,
+   "lo": 56,
+   "hi": 60,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "62_1.ogg",
+   "root": 62,
+   "tune": -1.9,
+   "loopStart": 189096,
+   "loopEnd": 195711,
+   "lo": 61,
+   "hi": 63,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "62_3.ogg",
+   "root": 62,
+   "tune": -2.5,
+   "loopStart": 187447,
+   "loopEnd": 194062,
+   "lo": 61,
+   "hi": 63,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "65_1.ogg",
+   "root": 65,
+   "tune": -1.5,
+   "loopStart": 167467,
+   "loopEnd": 207157,
+   "lo": 64,
+   "hi": 67,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "65_3.ogg",
+   "root": 65,
+   "tune": -3.2,
+   "loopStart": 168184,
+   "loopEnd": 194644,
+   "lo": 64,
+   "hi": 67,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "70_1.ogg",
+   "root": 70,
+   "tune": -4.1,
+   "loopStart": 193016,
+   "loopEnd": 219476,
+   "lo": 68,
+   "hi": 72,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "70_3.ogg",
+   "root": 70,
+   "tune": -5.6,
+   "loopStart": 199721,
+   "loopEnd": 210746,
+   "lo": 68,
+   "hi": 72,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "74_1.ogg",
+   "root": 74,
+   "tune": -3.4,
+   "loopStart": 179786,
+   "loopEnd": 219476,
+   "lo": 73,
+   "hi": 76,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "74_3.ogg",
+   "root": 74,
+   "tune": -1.5,
+   "loopStart": 175906,
+   "loopEnd": 215596,
+   "lo": 73,
+   "hi": 76,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "78_1.ogg",
+   "root": 78,
+   "tune": 99.3,
+   "loopStart": 181226,
+   "loopEnd": 207686,
+   "lo": 77,
+   "hi": 90,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "78_3.ogg",
+   "root": 78,
+   "tune": 101.1,
+   "loopStart": 204422,
+   "loopEnd": 211037,
+   "lo": 77,
+   "hi": 90,
+   "velLo": 65,
+   "velHi": 127
+  }
+ ]
+}

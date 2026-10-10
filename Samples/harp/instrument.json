@@ -1,0 +1,220 @@
+{
+ "id": "harp",
+ "name": "Harp",
+ "category": "Strings",
+ "sampleRate": 44100,
+ "sustained": false,
+ "attack": 0.0,
+ "release": 0.6,
+ "zones": [
+  {
+   "file": "35_4.ogg",
+   "root": 35,
+   "tune": 14.1,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 23,
+   "hi": 36,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "38_4.ogg",
+   "root": 38,
+   "tune": 5.3,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 37,
+   "hi": 39,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "41_4.ogg",
+   "root": 41,
+   "tune": 6.7,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 40,
+   "hi": 43,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "45_4.ogg",
+   "root": 45,
+   "tune": 3.9,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 44,
+   "hi": 46,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "48_4.ogg",
+   "root": 48,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 47,
+   "hi": 50,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "52_4.ogg",
+   "root": 52,
+   "tune": 3.9,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 51,
+   "hi": 53,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "55_4.ogg",
+   "root": 55,
+   "tune": 7.7,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 54,
+   "hi": 57,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "59_4.ogg",
+   "root": 59,
+   "tune": 13.9,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 58,
+   "hi": 60,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "62_4.ogg",
+   "root": 62,
+   "tune": 12.4,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 61,
+   "hi": 63,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "65_4.ogg",
+   "root": 65,
+   "tune": 1.1,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 64,
+   "hi": 67,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "69_4.ogg",
+   "root": 69,
+   "tune": 9.1,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 68,
+   "hi": 70,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "72_4.ogg",
+   "root": 72,
+   "tune": 11.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 71,
+   "hi": 74,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "76_4.ogg",
+   "root": 76,
+   "tune": 11.1,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 75,
+   "hi": 77,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "79_4.ogg",
+   "root": 79,
+   "tune": 5.5,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 78,
+   "hi": 81,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "83_4.ogg",
+   "root": 83,
+   "tune": 8.8,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 82,
+   "hi": 84,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "86_4.ogg",
+   "root": 86,
+   "tune": 7.1,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 85,
+   "hi": 87,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "89_4.ogg",
+   "root": 89,
+   "tune": 5.3,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 88,
+   "hi": 91,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "93_4.ogg",
+   "root": 93,
+   "tune": 17.5,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 92,
+   "hi": 94,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "95_4.ogg",
+   "root": 95,
+   "tune": 8.6,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 95,
+   "hi": 107,
+   "velLo": 0,
+   "velHi": 127
+  }
+ ]
+}
