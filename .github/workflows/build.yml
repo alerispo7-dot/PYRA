@@ -3,7 +3,6 @@ name: Build PYRA
 on:
   push:
     branches: [ main ]
-    tags: [ 'v*' ]
   workflow_dispatch:
 
 permissions:
@@ -81,8 +80,25 @@ jobs:
           name: PYRA-${{ matrix.name }}
           path: dist/PYRA-*.zip
 
-      - name: Attach to release (tags only)
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
+
+  release:
+    name: Publish downloads
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the builds
+        uses: actions/download-artifact@v4
         with:
-          files: dist/PYRA-*.zip
+          path: dist
+          merge-multiple: true
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="v0.5.${{ github.run_number }}"
+          gh release create "$VERSION" dist/PYRA-*.zip \
+            --repo "${{ github.repository }}" --target "${{ github.sha }}" --latest \
+            --title "PYRA $VERSION" \
+            --notes "Scarica PYRA-macOS.zip (Mac, Apple Silicon e Intel) oppure PYRA-Windows.zip. Dentro trovi le istruzioni di installazione (INSTALL_MAC.txt / INSTALL_WINDOWS.txt)."
