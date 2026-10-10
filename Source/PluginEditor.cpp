@@ -78,10 +78,11 @@ void PyraAudioProcessorEditor::buildUi()
 
     langButton.setButtonText (pyra::lang::current() == pyra::lang::English ? "EN" : "IT");
     langButton.setTooltip ("English / Italiano");
-    langButton.onClick = [this]
+    juce::Component::SafePointer<PyraAudioProcessorEditor> safeThis (this);
+    langButton.onClick = [safeThis]
     {
         pyra::lang::set (pyra::lang::current() == pyra::lang::English ? pyra::lang::Italian : pyra::lang::English);
-        juce::MessageManager::callAsync ([safe = juce::Component::SafePointer<PyraAudioProcessorEditor> (this)]
+        juce::MessageManager::callAsync ([safe = safeThis]
         {
             if (safe != nullptr) { safe->buildUi(); safe->resized(); }
         });
@@ -96,9 +97,10 @@ void PyraAudioProcessorEditor::buildUi()
 
 void PyraAudioProcessorEditor::openSaveDialog()
 {
-    saveDialog = std::make_unique<pyra::SaveDialog> (proc, [this]
+    juce::Component::SafePointer<PyraAudioProcessorEditor> safeThis (this);
+    saveDialog = std::make_unique<pyra::SaveDialog> (proc, [safeThis]
     {
-        juce::MessageManager::callAsync ([safe = juce::Component::SafePointer<PyraAudioProcessorEditor> (this)]
+        juce::MessageManager::callAsync ([safe = safeThis]
         {
             if (safe != nullptr) safe->saveDialog.reset();
         });
