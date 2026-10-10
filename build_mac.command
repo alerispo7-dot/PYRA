@@ -37,7 +37,8 @@ fi
 
 # 4. Compilazione (5-10 minuti la prima volta)
 echo "Compilo PYRA... (la prima volta ci vogliono alcuni minuti)"
-"$CMAKE" -B build-mac -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="$(uname -m)"
+# Universal: works both in apps running natively on Apple Silicon and in apps running under Rosetta (Intel)
+"$CMAKE" -B build-mac -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
 "$CMAKE" --build build-mac --target PYRA_All -j"$(sysctl -n hw.ncpu)"
 
 # 5. Installazione
@@ -55,6 +56,7 @@ done
 killall -9 AudioComponentRegistrar 2>/dev/null || true
 
 echo ""
+echo "Architetture: $(lipo -archs "$VST3/PYRA.vst3/Contents/MacOS/PYRA" 2>/dev/null)"
 echo "=== FATTO ==="
 echo "VST3 -> $VST3/PYRA.vst3   (FL Studio, Ableton...)"
 echo "AU   -> $AU/PYRA.component   (Logic)"
