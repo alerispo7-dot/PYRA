@@ -52,6 +52,7 @@ void PyraAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     settings.masterGain = 1.0f;   // the output volume is applied after the FX chain (below)
     engine.process (buffer, midi, settings, host);
 
+    fx.setOffsets (engine.fxOffsets);
     if (buffer.getNumChannels() >= 2)
         fx.process (buffer.getWritePointer (0), buffer.getWritePointer (1), buffer.getNumSamples(), host.bpm);
     else
@@ -72,13 +73,19 @@ void PyraAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
             for (int ch = 0; ch < buffer.getNumChannels(); ++ch) buffer.getWritePointer (ch)[i] *= g;
         }
 
-    // final safety: never send NaN / runaway values to the speakers
+    // final safety: never send NaN or anything above 0 dBFS to the speakers
     for (int ch = 0; ch < buffer.getNumChannels(); ++ch)
     {
         auto* d = buffer.getWritePointer (ch);
         for (int i = 0; i < buffer.getNumSamples(); ++i)
-            if (! std::isfinite (d[i])) d[i] = 0.0f;
-            else d[i] = juce::jlimit (-8.0f, 8.0f, d[i]);
+        {
+            float x = d[i];
+            if (! std::isfinite (x)) x = 0.0f;
+            // transparent up to -0.9 dBFS, then a soft knee that never exceeds 0 dBFS (protects ears and speakers)
+            const float ax = std::abs (x);
+            if (ax > 0.9f) x = std::copysign (0.9f + 0.1f * std::tanh ((ax - 0.9f) * 10.0f), x);
+            d[i] = x;
+        }
     }
 }
 

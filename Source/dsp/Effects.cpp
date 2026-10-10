@@ -50,6 +50,7 @@ void FxChain::init (juce::AudioProcessorValueTreeState& st)
 {
     auto p = [&st] (const char* id) { auto* v = st.getRawParameterValue (id); jassert (v != nullptr); return v; };
 
+    for (int d = 0; d < FxDestCount; ++d) modParam[d] = st.getParameter (choices::fxDestParamId (d));
     pd   = { p ("fx_dist_on"), p ("fx_dist_type"), p ("fx_dist_drive"), p ("fx_dist_tone"), p ("fx_dist_out"), p ("fx_dist_mix") };
     pr   = { p ("fx_res_on"), p ("fx_res_chord"), p ("fx_res_note"), p ("fx_res_decay"), p ("fx_res_bright"), p ("fx_res_mix") };
     pf   = { p ("fx_flt_on"), p ("fx_flt_type"), p ("fx_flt_cutoff"), p ("fx_flt_res"), p ("fx_flt_drive"), p ("fx_flt_mix") };
@@ -65,6 +66,26 @@ void FxChain::init (juce::AudioProcessorValueTreeState& st)
              p ("fx_eq_highf"), p ("fx_eq_highg") };
     pcmp = { p ("fx_comp_on"), p ("fx_comp_thresh"), p ("fx_comp_ratio"), p ("fx_comp_att"), p ("fx_comp_rel"),
              p ("fx_comp_makeup"), p ("fx_comp_mix") };
+}
+
+void FxChain::setOffsets (const float* o)
+{
+    for (int d = 0; d < FxDestCount; ++d) offsets[d] = o[d];
+}
+
+float FxChain::fo (int d, P p) const
+{
+    const float base = f (p);
+    if (std::abs (offsets[d]) < 1.0e-5f || modParam[d] == nullptr) return base;
+    const auto& r = modParam[d]->getNormalisableRange();
+    return r.convertFrom0to1 (juce::jlimit (0.0f, 1.0f, r.convertTo0to1 (base) + offsets[d]));
+}
+
+float FxChain::fmix (int d, P on, P mix) const
+{
+    // a module switched off but pushed by CHAOS / FOCUS plays with only the pushed amount
+    if (! b (on)) return juce::jlimit (0.0f, 1.0f, offsets[d]);
+    return fo (d, mix);
 }
 
 void FxChain::prepare (double sampleRate, int maxBlock)
@@ -148,10 +169,10 @@ void FxChain::processChunk (float* l, float* r, int n, double bpm)
     };
 
     // ------------------------------------------------------------ Distortion
-    run (fdDist, b (pd.on), [&] (float* L, float* R)
+    run (fdDist, b (pd.on) || forced (FxDistMix), [&] (float* L, float* R)
     {
         const int type = i (pd.type);
-        const float drive = f (pd.drive), mix = f (pd.mix);
+        const float drive = fo (FxDistDrive, pd.drive), mix = fmix (FxDistMix, pd.on, pd.mix);
         const float pre = juce::Decibels::decibelsToGain (drive * 30.0f);
         const float comp = 1.0f / (1.0f + drive * 1.5f);
 
@@ -220,7 +241,7 @@ void FxChain::processChunk (float* l, float* r, int n, double bpm)
         const int count = std::min (5, (int) chord.size());
         const float fb = 0.8f + f (pr.decay) * 0.195f;
         const float damp = 0.15f + f (pr.bright) * 0.84f;
-        const float mix = f (pr.mix);
+        const float mix = fo (FxResMix, pr.mix);
         const float norm = 1.0f / std::sqrt ((float) count);
         float delays[5][2];
         for (int c = 0; c < count; ++c)
@@ -253,8 +274,8 @@ void FxChain::processChunk (float* l, float* r, int n, double bpm)
     run (fdFlt, b (pf.on), [&] (float* L, float* R)
     {
         const int type = i (pf.type);
-        const float g = std::tan (kPi * std::min (f (pf.cutoff), sr * 0.45f) / sr);
-        const float k = 2.0f - 1.96f * f (pf.res);
+        const float g = std::tan (kPi * std::min (fo (FxFltCutoff, pf.cutoff), sr * 0.45f) / sr);
+        const float k = 2.0f - 1.96f * fo (FxFltRes, pf.res);
         const float a1 = 1.0f / (1.0f + g * (g + k)), a2 = g * a1, a3 = g * a2;
         const float drive = f (pf.drive), mix = f (pf.mix);
         const float dg = 1.0f + drive * 6.0f;
@@ -287,7 +308,7 @@ void FxChain::processChunk (float* l, float* r, int n, double bpm)
         const float inc = f (pc.rate) / sr;
         const float base = f (pc.delay) * 0.001f * sr;
         const float depth = f (pc.depth) * 0.006f * sr;
-        const float fb = f (pc.fb) * 0.8f, width = f (pc.width), mix = f (pc.mix);
+        const float fb = f (pc.fb) * 0.8f, width = f (pc.width), mix = fo (FxChoMix, pc.mix);
         for (int k = 0; k < n; ++k)
         {
             choPhase += inc; if (choPhase >= 1.0f) choPhase -= 1.0f;
@@ -318,7 +339,7 @@ void FxChain::processChunk (float* l, float* r, int n, double bpm)
     {
         const float inc = f (pl.rate) / sr;
         const float minD = 0.0003f * sr, range = f (pl.depth) * 0.0075f * sr;
-        const float fb = f (pl.fb), mix = f (pl.mix);
+        const float fb = f (pl.fb), mix = fo (FxFlaMix, pl.mix);
         for (int k = 0; k < n; ++k)
         {
             flaPhase += inc; if (flaPhase >= 1.0f) flaPhase -= 1.0f;
@@ -343,7 +364,7 @@ void FxChain::processChunk (float* l, float* r, int n, double bpm)
     {
         const float inc = f (pp.rate) / sr;
         const int stages = juce::jlimit (2, 12, i (pp.stages));
-        const float centre = f (pp.freq), depth = f (pp.depth), fb = f (pp.fb), mix = f (pp.mix);
+        const float centre = f (pp.freq), depth = f (pp.depth), fb = f (pp.fb), mix = fo (FxPhaMix, pp.mix);
         for (int k = 0; k < n; ++k)
         {
             phaPhase += inc; if (phaPhase >= 1.0f) phaPhase -= 1.0f;
@@ -373,7 +394,7 @@ void FxChain::processChunk (float* l, float* r, int n, double bpm)
     // ------------------------------------------------------------ Tape wow & flutter
     run (fdTape, b (pt.on), [&] (float* L, float* R)
     {
-        const float wow = f (pt.wow), flut = f (pt.flutter), sat = f (pt.sat), mix = f (pt.mix);
+        const float wow = fo (FxTapeWow, pt.wow), flut = f (pt.flutter), sat = f (pt.sat), mix = f (pt.mix);
         const float lpA = OnePole::coef (3500.0f * std::pow (5.5f, f (pt.tone)), sr);
         const float satGain = 1.0f + sat * 4.0f;
         const float satComp = 1.0f / (1.0f + sat * 1.2f);
@@ -405,14 +426,14 @@ void FxChain::processChunk (float* l, float* r, int n, double bpm)
     });
 
     // ------------------------------------------------------------ Delay
-    run (fdDly, b (pdl.on), [&] (float* L, float* R)
+    run (fdDly, b (pdl.on) || forced (FxDlyMix), [&] (float* L, float* R)
     {
         const int mode = i (pdl.mode);
         const double beats = choices::syncDivisionBeats (i (pdl.div));
         const float seconds = b (pdl.sync) ? (float) (beats * 60.0 / std::max (20.0, bpm)) : f (pdl.time) * 0.001f;
         const float target = std::clamp (seconds * sr, 1.0f, (float) dlyLine[0].capacity() - 4.0f);
         if (dlyTimeSmoothed < 0.0f) dlyTimeSmoothed = target;
-        const float fb = f (pdl.fb), width = f (pdl.width), mix = f (pdl.mix);
+        const float fb = fo (FxDlyFb, pdl.fb), width = f (pdl.width), mix = fmix (FxDlyMix, pdl.on, pdl.mix);
         const float hpA = OnePole::coef (f (pdl.lowcut), sr);
         const float lpA = OnePole::coef (f (pdl.highcut) * (mode == 1 ? 0.55f : 1.0f), sr);
         const float glide = 1.0f - std::exp (-1.0f / (0.12f * sr));
@@ -455,11 +476,11 @@ void FxChain::processChunk (float* l, float* r, int n, double bpm)
     });
 
     // ------------------------------------------------------------ Reverb (8-line FDN)
-    run (fdRev, b (pv.on), [&] (float* L, float* R)
+    run (fdRev, b (pv.on) || forced (FxRevMix), [&] (float* L, float* R)
     {
         const int type = i (pv.type);
         const float typeScale = type == 0 ? 0.55f : (type == 1 ? 1.15f : 1.3f);
-        const float size = (0.35f + f (pv.size) * 1.4f) * typeScale;
+        const float size = (0.35f + fo (FxRevSize, pv.size) * 1.4f) * typeScale;
         const float rt = std::max (0.1f, f (pv.decay) * (type == 0 ? 0.6f : 1.0f));
         static const float baseMs[8] = { 29.7f, 37.1f, 41.1f, 43.7f, 47.9f, 53.3f, 59.9f, 67.7f };
         float len[8], g[8];
@@ -470,7 +491,7 @@ void FxChain::processChunk (float* l, float* r, int n, double bpm)
         }
         const float dampA = OnePole::coef (18000.0f * std::pow (0.06f, f (pv.damp)), sr);
         const float pre = std::max (1.0f, f (pv.pre) * 0.001f * sr);
-        const float width = f (pv.width), mix = f (pv.mix);
+        const float width = f (pv.width), mix = fmix (FxRevMix, pv.on, pv.mix);
         const float shim = type == 2 ? f (pv.shim) * 0.55f : 0.0f;
         static const float diffMs[4] = { 4.7f, 3.6f, 12.7f, 9.3f };
         const float shimWin = 0.06f * sr;

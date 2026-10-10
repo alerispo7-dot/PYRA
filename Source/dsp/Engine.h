@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Voice.h"
+#include "Movement.h"
 #include <juce_audio_basics/juce_audio_basics.h>
 #include <vector>
 
@@ -27,6 +28,9 @@ public:
     /** Snapshot of the most recent voice's modulators, for the UI. */
     std::atomic<float> uiEnv[kNumEnv], uiLfo[kNumLfo];
     std::atomic<int> uiVoices { 0 };
+
+    Movement movement;
+    float fxOffsets[FxDestCount] {};   // latest FX offsets from CHAOS / FOCUS / MOTION
 
 private:
     static constexpr int kChunk = 16;
@@ -59,6 +63,8 @@ private:
     float activity = 0, humPhase = 0, pinkL[3] {}, pinkR[3] {};
     float convLp[2] {}, convHold[2] {}; int convCount = 0;
     float dcL = 0, dcR = 0, dcXl = 0, dcXr = 0;
+    float globalOff[DCount] {};
+    double freeBeat = 0.0;
 };
 
 } // namespace pyra

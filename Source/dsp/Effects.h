@@ -3,6 +3,7 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_dsp/juce_dsp.h>
 #include "DspUtil.h"
+#include "../Params.h"
 #include <vector>
 
 namespace pyra
@@ -88,6 +89,9 @@ public:
     void reset();
     void process (float* l, float* r, int n, double bpm);
 
+    /** Normalised offsets from CHAOS / FOCUS / MOTION (FxDestCount values). */
+    void setOffsets (const float* offsets);
+
     std::atomic<float> gainReductionDb { 0.0f };
 
 private:
@@ -97,6 +101,11 @@ private:
     static bool b (P p) { return p->load (std::memory_order_relaxed) > 0.5f; }
     static float f (P p) { return p->load (std::memory_order_relaxed); }
     static int i (P p) { return (int) std::lround (p->load (std::memory_order_relaxed)); }
+    float fo (int fxDest, P p) const;              // parameter value + its offset
+    float fmix (int fxDest, P on, P mix) const;    // mix that also works when the module is forced on
+    bool forced (int fxDest) const { return offsets[fxDest] > 0.001f; }
+    float offsets[FxDestCount] {};
+    juce::RangedAudioParameter* modParam[FxDestCount] {};
 
     float sr = 44100.0f;
     int maxChunk = 512;

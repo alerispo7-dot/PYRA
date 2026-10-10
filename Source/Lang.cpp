@@ -9,8 +9,8 @@ namespace lang
     {
         const char* aboutEn =
             "PYRA - wavetable synthesizer\n\n"
-            "This build: phases 1-4 (sound engine, modulation, interface, FX, ANALOG, ARP, 500 presets).\n"
-            "Next build: the CHAOS / FOCUS / MOTION knobs.\n\n"
+            "This build: all 5 phases (sound engine, modulation, FX, ANALOG, ARP, 500 presets, CHAOS / FOCUS / MOTION).\n"
+            "Next: the visual style, then sample-based realistic sounds.\n\n"
             "Quick tips\n"
             "- Double-click a knob to reset it, right-click for options.\n"
             "- Drag ENV / LFO / MACRO badges onto knobs to modulate them.\n"
@@ -18,8 +18,8 @@ namespace lang
 
         const char* aboutIt =
             "PYRA - sintetizzatore wavetable\n\n"
-            "Questa versione: fasi 1-4 (motore sonoro, modulazione, interfaccia, FX, ANALOG, ARP, 500 preset).\n"
-            "Prossima versione: le manopole CHAOS / FOCUS / MOTION.\n\n"
+            "Questa versione: tutte e 5 le fasi (motore sonoro, modulazione, FX, ANALOG, ARP, 500 preset, CHAOS / FOCUS / MOTION).\n"
+            "Prossimi passi: lo stile grafico, poi i suoni realistici con campioni.\n\n"
             "Consigli rapidi\n"
             "- Doppio clic su una manopola per azzerarla, clic destro per le opzioni.\n"
             "- Trascina i badge ENV / LFO / MACRO sulle manopole per modularle.\n"
@@ -105,6 +105,35 @@ namespace lang
                 { "Star your favourites, custom tags", "Stellina sui preferiti, tag personalizzati" },
                 { "One-click save of your own sounds, like Serum", "Salvataggio dei tuoi suoni con un clic, come su Serum" },
 
+
+                // ---- phase 5
+                { "Random movement inside safe ranges. Every turn makes the sound alive and never the same.",
+                  "Movimento casuale entro limiti sicuri. Ogni giro rende il suono vivo e mai uguale." },
+                { "One knob, many targets: you choose what it moves, how far and with which curve.",
+                  "Una manopola, tanti bersagli: scegli tu cosa muove, quanto e con quale curva." },
+                { "Rhythmic movement locked to the tempo of your DAW.", "Movimento ritmico agganciato al tempo della tua DAW." },
+                { "Speed", "Velocit\xc3\xa0" }, { "Bite", "Grinta" }, { "Space", "Spazio" }, { "ROLL", "RILANCIA" },
+                { "How fast the chaos moves", "Quanto velocemente si muove il caos" },
+                { "How much chaos touches grit: warp, FM, resonance, drive, distortion",
+                  "Quanto il caos tocca la grinta: warp, FM, risonanza, drive, distorsione" },
+                { "How much chaos touches space: stereo, width, reverb, delay",
+                  "Quanto il caos tocca lo spazio: stereo, ampiezza, riverbero, delay" },
+                { "New random character for the chaos (same amount, different movement)",
+                  "Nuovo carattere casuale per il caos (stessa quantit\xc3\xa0, movimento diverso)" },
+                { "How far FOCUS moves this target (left = opposite direction)",
+                  "Quanto FOCUS sposta questo bersaglio (a sinistra = direzione opposta)" },
+                { "Curve: left = acts early, centre = straight, right = acts late",
+                  "Curva: a sinistra agisce subito, al centro in modo lineare, a destra agisce tardi" },
+                { "chaos activity", "attivit\xc3\xa0 del caos" }, { "TARGET", "BERSAGLIO" }, { "DEPTH", "QUANTIT\xc3\x80" },
+                { "CURVE", "CURVA" }, { "SHAPE", "FORMA" }, { "RATE", "VELOCIT\xc3\x80" },
+                { "one cycle = the rate above", "un ciclo = la velocit\xc3\xa0 sopra" },
+                { "Tip: all three also appear as mod sources (Chaos, Focus, Motion) in the MATRIX.",
+                  "Consiglio: tutte e tre sono anche sorgenti di modulazione (Chaos, Focus, Motion) nella MATRICE." },
+                { "Default targets: brightness, wavetable, drive and reverb. Change them freely.",
+                  "Bersagli iniziali: brillantezza, wavetable, drive e riverbero. Cambiali come vuoi." },
+                { "Pump", "Pompa" }, { "Gate", "Gate" }, { "Trance Gate", "Trance gate" }, { "Filter Sweep", "Sweep del filtro" },
+                { "Wobble", "Wobble" }, { "Auto-Pan", "Auto-pan" }, { "Stutter", "Stutter" }, { "Random Steps", "Passi casuali" },
+                { "Swell", "Crescendo" }, { "Chaos", "Chaos" }, { "Focus", "Focus" }, { "Motion", "Motion" },
                 // ---- phase 4 (presets)
                 { "SAVE", "SALVA" }, { "Previous preset", "Preset precedente" }, { "Next preset", "Preset successivo" },
                 { "Save the current sound as your own preset", "Salva il suono attuale come tuo preset" },

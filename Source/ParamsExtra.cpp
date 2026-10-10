@@ -48,6 +48,32 @@ namespace choices
         return a;
     }
 
+    const juce::StringArray& motionShapes()
+    {
+        static juce::StringArray a { "Pump", "Gate", "Trance Gate", "Filter Sweep", "Wobble", "Auto-Pan", "Stutter",
+                                     "Random Steps", "Swell" };
+        return a;
+    }
+
+    static const char* kFxDestIds[FxDestCount] = { "fx_dist_drive", "fx_dist_mix", "fx_res_mix", "fx_flt_cutoff", "fx_flt_res",
+        "fx_cho_mix", "fx_fla_mix", "fx_pha_mix", "fx_tape_wow", "fx_dly_mix", "fx_dly_fb", "fx_rev_mix", "fx_rev_size" };
+
+    const char* fxDestParamId (int d) { return kFxDestIds[juce::jlimit (0, FxDestCount - 1, d)]; }
+
+    const juce::StringArray& focusDestinations()
+    {
+        static juce::StringArray a = []
+        {
+            auto r = modDestinations();
+            for (auto* n : { "FX Distortion Drive", "FX Distortion Mix", "FX Resonator Mix", "FX Filter Cutoff", "FX Filter Reso",
+                             "FX Chorus Mix", "FX Flanger Mix", "FX Phaser Mix", "FX Tape Wow", "FX Delay Mix", "FX Delay Feedback",
+                             "FX Reverb Mix", "FX Reverb Size" })
+                r.add (n);
+            return r;
+        }();
+        return a;
+    }
+
     const std::vector<int>& scaleSteps (int index)
     {
         const auto& d = scaleDefs();
@@ -221,3 +247,34 @@ void addPhase3Parameters (juce::AudioProcessorValueTreeState::ParameterLayout& l
 }
 
 } // namespace pyra
+
+namespace pyra
+{
+void addPhase5Parameters (juce::AudioProcessorValueTreeState::ParameterLayout& l)
+{
+    const juce::NormalisableRange<float> unit (0.0f, 1.0f);
+    F (l, "chaos_amt", "Chaos", unit, 0.0f);
+    F (l, "chaos_speed", "Chaos Speed", logRange (0.05f, 12.0f), 0.6f, "Hz");
+    F (l, "chaos_bite", "Chaos Bite", unit, 0.5f);
+    F (l, "chaos_space", "Chaos Space", unit, 0.5f);
+    I (l, "chaos_seed", "Chaos Seed", 1, 9999, 1);
+
+    F (l, "focus_amt", "Focus", unit, 0.0f);
+    // default mapping: one knob = "more intensity" for every preset
+    const int defDst[kNumFocusSlots]    = { dFilt (0, FCutoff), dOsc (0, OPos), dFilt (0, FDrive), DCount + FxRevMix, 0, 0, 0, 0 };
+    const float defDepth[kNumFocusSlots] = { 0.45f, 0.3f, 0.35f, 0.25f, 0, 0, 0, 0 };
+    for (int k = 0; k < kNumFocusSlots; ++k)
+    {
+        const auto n = "focus" + juce::String (k + 1) + "_";
+        const auto name = "Focus " + juce::String (k + 1) + " ";
+        C (l, n + "dst", name + "Destination", choices::focusDestinations(), defDst[k]);
+        F (l, n + "depth", name + "Depth", { -1.0f, 1.0f }, defDepth[k]);
+        F (l, n + "curve", name + "Curve", { -1.0f, 1.0f }, 0.0f);
+    }
+
+    F (l, "motion_amt", "Motion", unit, 0.0f);
+    C (l, "motion_shape", "Motion Shape", choices::motionShapes(), 0);
+    C (l, "motion_rate", "Motion Rate", choices::syncDivisions(), 7);
+    F (l, "motion_smooth", "Motion Smooth", unit, 0.2f);
+}
+}

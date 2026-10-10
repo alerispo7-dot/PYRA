@@ -7,7 +7,7 @@ Apri la scheda **Actions** del repository, scegli l'ultima build verde e scarica
 `PYRA-macOS` o `PYRA-Windows` in fondo alla pagina. Dentro lo zip trovi le istruzioni
 di installazione (INSTALL_MAC.txt / INSTALL_WINDOWS.txt).
 
-## Cosa c'è in questa versione (fasi 1-4)
+## Cosa c'è in questa versione (fasi 1-5)
 - 3 oscillatori wavetable (28 tabelle incluse, band-limited), unison fino a 16 voci
   con detune / blend / width, 9 modalità di warp, FM tra oscillatori
 - Sub oscillatore e generatore di rumore (5 tipi)
@@ -28,10 +28,14 @@ di installazione (INSTALL_MAC.txt / INSTALL_WINDOWS.txt).
   chitarre, arpeggi, sequenze, accordi, batteria, FX), con volume già bilanciato
 - **Preferiti** (stellina), **tag personali**, ricerca, salvataggio dei tuoi suoni con un clic
   (Documenti/PYRA/Presets). Rinominare un preset non cambia mai i progetti già salvati.
+- **CHAOS / FOCUS / MOTION** (pagina CHAOS): caos casuale con Speed, Bite, Space e ROLL; una macro con 8 bersagli
+  (anche effetti) con quantità e curva; movimento ritmico a tempo con 9 forme (pump, gate, trance gate, sweep,
+  wobble, auto-pan, stutter, passi casuali, crescendo). Tutte e tre sono anche sorgenti nella matrice.
+- Limitatore di sicurezza in uscita: mai oltre 0 dBFS
 - Interfaccia ridimensionabile, inglese / italiano
 
 ## In arrivo
-Manopole CHAOS / FOCUS / MOTION.
+Stile grafico definitivo, suoni realistici con campioni.
 
 ## Compilare da sé
 ```

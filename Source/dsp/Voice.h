@@ -19,6 +19,8 @@ struct VoiceContext
     float globalBendSemis = 0;   // already scaled by the bend range
     float lfoGlobalPhase[kNumLfo] {};
     float lfoSyncHz[kNumLfo] {};
+    const float* globalOff = nullptr;      // CHAOS / FOCUS / MOTION offsets (normalised)
+    float chaos = 0, focus = 0, motion = 0;
 };
 
 class Voice

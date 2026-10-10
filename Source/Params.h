@@ -59,6 +59,20 @@ namespace choices
 }
 
 void addPhase3Parameters (juce::AudioProcessorValueTreeState::ParameterLayout&);
+void addPhase5Parameters (juce::AudioProcessorValueTreeState::ParameterLayout&);
+
+constexpr int kNumFocusSlots = 8;
+
+/** FX parameters that CHAOS / FOCUS / MOTION can move (append-only). */
+enum FxDest { FxDistDrive, FxDistMix, FxResMix, FxFltCutoff, FxFltRes, FxChoMix, FxFlaMix, FxPhaMix,
+              FxTapeWow, FxDlyMix, FxDlyFb, FxRevMix, FxRevSize, FxDestCount };
+
+namespace choices
+{
+    const juce::StringArray& motionShapes();
+    const juce::StringArray& focusDestinations();   // synth destinations, then FX destinations
+    const char* fxDestParamId (int fxDest);
+}
 
 enum WarpMode   { WarpOff, WarpSync, WarpBendPlus, WarpBendMinus, WarpPwm, WarpAsym, WarpMirror, WarpFold, WarpQuantize, WarpCount };
 enum FmSource   { FmOff, FmOscA, FmOscB, FmOscC, FmSub, FmNoise };
@@ -74,6 +88,7 @@ enum ModSource
     SrcLfo1, SrcLfo2, SrcLfo3, SrcLfo4,
     SrcVelocity, SrcNote, SrcRandom, SrcModWheel, SrcPressure, SrcPitchBend, SrcSlide,
     SrcMacro1, SrcMacro2, SrcMacro3, SrcMacro4,
+    SrcChaos, SrcFocus, SrcMotion,
     SrcCount
 };
 
@@ -140,6 +155,14 @@ struct DestConv
     }
 };
 
+struct MovementSettings
+{
+    float chaos = 0, speed = 0.6f, bite = 0.5f, space = 0.5f; int seed = 1;
+    float focus = 0;
+    struct FocusSlot { int dst = 0; float depth = 0, curve = 0; } slots[kNumFocusSlots];
+    float motion = 0; int shape = 0, rate = 7; float smooth = 0.2f;
+};
+
 struct Settings
 {
     // global
@@ -160,6 +183,8 @@ struct Settings
     LfoSettings    lfo[kNumLfo];
 
     ModSlot slots[kNumModSlots]; int numSlots = 0;   // only active slots
+    MovementSettings move;
+    int globalDests[DCount] {}; int numGlobal = 0;   // destinations moved by CHAOS / FOCUS / MOTION
     bool destModded[DCount] {};
     bool envUsed[kNumEnv] {};
     bool lfoUsed[kNumLfo] {};
@@ -187,6 +212,9 @@ private:
         *bendUp {}, *bendDown {}, *mpe {}, *mpeRange {}, *velAmp {}, *transpose {}, *tune {},
         *drift {}, *spread {}, *filterRouting {}, *age {}, *tolerance {}, *circuit {},
         *anNoise {}, *anHum {}, *anHumFreq {}, *anBits {}, *anRate {};
+    std::atomic<float>* mvChaos {}, *mvSpeed {}, *mvBite {}, *mvSpace {}, *mvSeed {}, *mvFocus {}, *mvMotion {},
+        *mvShape {}, *mvRate {}, *mvSmooth {};
+    struct FocusRefs { std::atomic<float>* dst, *depth, *curve; } focusRefs[kNumFocusSlots] {};
     std::atomic<float>* macros[kNumMacros] {};
     std::atomic<float>* subOn {}, *subShape {}, *subOct {}, *subRoute {}, *subPan {};
     std::atomic<float>* noiseOn {}, *noiseType {}, *noiseRoute {}, *noisePan {};

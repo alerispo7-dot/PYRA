@@ -52,7 +52,7 @@ namespace choices
         static juce::StringArray a { "None", "Env 1", "Env 2", "Env 3", "Env 4",
                                      "LFO 1", "LFO 2", "LFO 3", "LFO 4",
                                      "Velocity", "Note", "Random", "Mod Wheel", "Pressure", "Pitch Bend", "Slide",
-                                     "Macro 1", "Macro 2", "Macro 3", "Macro 4" };
+                                     "Macro 1", "Macro 2", "Macro 3", "Macro 4", "Chaos", "Focus", "Motion" };
         return a;
     }
 
@@ -270,6 +270,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     }
 
     addPhase3Parameters (l);
+    addPhase5Parameters (l);
     return l;
 }
 
@@ -289,6 +290,14 @@ void ParamRefs::init (juce::AudioProcessorValueTreeState& st)
     velAmp = p ("velAmp"); transpose = p ("transpose"); tune = p ("tune");
     drift = p ("drift"); spread = p ("spread"); filterRouting = p ("filterRouting");
     age = p ("an_age"); tolerance = p ("an_tolerance"); circuit = p ("an_circuit");
+    mvChaos = p ("chaos_amt"); mvSpeed = p ("chaos_speed"); mvBite = p ("chaos_bite"); mvSpace = p ("chaos_space");
+    mvSeed = p ("chaos_seed"); mvFocus = p ("focus_amt"); mvMotion = p ("motion_amt"); mvShape = p ("motion_shape");
+    mvRate = p ("motion_rate"); mvSmooth = p ("motion_smooth");
+    for (int k = 0; k < kNumFocusSlots; ++k)
+    {
+        const auto n = "focus" + juce::String (k + 1) + "_";
+        focusRefs[k] = { p (n + "dst"), p (n + "depth"), p (n + "curve") };
+    }
     anNoise = p ("an_noise"); anHum = p ("an_hum"); anHumFreq = p ("an_humfreq"); anBits = p ("an_bits"); anRate = p ("an_rate");
     for (int m = 0; m < kNumMacros; ++m) macros[m] = p (pid::macro (m));
 
@@ -422,6 +431,39 @@ void ParamRefs::fill (Settings& s) const
         s.destModded[m.dst] = true;
         if (m.src >= SrcEnv1 && m.src <= SrcEnv4) s.envUsed[m.src - SrcEnv1] = true;
         if (m.src >= SrcLfo1 && m.src <= SrcLfo4) s.lfoUsed[m.src - SrcLfo1] = true;
+    }
+
+    // ---- CHAOS / FOCUS / MOTION
+    auto& mv = s.move;
+    mv.chaos = f (mvChaos); mv.speed = f (mvSpeed); mv.bite = f (mvBite); mv.space = f (mvSpace); mv.seed = i (mvSeed);
+    mv.focus = f (mvFocus); mv.motion = f (mvMotion); mv.shape = i (mvShape); mv.rate = i (mvRate); mv.smooth = f (mvSmooth);
+    for (int k = 0; k < kNumFocusSlots; ++k)
+        mv.slots[k] = { i (focusRefs[k].dst), f (focusRefs[k].depth), f (focusRefs[k].curve) };
+
+    s.numGlobal = 0;
+    auto addGlobal = [&s] (int d)
+    {
+        if (d <= DNone || d >= DCount) return;
+        if (! s.destModded[d]) { s.destModded[d] = true; }
+        for (int k = 0; k < s.numGlobal; ++k) if (s.globalDests[k] == d) return;
+        s.globalDests[s.numGlobal++] = d;
+    };
+    if (mv.chaos > 0.0f)
+    {
+        for (int o = 0; o < kNumOsc; ++o)
+            if (s.osc[o].on)
+                for (auto fld : { OPos, OWarp, OFm, ODetune, OFine, OPan, OWidth }) addGlobal (dOsc (o, fld));
+        for (int k = 0; k < kNumFilters; ++k)
+            if (s.filt[k].on) for (auto fld : { FCutoff, FRes, FDrive }) addGlobal (dFilt (k, fld));
+        if (s.noise.on) addGlobal (DNoiseColor);
+    }
+    if (mv.focus > 0.0f)
+        for (auto& sl : mv.slots) if (sl.dst > DNone && sl.dst < DCount && sl.depth != 0.0f) addGlobal (sl.dst);
+    if (mv.motion > 0.0f)
+    {
+        addGlobal (DAmp);
+        for (int k = 0; k < kNumFilters; ++k) if (s.filt[k].on) addGlobal (dFilt (k, FCutoff));
+        for (int o = 0; o < kNumOsc; ++o) if (s.osc[o].on) { addGlobal (dOsc (o, OPan)); addGlobal (dOsc (o, OPos)); }
     }
 
     for (int k = 0; k < kNumFilters; ++k)

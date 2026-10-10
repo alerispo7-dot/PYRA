@@ -5,6 +5,9 @@ namespace pyra
 void Engine::prepare (double sampleRate, int maxBlockSize)
 {
     sr = sampleRate;
+    movement.prepare (sampleRate);
+    std::fill (std::begin (globalOff), std::end (globalOff), 0.0f);
+    std::fill (std::begin (fxOffsets), std::end (fxOffsets), 0.0f);
     scratchR.assign ((size_t) std::max (maxBlockSize, 8192), 0.0f);
     for (auto& v : voices) v.prepare (sampleRate);
     held.clear();
@@ -191,6 +194,14 @@ void Engine::renderChunk (float* l, float* r, int n, const Settings& s, const Ho
             }
             ctx.lfoGlobalPhase[k] = (float) std::fmod (lfoFreePhase[k] + (lf.sync && host.playing ? 0.0 : lf.phase), 1.0);
         }
+
+        // CHAOS / FOCUS / MOTION (tempo-locked when the host is playing)
+        double beatNow;
+        if (host.playing && host.ppqValid) { beatNow = host.ppq + (double) (offsetInBlock + done) / sr * bpm / 60.0; freeBeat = beatNow; }
+        else { freeBeat += (double) len / sr * bpm / 60.0; beatNow = freeBeat; }
+        movement.compute (s, beatNow, bpm, len, globalOff, fxOffsets);
+        ctx.globalOff = globalOff;
+        ctx.chaos = movement.chaosValue; ctx.focus = movement.focusValue; ctx.motion = movement.motionValue;
 
         for (auto& v : voices)
             if (v.isActive())

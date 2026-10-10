@@ -126,6 +126,12 @@ static void snapshots (pyra::lang::Language language, const juce::String& suffix
 
     p.getPresetManager().load (p.getPresetManager().getAll()[75].id);
     p.getPresetManager().setFavourite (p.getPresetManager().getAll()[75].id, true);
+    set (p, "chaos_amt", 0.65f); set (p, "focus_amt", 0.4f); set (p, "motion_amt", 0.5f); set (p, "motion_shape", 3);
+    {   // run a little audio so the activity displays have something to show
+        juce::AudioBuffer<float> b (2, kBlock); juce::MidiBuffer m;
+        m.addEvent (juce::MidiMessage::noteOn (1, 60, 0.8f), 0);
+        for (int k = 0; k < 60; ++k) { p.processBlock (b, m); m.clear(); }
+    }
     std::unique_ptr<juce::AudioProcessorEditor> ed (p.createEditor());
     ed->setSize (1280, 880);
     auto* root = ed->getChildComponent (0);
@@ -478,6 +484,55 @@ int main (int argc, char** argv)
                         && std::abs (q.apvts.getRawParameterValue ("an_age")->load() - 0.4f) < 0.001f;
         if (! ok) ++failures;
         std::printf ("  %-26s %s (cutoff %.1f, amount %.3f)\n", "09_state_roundtrip", ok ? "ok" : "FAIL", c, a);
+    }
+
+    // ---- Phase 5: CHAOS / FOCUS / MOTION
+    {
+        resetAll (p);
+        for (int o = 0; o < 3; ++o) { set (p, pid::osc (o, "on"), 1); set (p, pid::osc (o, "voices"), 5); set (p, pid::osc (o, "level"), 0.4f); }
+        set (p, "f1_cutoff", 2000.0f);
+        set (p, "chaos_amt", 1.0f); set (p, "chaos_bite", 1.0f); set (p, "chaos_space", 1.0f); set (p, "chaos_speed", 3.0f);
+        render (p, "40_chaos_full", 4.0, chord (0.0, 3.5, { 48, 55, 60, 64 }));
+        set (p, "chaos_amt", 0.0f);
+        set (p, "focus_amt", 1.0f);
+        render (p, "41_focus_full", 3.0, chord (0.0, 2.5, { 48, 55, 60, 64 }));
+        set (p, "focus_amt", 0.0f);
+
+        FakePlayHead ph; ph.bpm = 120.0;
+        transport = &ph; p.setPlayHead (&ph);
+        for (int sh = 0; sh < 9; ++sh)
+        {
+            set (p, "motion_amt", 1.0f); set (p, "motion_shape", (float) sh);
+            render (p, "42_motion_" + choices::motionShapes()[sh].replace (" ", "").replace ("-", ""), 2.5, chord (0.0, 2.4, { 48, 60, 67 }));
+        }
+        p.setPlayHead (nullptr); transport = nullptr;
+        set (p, "motion_amt", 0.0f);
+
+        // every factory preset with all three macros at maximum must stay bounded
+        auto& pm = p.getPresetManager();
+        float worst = 0; juce::String worstName; int bad = 0;
+        for (int k = 0; k < pm.getAll().size(); k += 1)
+        {
+            const auto& info = pm.getAll()[k];
+            pm.load (info.id);
+            set (p, "chaos_amt", 1.0f); set (p, "chaos_bite", 1.0f); set (p, "chaos_space", 1.0f);
+            set (p, "focus_amt", 1.0f); set (p, "motion_amt", 1.0f);
+            p.prepareToPlay (kSr, kBlock);
+            juce::AudioBuffer<float> b (2, kBlock);
+            float pk = 0; bool fin = true;
+            for (int blk = 0; blk < (int) (1.5 * kSr / kBlock); ++blk)
+            {
+                juce::MidiBuffer m;
+                if (blk == 0) for (int nn : { 48, 55, 60 }) m.addEvent (juce::MidiMessage::noteOn (1, nn, 0.8f), 0);
+                if (blk == (int) (1.0 * kSr / kBlock)) for (int nn : { 48, 55, 60 }) m.addEvent (juce::MidiMessage::noteOff (1, nn), 0);
+                p.processBlock (b, m);
+                for (int c = 0; c < 2; ++c) for (int i = 0; i < kBlock; ++i) { const float v = b.getSample (c, i); if (! std::isfinite (v)) fin = false; pk = std::max (pk, std::abs (v)); }
+            }
+            if (! fin || pk > 4.0f) ++bad;
+            if (pk > worst) { worst = pk; worstName = info.name; }
+        }
+        if (bad > 0) ++failures;
+        std::printf ("  %-26s %s (loudest: %s, peak %.2f)\n", "43_all_presets_maxed", bad == 0 ? "ok" : "FAIL", worstName.toRawUTF8(), worst);
     }
 
     // ---- Preset system: factory load, save, rename keeps id, favourites, tags

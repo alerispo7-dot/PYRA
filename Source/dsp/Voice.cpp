@@ -148,30 +148,36 @@ void Voice::computeModulation (const VoiceContext& ctx, float* v, float* cutoffO
     const Settings& s = *ctx.s;
     std::copy (s.baseRaw, s.baseRaw + DCount, v);
     for (int f = 0; f < kNumFilters; ++f) cutoffOffset[f] = 0.0f;
-    if (s.numSlots == 0) return;
-
-    float src[SrcCount] {};
-    src[SrcEnv1] = ampEnv.getValue();
-    for (int e = 1; e < kNumEnv; ++e) src[SrcEnv1 + e] = modEnv[e - 1].getValue();
-    for (int l = 0; l < kNumLfo; ++l) src[SrcLfo1 + l] = lfos[l].getValue();
-    src[SrcVelocity]  = velocity;
-    src[SrcNote]      = (noteCur - 60.0f) / 60.0f;
-    src[SrcRandom]    = randomNote;
-    src[SrcModWheel]  = ctx.modWheel;
-    src[SrcPressure]  = std::max ({ ctx.channelPressure, polyPressure, mpePressure });
-    src[SrcPitchBend] = (s.mpe && channel != 1)
-                            ? std::clamp (mpeBendSemis / (float) std::max (1, s.mpeRange), -1.0f, 1.0f)
-                            : ctx.pitchBend;
-    src[SrcSlide]     = mpeSlide;
-    for (int m = 0; m < kNumMacros; ++m) src[SrcMacro1 + m] = s.macros[m];
+    const int ng = ctx.globalOff != nullptr ? s.numGlobal : 0;
+    if (s.numSlots == 0 && ng == 0) return;
 
     float off[DCount];
     for (int i = 0; i < s.numSlots; ++i) off[s.slots[i].dst] = 0.0f;
-    for (int i = 0; i < s.numSlots; ++i) off[s.slots[i].dst] += src[s.slots[i].src] * s.slots[i].amt;
+    for (int i = 0; i < ng; ++i) off[s.globalDests[i]] = ctx.globalOff[s.globalDests[i]];
 
-    for (int i = 0; i < s.numSlots; ++i)
+    if (s.numSlots > 0)
     {
-        const int d = s.slots[i].dst;
+        float src[SrcCount] {};
+        src[SrcEnv1] = ampEnv.getValue();
+        for (int e = 1; e < kNumEnv; ++e) src[SrcEnv1 + e] = modEnv[e - 1].getValue();
+        for (int l = 0; l < kNumLfo; ++l) src[SrcLfo1 + l] = lfos[l].getValue();
+        src[SrcVelocity]  = velocity;
+        src[SrcNote]      = (noteCur - 60.0f) / 60.0f;
+        src[SrcRandom]    = randomNote;
+        src[SrcModWheel]  = ctx.modWheel;
+        src[SrcPressure]  = std::max ({ ctx.channelPressure, polyPressure, mpePressure });
+        src[SrcPitchBend] = (s.mpe && channel != 1)
+                                ? std::clamp (mpeBendSemis / (float) std::max (1, s.mpeRange), -1.0f, 1.0f)
+                                : ctx.pitchBend;
+        src[SrcSlide]     = mpeSlide;
+        for (int m = 0; m < kNumMacros; ++m) src[SrcMacro1 + m] = s.macros[m];
+        src[SrcChaos] = ctx.chaos; src[SrcFocus] = ctx.focus; src[SrcMotion] = ctx.motion;
+
+        for (int i = 0; i < s.numSlots; ++i) off[s.slots[i].dst] += src[s.slots[i].src] * s.slots[i].amt;
+    }
+
+    auto convert = [&] (int d)
+    {
         const auto& c = s.conv[d];
         switch (c.kind)
         {
@@ -179,7 +185,9 @@ void Voice::computeModulation (const VoiceContext& ctx, float* v, float* cutoffO
             case DestConv::Amp:     v[d] = std::clamp (1.0f + off[d], 0.0f, 2.0f); break;
             default:                v[d] = c.toRaw (s.baseNorm[d] + off[d]); break;
         }
-    }
+    };
+    for (int i = 0; i < s.numSlots; ++i) convert (s.slots[i].dst);
+    for (int i = 0; i < ng; ++i) convert (s.globalDests[i]);
 
     for (int f = 0; f < kNumFilters; ++f)
         if (s.destModded[dFilt (f, FCutoff)])

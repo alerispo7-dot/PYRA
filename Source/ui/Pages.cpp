@@ -563,7 +563,8 @@ namespace
 
             // global mod sources without a panel of their own
             const std::pair<int, const char*> extra[] = { { SrcVelocity, "VEL" }, { SrcNote, "NOTE" }, { SrcModWheel, "WHEEL" },
-                                                          { SrcPressure, "PRESS" }, { SrcPitchBend, "BEND" }, { SrcRandom, "RAND" } };
+                                                          { SrcPressure, "PRESS" }, { SrcPitchBend, "BEND" }, { SrcRandom, "RAND" },
+                                                          { SrcChaos, "CHAOS" }, { SrcMotion, "MOTION" } };
             for (auto& e : extra)
             {
                 auto* b = new ModSourceBadge (e.first, e.second);
@@ -597,7 +598,7 @@ namespace
         {
             g.setColour (colours::textDim);
             g.setFont (PyraLookAndFeel::font (11.0f));
-            g.drawText (tr ("More mod sources: drag them onto a knob"), 8 + 6 * 66 + 6, getHeight() - 24, 400, 20,
+            g.drawText (tr ("More mod sources: drag them onto a knob"), 8 + 8 * 66 + 6, getHeight() - 24, 400, 20,
                         juce::Justification::centredLeft);
         }
 
