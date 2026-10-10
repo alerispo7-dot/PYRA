@@ -9,8 +9,8 @@ namespace lang
     {
         const char* aboutEn =
             "PYRA - wavetable synthesizer\n\n"
-            "This build: phases 1-3 (sound engine, modulation, interface, FX, ANALOG, ARP).\n"
-            "Next builds: the preset library (about 500 presets, favourites, tags), then the CHAOS / FOCUS / MOTION knobs.\n\n"
+            "This build: phases 1-4 (sound engine, modulation, interface, FX, ANALOG, ARP, 500 presets).\n"
+            "Next build: the CHAOS / FOCUS / MOTION knobs.\n\n"
             "Quick tips\n"
             "- Double-click a knob to reset it, right-click for options.\n"
             "- Drag ENV / LFO / MACRO badges onto knobs to modulate them.\n"
@@ -18,8 +18,8 @@ namespace lang
 
         const char* aboutIt =
             "PYRA - sintetizzatore wavetable\n\n"
-            "Questa versione: fasi 1-3 (motore sonoro, modulazione, interfaccia, FX, ANALOG, ARP).\n"
-            "Prossime versioni: la libreria di preset (circa 500, preferiti, tag), poi le manopole CHAOS / FOCUS / MOTION.\n\n"
+            "Questa versione: fasi 1-4 (motore sonoro, modulazione, interfaccia, FX, ANALOG, ARP, 500 preset).\n"
+            "Prossima versione: le manopole CHAOS / FOCUS / MOTION.\n\n"
             "Consigli rapidi\n"
             "- Doppio clic su una manopola per azzerarla, clic destro per le opzioni.\n"
             "- Trascina i badge ENV / LFO / MACRO sulle manopole per modularle.\n"
@@ -104,6 +104,35 @@ namespace lang
                 { "About 500 factory presets in categories and sub-categories", "Circa 500 preset divisi in categorie e sottocategorie" },
                 { "Star your favourites, custom tags", "Stellina sui preferiti, tag personalizzati" },
                 { "One-click save of your own sounds, like Serum", "Salvataggio dei tuoi suoni con un clic, come su Serum" },
+
+                // ---- phase 4 (presets)
+                { "SAVE", "SALVA" }, { "Previous preset", "Preset precedente" }, { "Next preset", "Preset successivo" },
+                { "Save the current sound as your own preset", "Salva il suono attuale come tuo preset" },
+                { "Start from the default sound", "Riparti dal suono iniziale" }, { "(user)", "(tuo)" }, { "(edit)", "(modificato)" },
+                { "e.g. dark, trap, my song", "es. scuro, trap, la mia canzone" }, { "User", "Utente" },
+                { "SAVE AS NEW", "SALVA COME NUOVO" }, { "OVERWRITE", "SOVRASCRIVI" }, { "CANCEL", "ANNULLA" },
+                { "SAVE PRESET", "SALVA PRESET" }, { "NAME", "NOME" }, { "CATEGORY", "CATEGORIA" },
+                { "TAGS (separated by commas)", "TAG (separati da virgole)" },
+                { "Saved in Documents/PYRA/Presets - it appears in the browser right away.",
+                  "Salvato in Documenti/PYRA/Presets: compare subito nel browser." },
+                { "Search presets, categories, tags...", "Cerca preset, categorie, tag..." },
+                { "TAGS...", "TAG..." }, { "RENAME", "RINOMINA" }, { "DELETE", "ELIMINA" },
+                { "SAVE CURRENT SOUND", "SALVA IL SUONO ATTUALE" }, { "OPEN FOLDER", "APRI CARTELLA" }, { "REFRESH", "AGGIORNA" },
+                { "All Presets", "Tutti i preset" }, { "Favourites", "Preferiti" }, { "My Presets", "I miei preset" },
+                { "CATEGORIES", "CATEGORIE" }, { "MY TAGS", "I MIEI TAG" }, { "TAGS", "TAG" },
+                { "Factory preset", "Preset di fabbrica" }, { "Your preset", "Tuo preset" }, { "user", "tuo" },
+                { "Click a preset to load it. Click the star to add it to your favourites.",
+                  "Clicca un preset per caricarlo. Clicca la stellina per aggiungerlo ai preferiti." },
+                { "My tags", "I miei tag" }, { "Your own tags for", "I tuoi tag per" },
+                { "(separated by commas). They never change the sound or your projects.",
+                  "(separati da virgole). Non cambiano mai il suono n\xc3\xa9 i tuoi progetti." },
+                { "OK", "OK" }, { "Rename preset", "Rinomina preset" },
+                { "Projects that use this preset keep sounding exactly the same.",
+                  "I progetti che usano questo preset continuano a suonare esattamente uguali." },
+                { "Delete preset", "Elimina preset" }, { "will be moved to the Trash.", "verr\xc3\xa0 spostato nel Cestino." },
+                { "Bass", "Bassi" }, { "Lead", "Lead" }, { "Pad", "Pad" }, { "Keys", "Tastiere" }, { "Pluck", "Pluck" },
+                { "Strings", "Archi" }, { "Brass & Winds", "Ottoni e fiati" }, { "Guitar", "Chitarre" }, { "Arp", "Arpeggi" },
+                { "Sequence", "Sequenze" }, { "Chords", "Accordi" }, { "Drums", "Batteria" }, { "FX", "FX" },
                 // ---- phase 3
                 { "DISTORTION", "DISTORSIONE" }, { "RESONATOR", "RISONATORE" }, { "CHORUS", "CHORUS" }, { "FLANGER", "FLANGER" },
                 { "PHASER", "PHASER" }, { "TAPE", "NASTRO" }, { "DELAY", "DELAY" }, { "REVERB", "RIVERBERO" },

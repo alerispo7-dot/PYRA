@@ -5,6 +5,7 @@
 #include "dsp/Engine.h"
 #include "dsp/Effects.h"
 #include "dsp/Arp.h"
+#include "Presets.h"
 
 class PyraAudioProcessor : public juce::AudioProcessor
 {
@@ -43,6 +44,10 @@ public:
     pyra::Arpeggiator arp;
     std::atomic<double> hostBpm { 120.0 };
 
+    // current preset (message thread only); saved with the project
+    juce::String presetId, presetName { "Init" };
+    pyra::PresetManager& getPresetManager();
+
     /** Keyboard state shared with the on-screen keyboard. */
     juce::MidiKeyboardState keyboardState;
 
@@ -50,6 +55,8 @@ private:
     pyra::ParamRefs refs;
     pyra::Settings settings;
     juce::AudioBuffer<float> tmpRight;
+    juce::SmoothedValue<float> outputGain { 1.0f };
+    std::unique_ptr<pyra::PresetManager> presetManager;   // created on first use (message thread)
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PyraAudioProcessor)
 };

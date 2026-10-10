@@ -62,16 +62,18 @@ void PyraAudioProcessorEditor::buildUi()
     pages.push_back (pyra::createFxPage (*ui));
     pages.push_back (pyra::createArpPage (*ui));
     pages.push_back (pyra::createAnalogPage (*ui));
-    pages.push_back (pyra::createComingSoonPage (tr ("PRESETS"), {
-        tr ("About 500 factory presets in categories and sub-categories"),
-        tr ("Star your favourites, custom tags"),
-        tr ("One-click save of your own sounds, like Serum") }));
+    pages.push_back (pyra::createPresetPage (*ui, presetFilter, [this] { openSaveDialog(); }));
     pages.push_back (pyra::createGlobalPage (*ui, [this] { buildUi(); resized(); }));
 
     for (auto& pg : pages) root.addChildComponent (*pg);
 
     masterKnob = std::make_unique<pyra::Knob> (proc.apvts, "master", "Volume", nullptr);
     root.addAndMakeVisible (*masterKnob);
+
+    presetBar = std::make_unique<pyra::PresetBar> (proc, presetFilter);
+    presetBar->onOpenBrowser = [this] { showPage (PagePresets); };
+    presetBar->onSave = [this] { openSaveDialog(); };
+    root.addAndMakeVisible (*presetBar);
 
     langButton.setButtonText (pyra::lang::current() == pyra::lang::English ? "EN" : "IT");
     langButton.setTooltip ("English / Italiano");
@@ -89,6 +91,20 @@ void PyraAudioProcessorEditor::buildUi()
     showPage (juce::jlimit (0, (int) pages.size() - 1, currentPage));
     root.resized();
     for (auto* k : ui->knobs) k->refreshModulation();
+}
+
+void PyraAudioProcessorEditor::openSaveDialog()
+{
+    saveDialog = std::make_unique<pyra::SaveDialog> (proc, [this]
+    {
+        juce::MessageManager::callAsync ([safe = juce::Component::SafePointer<PyraAudioProcessorEditor> (this)]
+        {
+            if (safe != nullptr) safe->saveDialog.reset();
+        });
+    });
+    root.addAndMakeVisible (*saveDialog);
+    saveDialog->setBounds (root.getLocalBounds());
+    saveDialog->toFront (true);
 }
 
 void PyraAudioProcessorEditor::showPage (int index)
@@ -121,7 +137,7 @@ void PyraAudioProcessorEditor::timerCallback()
     for (auto* k : ui->knobs) k->refreshModulation();
 
     const int v = proc.engine.uiVoices.load();
-    if (v != lastVoices) { lastVoices = v; root.repaint (baseW - 330, 0, 140, 46); }
+    if (v != lastVoices) { lastVoices = v; root.repaint (baseW - 330, 0, 140, topH); }
 }
 
 //==============================================================================
@@ -176,7 +192,9 @@ void PyraAudioProcessorEditor::Root::resized()
     if (e.masterKnob != nullptr) e.masterKnob->setBounds (getWidth() - 186, 0, 120, 46);
 
     const int kbH = 58;
-    auto content = getLocalBounds().withTrimmedTop (46).withTrimmedBottom (kbH);
+    if (e.presetBar != nullptr) e.presetBar->setBounds (8, topH + 2, getWidth() - 16, presetH - 6);
+    if (e.saveDialog != nullptr) e.saveDialog->setBounds (getLocalBounds());
+    auto content = getLocalBounds().withTrimmedTop (topH + presetH).withTrimmedBottom (kbH);
     for (auto& p : e.pages) p->setBounds (content);
     auto kb = getLocalBounds().removeFromBottom (kbH).reduced (8, 4);
     e.keyboard.setAvailableRange (21, 108);                    // 88 keys, like a piano

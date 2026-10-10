@@ -3,6 +3,7 @@
 #include "PluginProcessor.h"
 #include "dsp/Wavetables.h"
 #include "Lang.h"
+#include "Presets.h"
 
 using namespace pyra;
 
@@ -123,8 +124,10 @@ static void snapshots (pyra::lang::Language language, const juce::String& suffix
     set (p, "f1_cutoff", 2500.0f); set (p, "f1_res", 0.45f);
     set (p, pid::osc (1, "on"), 1); set (p, pid::osc (1, "wt"), 10); set (p, pid::osc (1, "pos"), 0.4f);
 
+    p.getPresetManager().load (p.getPresetManager().getAll()[75].id);
+    p.getPresetManager().setFavourite (p.getPresetManager().getAll()[75].id, true);
     std::unique_ptr<juce::AudioProcessorEditor> ed (p.createEditor());
-    ed->setSize (1280, 840);
+    ed->setSize (1280, 880);
     auto* root = ed->getChildComponent (0);
     juce::Array<juce::TextButton*> tabs;
     for (auto* c : root->getChildren())
@@ -145,9 +148,128 @@ static void snapshots (pyra::lang::Language language, const juce::String& suffix
     std::printf ("UI snapshots written (%s)\n", suffix.toRawUTF8());
 }
 
+// Renders every preset of a bank, measures loudness and writes a normalised copy.
+static int normalizeBank (const juce::File& in, const juce::File& out, const juce::File& auditionDir)
+{
+    auto bank = juce::JSON::parse (in);
+    auto* arr = bank.getArray();
+    if (arr == nullptr) { std::printf ("cannot read %s\n", in.getFullPathName().toRawUTF8()); return 1; }
+
+    PyraAudioProcessor p;
+    int problems = 0;
+    juce::StringArray report;
+    std::map<juce::String, std::vector<float>> catLevels;
+
+    for (int idx = 0; idx < arr->size(); ++idx)
+    {
+        auto& preset = arr->getReference (idx);
+        const auto cat = preset["category"].toString();
+        presetdata::apply (p, preset);
+
+        // test performance by category
+        std::vector<Note> notes; double len = 2.5;
+        if (cat == "Bass")                         notes = chord (0.0, 1.5, { 36 });
+        else if (cat == "Lead")                    notes = chord (0.0, 1.5, { 60 });
+        else if (cat == "Drums")                   { notes = chord (0.0, 0.15, { 48 }); len = 1.5; }
+        else if (cat == "FX")                      { notes = chord (0.0, 4.0, { 60 }); len = 6.0; }
+        else if (cat == "Arp" || cat == "Sequence") { notes = chord (0.0, 3.0, { 48, 55, 60, 63 }); len = 3.5; }
+        else if (cat == "Pad" || cat == "Strings") { notes = chord (0.0, 3.0, { 48, 55, 60, 63 }); len = 4.5; }
+        else if (cat == "Chords")                  notes = chord (0.0, 1.5, { 48 });
+        else                                       notes = chord (0.0, 1.5, { 48, 55, 60, 64 });
+
+        // render
+        p.prepareToPlay (kSr, kBlock);
+        const int total = (int) (len * kSr);
+        juce::AudioBuffer<float> outBuf (2, total), block (2, kBlock);
+        for (int pos = 0; pos < total; pos += kBlock)
+        {
+            const int n = std::min (kBlock, total - pos);
+            block.setSize (2, n, false, false, true);
+            juce::MidiBuffer midi;
+            for (auto& nt : notes)
+            {
+                const int on = (int) (nt.time * kSr), off = (int) ((nt.time + nt.length) * kSr);
+                if (on >= pos && on < pos + n) midi.addEvent (juce::MidiMessage::noteOn (1, nt.note, nt.vel), on - pos);
+                if (off >= pos && off < pos + n) midi.addEvent (juce::MidiMessage::noteOff (1, nt.note), off - pos);
+            }
+            p.processBlock (block, midi);
+            for (int c = 0; c < 2; ++c) outBuf.copyFrom (c, pos, block, c, 0, n);
+        }
+
+        // measure: loudest 300 ms window (RMS) and sample peak
+        float peak = 0; bool finite = true; double dc = 0;
+        for (int c = 0; c < 2; ++c)
+            for (int i = 0; i < total; ++i)
+            {
+                const float v = outBuf.getSample (c, i);
+                if (! std::isfinite (v)) finite = false;
+                peak = std::max (peak, std::abs (v)); dc += v;
+            }
+        dc /= 2.0 * total;
+        const int win = (int) (0.3 * kSr);
+        double best = 0;
+        for (int start = 0; start + win <= total; start += win / 4)
+        {
+            double sum = 0;
+            for (int c = 0; c < 2; ++c)
+                for (int i = start; i < start + win; ++i) { const double v = outBuf.getSample (c, i); sum += v * v; }
+            best = std::max (best, sum / (2.0 * win));
+        }
+        const float rmsDb = (float) (10.0 * std::log10 (best + 1e-12));
+        const float peakDb = juce::Decibels::gainToDecibels (peak, -120.0f);
+
+        const float targetRms = cat == "Drums" ? -14.0f : -16.0f;
+        const float gainDb = std::min (targetRms - rmsDb, -1.5f - peakDb);
+        auto* params = preset["params"].getDynamicObject();
+        const float oldMaster = params->hasProperty ("master") ? (float) params->getProperty ("master") : -4.0f;
+        float newMaster = oldMaster + gainDb;
+        bool clamped = false;
+        if (newMaster > 24.0f) { newMaster = 24.0f; clamped = true; }
+        if (newMaster < -36.0f) { newMaster = -36.0f; clamped = true; }
+        params->setProperty ("master", std::round (newMaster * 10.0f) / 10.0f);
+
+        const bool silent = peakDb < -60.0f;
+        const bool bad = ! finite || silent || clamped || std::abs (dc) > 0.02;
+        if (bad) ++problems;
+        catLevels[cat].push_back (rmsDb - peakDb);   // crest factor
+        report.add (juce::String::formatted ("%-4d %-14s %-26s rms %6.1f  peak %6.1f  master %5.1f -> %5.1f %s%s%s%s",
+            idx, cat.toRawUTF8(), preset["name"].toString().toRawUTF8(), rmsDb, peakDb, oldMaster, newMaster,
+            finite ? "" : " NAN", silent ? " SILENT" : "", clamped ? " CLAMPED" : "", std::abs (dc) > 0.02 ? " DC" : ""));
+
+        // audition file (normalised) for listening checks
+        if (auditionDir != juce::File())
+        {
+            outBuf.applyGain (juce::Decibels::decibelsToGain (newMaster - oldMaster));
+            auto f = auditionDir.getChildFile (juce::String (idx).paddedLeft ('0', 3) + "_"
+                                               + juce::File::createLegalFileName (preset["name"].toString()).replace (" ", "_") + ".wav");
+            f.deleteFile();
+            juce::WavAudioFormat wav;
+            if (auto stream = std::make_unique<juce::FileOutputStream> (f); stream->openedOk())
+                if (auto* w = wav.createWriterFor (stream.get(), kSr, 2, 16, {}, 0))
+                {
+                    stream.release();
+                    std::unique_ptr<juce::AudioFormatWriter> writer (w);
+                    writer->writeFromAudioSampleBuffer (outBuf, 0, total);
+                }
+        }
+    }
+
+    out.replaceWithText (juce::JSON::toString (bank, true));
+    report.add (juce::String (problems) + " presets with problems");
+    juce::File::getCurrentWorkingDirectory().getChildFile ("normalize_report.txt").replaceWithText (report.joinIntoString ("\n"));
+    std::printf ("normalised %d presets, %d with problems (see normalize_report.txt)\n", arr->size(), problems);
+    return problems == 0 ? 0 : 2;
+}
+
 int main (int argc, char** argv)
 {
     juce::ScopedJuceInitialiser_GUI init;
+    if (argc > 3 && juce::String (argv[1]) == "--normalize")
+    {
+        juce::File audition;
+        if (argc > 4) { audition = juce::File (argv[4]); audition.createDirectory(); }
+        return normalizeBank (juce::File (argv[2]), juce::File (argv[3]), audition);
+    }
     if (argc > 1 && juce::String (argv[1]) == "--ui")
     {
         snapshots (pyra::lang::English, "_en");
@@ -356,6 +478,34 @@ int main (int argc, char** argv)
                         && std::abs (q.apvts.getRawParameterValue ("an_age")->load() - 0.4f) < 0.001f;
         if (! ok) ++failures;
         std::printf ("  %-26s %s (cutoff %.1f, amount %.3f)\n", "09_state_roundtrip", ok ? "ok" : "FAIL", c, a);
+    }
+
+    // ---- Preset system: factory load, save, rename keeps id, favourites, tags
+    {
+        PyraAudioProcessor q;
+        auto& pm = q.getPresetManager();
+        const int factoryCount = pm.getAll().size();
+        bool ok = factoryCount >= 500;
+        const auto& first = pm.getAll()[100];
+        ok = ok && pm.load (first.id) && q.presetName == first.name && ! pm.isModified();
+        set (q, "f1_cutoff", 777.0f);
+        ok = ok && pm.isModified();
+        const auto id = pm.saveUser ("Test Sound", "Bass", { "mytag" });
+        ok = ok && id.startsWith ("user:") && pm.find (id) != nullptr;
+        pm.setFavourite (id, true);
+        pm.setPersonalTags (first.id, { "Marco" });
+        ok = ok && pm.renameUser (id, "Paolo") && pm.find (id) != nullptr && pm.find (id)->name == "Paolo";
+        pm.loadInit();
+        ok = ok && pm.load (id) && std::abs (q.apvts.getRawParameterValue ("f1_cutoff")->load() - 777.0f) < 1.0f;
+        ok = ok && pm.isFavourite (id) && pm.getPersonalTags (first.id).contains ("Marco");
+        // a project saved with the old name still reports the current one
+        juce::MemoryBlock mb; q.getStateInformation (mb);
+        PyraAudioProcessor r2; r2.setStateInformation (mb.getData(), (int) mb.getSize());
+        ok = ok && r2.getPresetManager().getCurrentName() == "Paolo";
+        ok = ok && pm.deleteUser (id) && pm.find (id) == nullptr;
+        pm.setPersonalTags (first.id, {});
+        if (! ok) ++failures;
+        std::printf ("  %-26s %s (%d presets)\n", "30_preset_system", ok ? "ok" : "FAIL", factoryCount);
     }
 
     std::printf ("\n%s (%d failures)\n", failures == 0 ? "ALL PASSED" : "FAILURES", failures);

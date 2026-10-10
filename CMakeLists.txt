@@ -52,6 +52,7 @@ set(PYRA_SOURCES
     Source/PluginEditor.cpp
     Source/Params.cpp
     Source/ParamsExtra.cpp
+    Source/Presets.cpp
     Source/dsp/Effects.cpp
     Source/dsp/Arp.cpp
     Source/Lang.cpp
@@ -61,7 +62,11 @@ set(PYRA_SOURCES
     Source/ui/PyraLookAndFeel.cpp
     Source/ui/Widgets.cpp
     Source/ui/Pages.cpp
-    Source/ui/Pages3.cpp)
+    Source/ui/Pages3.cpp
+    Source/ui/PresetUi.cpp)
+
+juce_add_binary_data(PyraData SOURCES Resources/FactoryPresets.json.gz)
+set_target_properties(PyraData PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
 target_sources(PYRA PRIVATE ${PYRA_SOURCES})
 target_include_directories(PYRA PRIVATE Source)
@@ -83,6 +88,7 @@ target_compile_definitions(PYRA PUBLIC ${PYRA_DEFINITIONS})
 
 target_link_libraries(PYRA
     PRIVATE
+        PyraData
         juce::juce_audio_utils
         juce::juce_dsp
     PUBLIC
@@ -100,6 +106,6 @@ if(PYRA_BUILD_TESTS)
         JucePlugin_ProducesMidiOutput=0 JucePlugin_IsMidiEffect=0 JucePlugin_VersionString="0.1.0"
         JUCE_STANDALONE_APPLICATION=1)
     target_link_libraries(PyraRenderTest PRIVATE
-        juce::juce_audio_utils juce::juce_dsp
+        PyraData juce::juce_audio_utils juce::juce_dsp
         juce::juce_recommended_config_flags)
 endif()

@@ -4,6 +4,7 @@
 #include "PluginProcessor.h"
 #include "ui/PyraLookAndFeel.h"
 #include "ui/Pages.h"
+#include "ui/PresetUi.h"
 
 class PyraAudioProcessorEditor : public juce::AudioProcessorEditor,
                                  public juce::DragAndDropContainer,
@@ -16,7 +17,8 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
 
-    static constexpr int baseW = 1280, baseH = 840;
+    static constexpr int baseW = 1280, baseH = 880;
+    static constexpr int topH = 46, presetH = 38;
 
 private:
     /** Everything is laid out at 1280x840 inside this component, then scaled. */
@@ -32,6 +34,7 @@ private:
     void timerCallback() override;
     void buildUi();
     void showPage (int index);
+    void openSaveDialog();
 
     PyraAudioProcessor& proc;
     pyra::PyraLookAndFeel lnf;
@@ -44,6 +47,9 @@ private:
     int currentPage = 0;
 
     std::unique_ptr<pyra::Knob> masterKnob;
+    pyra::PresetFilter presetFilter;
+    std::unique_ptr<pyra::PresetBar> presetBar;
+    std::unique_ptr<pyra::SaveDialog> saveDialog;
     juce::TextButton langButton;
     juce::MidiKeyboardComponent keyboard;
     juce::TooltipWindow tooltips { this, 600 };

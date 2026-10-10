@@ -58,6 +58,7 @@ private:
     Rng anRng;
     float activity = 0, humPhase = 0, pinkL[3] {}, pinkR[3] {};
     float convLp[2] {}, convHold[2] {}; int convCount = 0;
+    float dcL = 0, dcR = 0, dcXl = 0, dcXr = 0;
 };
 
 } // namespace pyra

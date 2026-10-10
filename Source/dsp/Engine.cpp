@@ -105,6 +105,17 @@ void Engine::process (juce::AudioBuffer<float>& buffer, const juce::MidiBuffer& 
 
 void Engine::applyAnalog (float* l, float* r, int n, const Settings& s)
 {
+    // DC blocker (~5 Hz): FM and asymmetric shapes can leave a small offset
+    {
+        const float a = 1.0f - (kTwoPi * 5.0f / (float) sr);
+        for (int i = 0; i < n; ++i)
+        {
+            const float xl = l[i], xr = r[i];
+            dcL = xl - dcXl + a * dcL; dcXl = xl; l[i] = dcL;
+            dcR = xr - dcXr + a * dcR; dcXr = xr; r[i] = dcR;
+        }
+    }
+
     // vintage converter: lower bit depth and sample rate (with a soft anti-alias low-pass, like old samplers)
     if (s.bits > 0.0f || s.rateReduce > 0.0f)
     {

@@ -166,7 +166,8 @@ private:
             {
                 auto& buf = comb[ch];
                 const int size = (int) buf.size();
-                const float delay = std::clamp (sr / std::max (hz, 20.0f), 1.0f, (float) size - 2.0f);
+                // 0.43 samples compensate the damping low-pass inside the loop, so the comb stays in tune
+                const float delay = std::clamp (sr / std::max (hz, 20.0f) - 0.43f, 1.0f, (float) size - 2.0f);
                 float rp = (float) combPos - delay;
                 if (rp < 0.0f) rp += (float) size;
                 const int i0 = (int) rp;

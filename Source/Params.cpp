@@ -152,7 +152,11 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     Layout l;
 
     // ---- Global
-    addFloat (l, "master", "Master Volume", { -48.0f, 6.0f, 0.0f }, -4.0f, "dB");
+    {
+        juce::NormalisableRange<float> r (-48.0f, 24.0f);
+        r.setSkewForCentre (0.0f);
+        addFloat (l, "master", "Master Volume", r, -4.0f, "dB");
+    }
     addInt   (l, "polyphony", "Polyphony", 1, kMaxVoices, 16);
     addChoice(l, "voiceMode", "Voice Mode", choices::voiceModes(), 0);
     addFloat (l, "glide", "Glide", timeRange (5.0f, 0.3f), 0.0f, "s");

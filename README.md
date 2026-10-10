@@ -7,7 +7,7 @@ Apri la scheda **Actions** del repository, scegli l'ultima build verde e scarica
 `PYRA-macOS` o `PYRA-Windows` in fondo alla pagina. Dentro lo zip trovi le istruzioni
 di installazione (INSTALL_MAC.txt / INSTALL_WINDOWS.txt).
 
-## Cosa c'è in questa versione (fasi 1-3)
+## Cosa c'è in questa versione (fasi 1-4)
 - 3 oscillatori wavetable (28 tabelle incluse, band-limited), unison fino a 16 voci
   con detune / blend / width, 9 modalità di warp, FM tra oscillatori
 - Sub oscillatore e generatore di rumore (5 tipi)
@@ -24,10 +24,14 @@ di installazione (INSTALL_MAC.txt / INSTALL_WINDOWS.txt).
   ronzio, convertitore vintage (tutto a 0 = suono digitale pulito)
 - **ARP**: 8 modalità (incluso Sequencer), 20 scale, editor a 32 step (nota, velocity, gate, on, legato,
   blocco), RANDOM che rispetta gli step bloccati, swing, latch, sync con la DAW, trascinamento MIDI nella DAW
+- **500 preset** in 13 categorie e 70 sottocategorie (bassi, lead, pad, tastiere, pluck, archi, ottoni e fiati,
+  chitarre, arpeggi, sequenze, accordi, batteria, FX), con volume già bilanciato
+- **Preferiti** (stellina), **tag personali**, ricerca, salvataggio dei tuoi suoni con un clic
+  (Documenti/PYRA/Presets). Rinominare un preset non cambia mai i progetti già salvati.
 - Interfaccia ridimensionabile, inglese / italiano
 
 ## In arrivo
-Libreria di ~500 preset con preferiti e tag → manopole CHAOS / FOCUS / MOTION.
+Manopole CHAOS / FOCUS / MOTION.
 
 ## Compilare da sé
 ```
@@ -36,3 +40,10 @@ cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --config Release --target PYRA_All
 ```
 Usa [JUCE](https://juce.com) 8 (incluso come submodule).
+
+## Rigenerare i preset di fabbrica
+```
+python3 Tools/make_presets.py Resources/FactoryPresets.raw.json
+PyraRenderTest --normalize Resources/FactoryPresets.raw.json Resources/FactoryPresets.json
+gzip -9 -c Resources/FactoryPresets.json > Resources/FactoryPresets.json.gz
+```

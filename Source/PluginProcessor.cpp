@@ -17,6 +17,8 @@ void PyraAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     engine.prepare (sampleRate, samplesPerBlock);
     fx.prepare (sampleRate, samplesPerBlock);
     arp.prepare (sampleRate);
+    outputGain.reset (sampleRate, 0.02);
+    outputGain.setCurrentAndTargetValue (juce::Decibels::decibelsToGain (apvts.getRawParameterValue ("master")->load(), -48.0f));
     keyboardState.reset();
 }
 
@@ -46,6 +48,8 @@ void PyraAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
 
     hostBpm = host.bpm;
     arp.process (midi, buffer.getNumSamples(), host);
+    const float masterGain = settings.masterGain;
+    settings.masterGain = 1.0f;   // the output volume is applied after the FX chain (below)
     engine.process (buffer, midi, settings, host);
 
     if (buffer.getNumChannels() >= 2)
@@ -59,6 +63,14 @@ void PyraAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
         buffer.addFrom (0, 0, tmpRight, 0, 0, buffer.getNumSamples());
         buffer.applyGain (0.5f);
     }
+
+    outputGain.setTargetValue (masterGain);
+    if (outputGain.isSmoothing() || std::abs (masterGain - 1.0f) > 1.0e-6f)
+        for (int i = 0; i < buffer.getNumSamples(); ++i)
+        {
+            const float g = outputGain.getNextValue();
+            for (int ch = 0; ch < buffer.getNumChannels(); ++ch) buffer.getWritePointer (ch)[i] *= g;
+        }
 
     // final safety: never send NaN / runaway values to the speakers
     for (int ch = 0; ch < buffer.getNumChannels(); ++ch)
@@ -81,6 +93,8 @@ void PyraAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
     state.setProperty ("pyraVersion", JucePlugin_VersionString, nullptr);
     state.removeChild (state.getChildWithName ("ARP_PATTERN"), nullptr);
     state.appendChild (arpPattern.toTree(), nullptr);
+    state.setProperty ("presetId", presetId, nullptr);
+    state.setProperty ("presetName", presetName, nullptr);
     if (auto xml = state.createXml())
         copyXmlToBinary (*xml, destData);
 }
@@ -92,8 +106,16 @@ void PyraAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
         {
             auto tree = juce::ValueTree::fromXml (*xml);
             arpPattern.fromTree (tree.getChildWithName ("ARP_PATTERN"));
+            presetId = tree.getProperty ("presetId").toString();
+            presetName = tree.getProperty ("presetName", "Init").toString();
             apvts.replaceState (tree);
         }
+}
+
+pyra::PresetManager& PyraAudioProcessor::getPresetManager()
+{
+    if (presetManager == nullptr) presetManager = std::make_unique<pyra::PresetManager> (*this);
+    return *presetManager;
 }
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
