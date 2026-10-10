@@ -87,6 +87,9 @@ if(PYRA_LOCAL_LINUX)
 endif()
 
 target_compile_definitions(PYRA PUBLIC ${PYRA_DEFINITIONS})
+if(MSVC)
+    target_compile_options(PYRA PRIVATE /utf-8 /bigobj)
+endif()
 
 target_link_libraries(PYRA
     PRIVATE
