@@ -8,11 +8,15 @@ PyraAudioProcessor::PyraAudioProcessor()
 {
     pyra::Wavetables::get();   // build the wavetable bank now, never on the audio thread
     refs.init (apvts);
+    fx.init (apvts);
+    arp.init (apvts, arpPattern);
 }
 
 void PyraAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     engine.prepare (sampleRate, samplesPerBlock);
+    fx.prepare (sampleRate, samplesPerBlock);
+    arp.prepare (sampleRate);
     keyboardState.reset();
 }
 
@@ -40,7 +44,30 @@ void PyraAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
             host.playing = pos->getIsPlaying();
         }
 
+    hostBpm = host.bpm;
+    arp.process (midi, buffer.getNumSamples(), host);
     engine.process (buffer, midi, settings, host);
+
+    if (buffer.getNumChannels() >= 2)
+        fx.process (buffer.getWritePointer (0), buffer.getWritePointer (1), buffer.getNumSamples(), host.bpm);
+    else
+    {
+        // mono host: run the FX on a stereo copy and fold back down
+        tmpRight.setSize (1, buffer.getNumSamples(), false, false, true);
+        tmpRight.copyFrom (0, 0, buffer, 0, 0, buffer.getNumSamples());
+        fx.process (buffer.getWritePointer (0), tmpRight.getWritePointer (0), buffer.getNumSamples(), host.bpm);
+        buffer.addFrom (0, 0, tmpRight, 0, 0, buffer.getNumSamples());
+        buffer.applyGain (0.5f);
+    }
+
+    // final safety: never send NaN / runaway values to the speakers
+    for (int ch = 0; ch < buffer.getNumChannels(); ++ch)
+    {
+        auto* d = buffer.getWritePointer (ch);
+        for (int i = 0; i < buffer.getNumSamples(); ++i)
+            if (! std::isfinite (d[i])) d[i] = 0.0f;
+            else d[i] = juce::jlimit (-8.0f, 8.0f, d[i]);
+    }
 }
 
 juce::AudioProcessorEditor* PyraAudioProcessor::createEditor()
@@ -52,6 +79,8 @@ void PyraAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     auto state = apvts.copyState();
     state.setProperty ("pyraVersion", JucePlugin_VersionString, nullptr);
+    state.removeChild (state.getChildWithName ("ARP_PATTERN"), nullptr);
+    state.appendChild (arpPattern.toTree(), nullptr);
     if (auto xml = state.createXml())
         copyXmlToBinary (*xml, destData);
 }
@@ -60,7 +89,11 @@ void PyraAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     if (auto xml = getXmlFromBinary (data, sizeInBytes))
         if (xml->hasTagName (apvts.state.getType()))
-            apvts.replaceState (juce::ValueTree::fromXml (*xml));
+        {
+            auto tree = juce::ValueTree::fromXml (*xml);
+            arpPattern.fromTree (tree.getChildWithName ("ARP_PATTERN"));
+            apvts.replaceState (tree);
+        }
 }
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()

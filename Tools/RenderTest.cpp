@@ -14,6 +14,19 @@ namespace
 
     struct Note { double time, length; int note; float vel; int ch = 1; };
 
+    /** Simulated DAW transport (playing at a fixed tempo). */
+    struct FakePlayHead : juce::AudioPlayHead
+    {
+        double bpm = 128.0, ppq = 0.0; bool playing = true;
+        juce::Optional<PositionInfo> getPosition() const override
+        {
+            PositionInfo p;
+            p.setBpm (bpm); p.setPpqPosition (ppq); p.setIsPlaying (playing);
+            return p;
+        }
+    };
+    FakePlayHead* transport = nullptr;
+
     void set (PyraAudioProcessor& p, const juce::String& id, float value)
     {
         auto* param = p.apvts.getParameter (id);
@@ -52,6 +65,7 @@ namespace
                 if (off >= pos && off < pos + len) midi.addEvent (juce::MidiMessage::noteOff (n.ch, n.note), off - pos);
             }
             if (extraMidi) extraMidi (midi, pos, len);
+            if (transport != nullptr) transport->ppq = pos / kSr * transport->bpm / 60.0 + 0.37;   // start mid-beat
             p.processBlock (block, midi);
             for (int c = 0; c < 2; ++c) out.copyFrom (c, pos, block, c, 0, len);
         }
@@ -115,7 +129,7 @@ static void snapshots (pyra::lang::Language language, const juce::String& suffix
     juce::Array<juce::TextButton*> tabs;
     for (auto* c : root->getChildren())
         if (auto* b = dynamic_cast<juce::TextButton*> (c))
-            if (b->getButtonText().length() > 2) tabs.add (b);
+            if (b->getButtonText() != "EN" && b->getButtonText() != "IT") tabs.add (b);
 
     for (int i = 0; i < tabs.size(); ++i)
     {
@@ -248,6 +262,74 @@ int main (int argc, char** argv)
         std::printf ("     (worst case: 1536 oscillators at once, %.1f%% of one CPU core)\n", r.cpuRatio * 100.0);
     }
 
+    // ---- Phase 3: every FX module on a plucky chord
+    {
+        const char* mods[] = { "dist", "res", "flt", "cho", "fla", "pha", "tape", "dly", "rev", "eq", "comp" };
+        for (auto* m : mods)
+        {
+            resetAll (p);
+            set (p, "env1_dec", 0.4f); set (p, "env1_sus", 0.2f); set (p, "env1_rel", 0.3f);
+            set (p, juce::String ("fx_") + m + "_on", 1);
+            if (juce::String (m) == "eq") { set (p, "fx_eq_lowg", 6); set (p, "fx_eq_midg", -6); set (p, "fx_eq_highg", 4); }
+            render (p, "20_fx_" + juce::String (m), 3.0, chord (0.0, 0.6, { 48, 60, 63, 67 }));
+        }
+        // delay timing: short blip, dry off
+        resetAll (p);
+        set (p, "env1_dec", 0.02f); set (p, "env1_sus", 0.0f); set (p, "env1_rel", 0.01f);
+        set (p, "fx_dly_on", 1); set (p, "fx_dly_mix", 1.0f); set (p, "fx_dly_fb", 0.5f);
+        render (p, "26_delay_blip", 2.0, chord (0.0, 0.03, { 72 }));
+
+        // distortion types
+        for (int t = 0; t < 8; ++t)
+        {
+            resetAll (p);
+            set (p, "fx_dist_on", 1); set (p, "fx_dist_type", (float) t); set (p, "fx_dist_drive", 0.6f);
+            render (p, "21_dist_type" + juce::String (t), 1.0, chord (0.0, 0.8, { 40 }));
+        }
+        // stability: delay feedback above 1, huge shimmer reverb, everything on at once
+        resetAll (p);
+        set (p, "fx_dly_on", 1); set (p, "fx_dly_fb", 1.05f); set (p, "fx_dly_mode", 1);
+        set (p, "fx_rev_on", 1); set (p, "fx_rev_type", 2); set (p, "fx_rev_decay", 20.0f); set (p, "fx_rev_shim", 1.0f); set (p, "fx_rev_mix", 0.6f);
+        auto r1 = render (p, "22_runaway_test", 12.0, chord (0.0, 0.5, { 60, 64, 67 }));
+        std::printf ("     (12 s with delay feedback 105%% + 20 s shimmer: peak %.2f, must stay bounded)\n", r1.peak);
+
+        resetAll (p);
+        for (auto* m : mods) set (p, juce::String ("fx_") + m + "_on", 1);
+        set (p, "polyphony", 16);
+        auto r2 = render (p, "23_all_fx_on", 4.0, chord (0.0, 2.0, { 36, 48, 55, 60, 64, 67, 72 }));
+        std::printf ("     (all 11 effects: %.1f%% CPU)\n", r2.cpuRatio * 100.0);
+    }
+
+    // ---- ANALOG: full AGE vs clean
+    resetAll (p);
+    set (p, "an_age", 1.0f); set (p, "an_bits", 0.5f); set (p, "an_rate", 0.4f);
+    render (p, "24_analog_age_full", 3.0, chord (0.0, 2.0, { 48, 55, 60, 64 }));
+
+    // ---- ARP: every mode, free running (no host transport)
+    for (int m = 0; m < 8; ++m)
+    {
+        resetAll (p);
+        set (p, "arp_on", 1); set (p, "arp_mode", (float) m); set (p, "arp_oct", 2);
+        set (p, "env1_dec", 0.2f); set (p, "env1_sus", 0.3f);
+        if (m == 7) { set (p, "arp_scale", 2); p.arpPattern.randomize (16, 42); }
+        int noteOns = 0;
+        render (p, "25_arp_" + choices::arpModes()[m].replace (" ", "").replace ("-", ""), 2.2, chord (0.0, 2.0, { 60, 64, 67 }));
+        (void) noteOns;
+    }
+    p.arpPattern.clear();
+
+    // ARP locked to a playing DAW at 128 BPM (notes must land on the 1/16 grid)
+    {
+        FakePlayHead ph;
+        transport = &ph;
+        p.setPlayHead (&ph);
+        resetAll (p);
+        set (p, "arp_on", 1); set (p, "env1_dec", 0.1f); set (p, "env1_sus", 0.0f);
+        render (p, "27_arp_host_128bpm", 2.0, chord (0.05, 1.8, { 60, 67 }));
+        p.setPlayHead (nullptr);
+        transport = nullptr;
+    }
+
     // Aliasing check material: single high saw notes (analysed outside)
     resetAll (p);
     set (p, "f1_on", 0);
@@ -260,13 +342,18 @@ int main (int argc, char** argv)
         resetAll (p);
         set (p, "f1_cutoff", 1234.0f);
         set (p, "mod3_src", SrcMacro2); set (p, "mod3_dst", dOsc (2, OPos)); set (p, "mod3_amt", -0.42f);
+        p.arpPattern.steps[3].degree = 5; p.arpPattern.steps[3].lock = true;
+        set (p, "fx_rev_on", 1); set (p, "an_age", 0.4f);
         juce::MemoryBlock mb;
         p.getStateInformation (mb);
         PyraAudioProcessor q;
         q.setStateInformation (mb.getData(), (int) mb.getSize());
         const float c = q.apvts.getRawParameterValue ("f1_cutoff")->load();
         const float a = q.apvts.getRawParameterValue ("mod3_amt")->load();
-        const bool ok = std::abs (c - 1234.0f) < 1.0f && std::abs (a + 0.42f) < 0.001f;
+        const bool ok = std::abs (c - 1234.0f) < 1.0f && std::abs (a + 0.42f) < 0.001f
+                        && q.arpPattern.steps[3].degree.load() == 5 && q.arpPattern.steps[3].lock.load()
+                        && q.apvts.getRawParameterValue ("fx_rev_on")->load() > 0.5f
+                        && std::abs (q.apvts.getRawParameterValue ("an_age")->load() - 0.4f) < 0.001f;
         if (! ok) ++failures;
         std::printf ("  %-26s %s (cutoff %.1f, amount %.3f)\n", "09_state_roundtrip", ok ? "ok" : "FAIL", c, a);
     }

@@ -52,6 +52,12 @@ private:
     double lfoFreePhase[kNumLfo] {};
     juce::SmoothedValue<float> master;
     std::vector<float> scratchR;
+
+    // analog / vintage stage
+    void applyAnalog (float* l, float* r, int n, const Settings& s);
+    Rng anRng;
+    float activity = 0, humPhase = 0, pinkL[3] {}, pinkR[3] {};
+    float convLp[2] {}, convHold[2] {}; int convCount = 0;
 };
 
 } // namespace pyra

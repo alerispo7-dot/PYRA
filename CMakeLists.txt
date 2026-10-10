@@ -51,13 +51,17 @@ set(PYRA_SOURCES
     Source/PluginProcessor.cpp
     Source/PluginEditor.cpp
     Source/Params.cpp
+    Source/ParamsExtra.cpp
+    Source/dsp/Effects.cpp
+    Source/dsp/Arp.cpp
     Source/Lang.cpp
     Source/dsp/Wavetables.cpp
     Source/dsp/Voice.cpp
     Source/dsp/Engine.cpp
     Source/ui/PyraLookAndFeel.cpp
     Source/ui/Widgets.cpp
-    Source/ui/Pages.cpp)
+    Source/ui/Pages.cpp
+    Source/ui/Pages3.cpp)
 
 target_sources(PYRA PRIVATE ${PYRA_SOURCES})
 target_include_directories(PYRA PRIVATE Source)

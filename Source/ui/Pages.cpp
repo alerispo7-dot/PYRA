@@ -718,10 +718,10 @@ namespace
     {
     public:
         GlobalPage (UiContext& ui, std::function<void()> onLang)
-            : voice (tr ("VOICE")), mpePanel ("MPE"), analog (tr ("ANALOG CHARACTER")), language (tr ("LANGUAGE")),
+            : voice (tr ("VOICE")), mpePanel ("MPE"), language (tr ("LANGUAGE")),
               about (tr ("ABOUT")), onLanguageChanged (std::move (onLang))
         {
-            for (auto* p : { &voice, &mpePanel, &analog, &language, &about }) addAndMakeVisible (p);
+            for (auto* p : { &voice, &mpePanel, &language, &about }) addAndMakeVisible (p);
 
             Builder bv { ui, voice, owned };
             poly = bv.knob ("polyphony", "Voices", false);
@@ -739,9 +739,6 @@ namespace
             mpe = bm.toggle ("mpe", tr ("MPE on"));
             mpeRange = bm.knob ("mpeRange", "Bend Range", false);
 
-            Builder ba { ui, analog, owned };
-            drift = ba.knob ("drift", "Drift", false);
-            spread = ba.knob ("spread", "Voice Spread", false);
 
             for (auto* btn : { &en, &it })
             {
@@ -764,7 +761,6 @@ namespace
             aboutText.setText (tr ("ABOUT_TEXT"));
 
             voiceHelp = tr ("Poly = chords. Mono = one note, retriggers. Legato = one note, slides without retriggering.");
-            analogHelp = tr ("Drift: oscillators wander slightly out of tune, like real hardware. Voice Spread: every note is a little different (pitch, filter, envelope). Both at 0 = clean digital sound. More analog tools arrive with the ANALOG section in phase 3.");
         }
 
         void setLanguage (lang::Language l)
@@ -781,7 +777,6 @@ namespace
             g.setColour (colours::textDim);
             g.setFont (PyraLookAndFeel::font (12.0f));
             g.drawFittedText (voiceHelp, voice.getBounds().removeFromBottom (40).reduced (14, 4), juce::Justification::centredLeft, 2);
-            g.drawFittedText (analogHelp, analog.getBounds().withTrimmedTop (120).reduced (14, 6), juce::Justification::topLeft, 6);
         }
 
         void resized() override
@@ -789,8 +784,7 @@ namespace
             const int m = 8;
             voice.setBounds (m, m, 820, 250);
             mpePanel.setBounds (m + 820 + m, m, getWidth() - 836 - 2 * m, 250);
-            analog.setBounds (m, 266, 520, 250);
-            language.setBounds (m + 520 + m, 266, 300, 250);
+            language.setBounds (m, 266, 820, 140);
             about.setBounds (m + 828 + m, 266, getWidth() - 836 - 2 * m, getHeight() - 266 - m);
 
             rowOfKnobs ({ poly, glide, bendUp, bendDown, velAmp, transpose, tune, master }, { 10, 34, 800, 90 });
@@ -800,7 +794,6 @@ namespace
             mpe->setBounds (14, 34, 120, 24);
             mpeRange->setBounds (14, 70, 90, 90);
 
-            rowOfKnobs ({ drift, spread }, { 10, 30, 200, 90 });
 
             en.setBounds (14, 40, 130, 34);
             it.setBounds (154, 40, 130, 34);
@@ -808,14 +801,14 @@ namespace
             aboutText.setBounds (about.getLocalBounds().withTrimmedTop (28).reduced (10, 4));
         }
 
-        Panel voice, mpePanel, analog, language, about;
+        Panel voice, mpePanel, language, about;
         std::function<void()> onLanguageChanged;
         juce::OwnedArray<juce::Component> owned;
-        Knob* poly, *glide, *bendUp, *bendDown, *velAmp, *transpose, *tune, *master, *mpeRange, *drift, *spread;
+        Knob* poly, *glide, *bendUp, *bendDown, *velAmp, *transpose, *tune, *master, *mpeRange;
         ParamCombo* mode; ParamToggle* glideLegato, *mpe;
         juce::TextButton en, it;
         juce::TextEditor aboutText;
-        juce::String voiceHelp, analogHelp;
+        juce::String voiceHelp;
     };
 
     //==========================================================================

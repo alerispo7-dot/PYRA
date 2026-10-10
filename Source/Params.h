@@ -44,7 +44,21 @@ namespace choices
     double syncDivisionBeats (int index);
     const juce::StringArray& modSources();
     const juce::StringArray& modDestinations();
+
+    // phase 3
+    const juce::StringArray& distTypes();
+    const juce::StringArray& chords();
+    const juce::StringArray& fxFilterTypes();
+    const juce::StringArray& delayModes();
+    const juce::StringArray& reverbTypes();
+    const juce::StringArray& humFreqs();
+    const juce::StringArray& arpModes();
+    const juce::StringArray& noteNames();
+    const juce::StringArray& scales();
+    const std::vector<int>& scaleSteps (int index);
 }
+
+void addPhase3Parameters (juce::AudioProcessorValueTreeState::ParameterLayout&);
 
 enum WarpMode   { WarpOff, WarpSync, WarpBendPlus, WarpBendMinus, WarpPwm, WarpAsym, WarpMirror, WarpFold, WarpQuantize, WarpCount };
 enum FmSource   { FmOff, FmOscA, FmOscB, FmOscC, FmSub, FmNoise };
@@ -134,6 +148,8 @@ struct Settings
     int bendUp = 2, bendDown = 2; bool mpe = false; int mpeRange = 48;
     float velAmp = 0.5f; int transpose = 0; float tune = 0;
     float drift = 0, spread = 0; int filterRouting = 0;
+    float tolerance = 0, circuit = 0;   // ANALOG (already combined with AGE)
+    float noiseFloor = 0, hum = 0, bits = 0, rateReduce = 0; int humFreq = 0;
     float macros[kNumMacros] {};
 
     OscSettings    osc[kNumOsc];
@@ -169,7 +185,8 @@ private:
 
     std::atomic<float>* master {}, *polyphony {}, *voiceMode {}, *glide {}, *glideLegato {},
         *bendUp {}, *bendDown {}, *mpe {}, *mpeRange {}, *velAmp {}, *transpose {}, *tune {},
-        *drift {}, *spread {}, *filterRouting {};
+        *drift {}, *spread {}, *filterRouting {}, *age {}, *tolerance {}, *circuit {},
+        *anNoise {}, *anHum {}, *anHumFreq {}, *anBits {}, *anRate {};
     std::atomic<float>* macros[kNumMacros] {};
     std::atomic<float>* subOn {}, *subShape {}, *subOct {}, *subRoute {}, *subPan {};
     std::atomic<float>* noiseOn {}, *noiseType {}, *noiseRoute {}, *noisePan {};

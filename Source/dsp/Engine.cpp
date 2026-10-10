@@ -61,6 +61,8 @@ void Engine::process (juce::AudioBuffer<float>& buffer, const juce::MidiBuffer& 
     if (pos < numSamples)
         renderChunk (l + pos, rr + pos, numSamples - pos, s, host, pos);
 
+    applyAnalog (l, rr, numSamples, s);
+
     if (r == nullptr)
         for (int i = 0; i < numSamples; ++i) l[i] = 0.5f * (l[i] + rr[i]);
 
@@ -99,6 +101,46 @@ void Engine::process (juce::AudioBuffer<float>& buffer, const juce::MidiBuffer& 
     }
     else
         for (int e = 0; e < kNumEnv; ++e) uiEnv[e] = 0.0f;
+}
+
+void Engine::applyAnalog (float* l, float* r, int n, const Settings& s)
+{
+    // vintage converter: lower bit depth and sample rate (with a soft anti-alias low-pass, like old samplers)
+    if (s.bits > 0.0f || s.rateReduce > 0.0f)
+    {
+        const int factor = 1 + (int) (s.rateReduce * 15.0f);
+        const float lpA = factor > 1 ? std::min (1.0f, 2.0f * kPi * (float) (sr * 0.42 / factor) / (float) sr) : 1.0f;
+        const float q = s.bits > 0.0f ? std::exp2 (15.0f - s.bits * 11.0f) : 0.0f;
+        for (int i = 0; i < n; ++i)
+        {
+            convLp[0] += lpA * (l[i] - convLp[0]);
+            convLp[1] += lpA * (r[i] - convLp[1]);
+            if (--convCount <= 0) { convHold[0] = convLp[0]; convHold[1] = convLp[1]; convCount = factor; }
+            float a = factor > 1 ? convHold[0] : convLp[0], b = factor > 1 ? convHold[1] : convLp[1];
+            if (q > 0.0f) { a = std::round (a * q) / q; b = std::round (b * q) / q; }
+            l[i] = a; r[i] = b;
+        }
+    }
+
+    // noise floor + mains hum, only while the synth is sounding (no hiss in silent parts of a song)
+    if (s.noiseFloor <= 0.0f && s.hum <= 0.0f) { activity = 0.0f; return; }
+    const bool sounding = getActiveVoiceCount() > 0;
+    const float noiseGain = s.noiseFloor > 0.0f ? juce::Decibels::decibelsToGain (-88.0f + s.noiseFloor * 46.0f) : 0.0f;
+    const float humGain = s.hum > 0.0f ? juce::Decibels::decibelsToGain (-80.0f + s.hum * 44.0f) : 0.0f;
+    const float humInc = (s.humFreq == 1 ? 60.0f : 50.0f) / (float) sr;
+    const float actUp = 1.0f / (0.005f * (float) sr), actDown = 1.0f / (0.4f * (float) sr);
+    for (int i = 0; i < n; ++i)
+    {
+        activity = sounding ? std::min (1.0f, activity + actUp) : std::max (0.0f, activity - actDown);
+        if (activity <= 0.0f) continue;
+        const float wl = anRng.bi(), wr = anRng.bi();
+        pinkL[0] = 0.997f * pinkL[0] + wl * 0.029f; pinkL[1] = 0.985f * pinkL[1] + wl * 0.032f; pinkL[2] = 0.95f * pinkL[2] + wl * 0.048f;
+        pinkR[0] = 0.997f * pinkR[0] + wr * 0.029f; pinkR[1] = 0.985f * pinkR[1] + wr * 0.032f; pinkR[2] = 0.95f * pinkR[2] + wr * 0.048f;
+        humPhase += humInc; if (humPhase >= 1.0f) humPhase -= 1.0f;
+        const float hum = std::sin (kTwoPi * humPhase) + 0.5f * std::sin (2.0f * kTwoPi * humPhase) + 0.25f * std::sin (3.0f * kTwoPi * humPhase);
+        l[i] += activity * (noiseGain * (pinkL[0] + pinkL[1] + pinkL[2] + wl * 0.02f) * 4.0f + humGain * hum * 0.6f);
+        r[i] += activity * (noiseGain * (pinkR[0] + pinkR[1] + pinkR[2] + wr * 0.02f) * 4.0f + humGain * hum * 0.6f);
+    }
 }
 
 void Engine::renderChunk (float* l, float* r, int n, const Settings& s, const HostInfo& host, int offsetInBlock)

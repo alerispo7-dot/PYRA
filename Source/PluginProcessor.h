@@ -3,6 +3,8 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include "Params.h"
 #include "dsp/Engine.h"
+#include "dsp/Effects.h"
+#include "dsp/Arp.h"
 
 class PyraAudioProcessor : public juce::AudioProcessor
 {
@@ -23,7 +25,7 @@ public:
     bool acceptsMidi() const override  { return true; }
     bool producesMidi() const override { return false; }
     bool isMidiEffect() const override { return false; }
-    double getTailLengthSeconds() const override { return 0.0; }
+    double getTailLengthSeconds() const override { return 12.0; }
 
     int getNumPrograms() override { return 1; }
     int getCurrentProgram() override { return 0; }
@@ -36,6 +38,10 @@ public:
 
     juce::AudioProcessorValueTreeState apvts;
     pyra::Engine engine;
+    pyra::FxChain fx;
+    pyra::ArpPattern arpPattern;
+    pyra::Arpeggiator arp;
+    std::atomic<double> hostBpm { 120.0 };
 
     /** Keyboard state shared with the on-screen keyboard. */
     juce::MidiKeyboardState keyboardState;
@@ -43,6 +49,7 @@ public:
 private:
     pyra::ParamRefs refs;
     pyra::Settings settings;
+    juce::AudioBuffer<float> tmpRight;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PyraAudioProcessor)
 };

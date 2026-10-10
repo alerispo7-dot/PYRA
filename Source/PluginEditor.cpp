@@ -59,21 +59,9 @@ void PyraAudioProcessorEditor::buildUi()
 
     pages.push_back (pyra::createSynthPage (*ui));
     pages.push_back (pyra::createMatrixPage (*ui));
-    pages.push_back (pyra::createComingSoonPage ("FX", {
-        tr ("Distortion (several models), compressor, EQ"),
-        tr ("Chorus, flanger, phaser, tape wow & flutter"),
-        tr ("Tape echo and delay, 3 reverbs (room, hall, shimmer)"),
-        tr ("Resonators and FX filter, all in a fixed, tidy chain") }));
-    pages.push_back (pyra::createComingSoonPage ("ARP", {
-        tr ("Random button: a new arpeggio at every click"),
-        tr ("Step editor up to 32 steps: note, velocity, length, tie"),
-        tr ("Lock the steps you like, randomize the others"),
-        tr ("Scales and root note, modes, swing, drag MIDI to your DAW") }));
-    pages.push_back (pyra::createComingSoonPage ("ANALOG", {
-        tr ("AGE knob: from brand new to 1978 synth"),
-        tr ("Circuit and tape saturation, component tolerance"),
-        tr ("Noise floor and hum, vintage converter (80s sampler grit)"),
-        tr ("Optional: at 0 everything stays clean and digital") }));
+    pages.push_back (pyra::createFxPage (*ui));
+    pages.push_back (pyra::createArpPage (*ui));
+    pages.push_back (pyra::createAnalogPage (*ui));
     pages.push_back (pyra::createComingSoonPage (tr ("PRESETS"), {
         tr ("About 500 factory presets in categories and sub-categories"),
         tr ("Star your favourites, custom tags"),

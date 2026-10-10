@@ -265,6 +265,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
         addFloat (l, pid::mod (s, "amt"), n + "Amount", { -1.0f, 1.0f }, 0.0f);
     }
 
+    addPhase3Parameters (l);
     return l;
 }
 
@@ -283,6 +284,8 @@ void ParamRefs::init (juce::AudioProcessorValueTreeState& st)
     bendUp = p ("bendUp"); bendDown = p ("bendDown"); mpe = p ("mpe"); mpeRange = p ("mpeRange");
     velAmp = p ("velAmp"); transpose = p ("transpose"); tune = p ("tune");
     drift = p ("drift"); spread = p ("spread"); filterRouting = p ("filterRouting");
+    age = p ("an_age"); tolerance = p ("an_tolerance"); circuit = p ("an_circuit");
+    anNoise = p ("an_noise"); anHum = p ("an_hum"); anHumFreq = p ("an_humfreq"); anBits = p ("an_bits"); anRate = p ("an_rate");
     for (int m = 0; m < kNumMacros; ++m) macros[m] = p (pid::macro (m));
 
     subOn = p ("sub_on"); subShape = p ("sub_shape"); subOct = p ("sub_oct"); subRoute = p ("sub_route"); subPan = p ("sub_pan");
@@ -342,7 +345,20 @@ void ParamRefs::fill (Settings& s) const
     s.bendUp = i (bendUp); s.bendDown = i (bendDown);
     s.mpe = b (mpe); s.mpeRange = i (mpeRange);
     s.velAmp = f (velAmp); s.transpose = i (transpose); s.tune = f (tune);
-    s.drift = f (drift); s.spread = f (spread); s.filterRouting = i (filterRouting);
+    s.filterRouting = i (filterRouting);
+    {
+        // AGE pushes every analog control up together; each knob still works on its own
+        const float a = f (age);
+        s.drift     = std::min (1.0f, f (drift) + a * 0.6f);
+        s.spread    = std::min (1.0f, f (spread) + a * 0.5f);
+        s.tolerance = std::min (1.0f, f (tolerance) + a * 0.5f);
+        s.circuit   = std::min (1.0f, f (circuit) + a * 0.45f);
+        s.noiseFloor = std::min (1.0f, f (anNoise) + a * 0.35f);
+        s.hum        = std::min (1.0f, f (anHum) + a * 0.15f);
+        s.humFreq    = i (anHumFreq);
+        s.bits       = f (anBits);        // vintage converter is a separate choice, not part of AGE
+        s.rateReduce = f (anRate);
+    }
     for (int m = 0; m < kNumMacros; ++m) s.macros[m] = f (macros[m]);
 
     s.sub = { b (subOn), i (subShape), i (subOct), i (subRoute), f (subPan) };

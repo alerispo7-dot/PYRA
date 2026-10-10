@@ -66,6 +66,7 @@ private:
     float noteCur = 60.0f, noteTarget = 60.0f, glideStep = 0.0f;
     float randomNote = 0.0f;
     float spreadR[4] {};
+    float tolOsc[kNumOsc] {}, tolFilter = 0;
     float driftVal = 0, driftTarget = 0, driftTimer = 0;
     float ampGain = 1.0f;
     float lfoRateMul[kNumLfo] { 1, 1, 1, 1 };

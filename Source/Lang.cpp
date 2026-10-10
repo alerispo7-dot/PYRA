@@ -9,8 +9,8 @@ namespace lang
     {
         const char* aboutEn =
             "PYRA - wavetable synthesizer\n\n"
-            "This build: phase 1 + 2 (sound engine, modulation, interface).\n"
-            "Next builds: FX + ANALOG + ARP, then the preset library (about 500 presets), then the CHAOS / FOCUS / MOTION knobs.\n\n"
+            "This build: phases 1-3 (sound engine, modulation, interface, FX, ANALOG, ARP).\n"
+            "Next builds: the preset library (about 500 presets, favourites, tags), then the CHAOS / FOCUS / MOTION knobs.\n\n"
             "Quick tips\n"
             "- Double-click a knob to reset it, right-click for options.\n"
             "- Drag ENV / LFO / MACRO badges onto knobs to modulate them.\n"
@@ -18,8 +18,8 @@ namespace lang
 
         const char* aboutIt =
             "PYRA - sintetizzatore wavetable\n\n"
-            "Questa versione: fase 1 + 2 (motore sonoro, modulazione, interfaccia).\n"
-            "Prossime versioni: FX + ANALOG + ARP, poi la libreria di preset (circa 500), poi le manopole CHAOS / FOCUS / MOTION.\n\n"
+            "Questa versione: fasi 1-3 (motore sonoro, modulazione, interfaccia, FX, ANALOG, ARP).\n"
+            "Prossime versioni: la libreria di preset (circa 500, preferiti, tag), poi le manopole CHAOS / FOCUS / MOTION.\n\n"
             "Consigli rapidi\n"
             "- Doppio clic su una manopola per azzerarla, clic destro per le opzioni.\n"
             "- Trascina i badge ENV / LFO / MACRO sulle manopole per modularle.\n"
@@ -104,6 +104,54 @@ namespace lang
                 { "About 500 factory presets in categories and sub-categories", "Circa 500 preset divisi in categorie e sottocategorie" },
                 { "Star your favourites, custom tags", "Stellina sui preferiti, tag personalizzati" },
                 { "One-click save of your own sounds, like Serum", "Salvataggio dei tuoi suoni con un clic, come su Serum" },
+                // ---- phase 3
+                { "DISTORTION", "DISTORSIONE" }, { "RESONATOR", "RISONATORE" }, { "CHORUS", "CHORUS" }, { "FLANGER", "FLANGER" },
+                { "PHASER", "PHASER" }, { "TAPE", "NASTRO" }, { "DELAY", "DELAY" }, { "REVERB", "RIVERBERO" },
+                { "COMPRESSOR", "COMPRESSORE" }, { "SIGNAL CHAIN", "CATENA DEL SEGNALE" },
+                { "Turn on only what you need: switched-off effects use no CPU.", "Accendi solo quello che ti serve: gli effetti spenti non usano CPU." },
+                { "Tone", "Tono" }, { "Note", "Nota" }, { "Bright", "Brillantezza" }, { "Depth", "Profondit\xc3\xa0" },
+                { "Feedback", "Feedback" }, { "Frequency", "Frequenza" }, { "Stages", "Stadi" }, { "Wow", "Wow" },
+                { "Flutter", "Flutter" }, { "Saturation", "Saturazione" }, { "Time", "Tempo" }, { "Low Cut", "Taglio bassi" },
+                { "High Cut", "Taglio alti" }, { "Size", "Dimensione" }, { "Pre-Delay", "Pre-delay" }, { "Damping", "Smorzamento" },
+                { "Shimmer", "Shimmer" }, { "Low Freq", "Freq. bassi" }, { "Low Gain", "Guad. bassi" }, { "Mid Freq", "Freq. medi" },
+                { "Mid Gain", "Guad. medi" }, { "Mid Q", "Q medi" }, { "High Freq", "Freq. alti" }, { "High Gain", "Guad. alti" },
+                { "Threshold", "Soglia" }, { "Ratio", "Rapporto" }, { "Makeup", "Guadagno" },
+                { "Soft Clip", "Soft clip" }, { "Hard Clip", "Hard clip" }, { "Tube", "Valvola" }, { "Fold", "Fold" },
+                { "Diode", "Diodo" }, { "Overdrive", "Overdrive" }, { "Bitcrush", "Bitcrush" }, { "Downsample", "Downsample" },
+                { "Single", "Singola" }, { "Octaves", "Ottave" }, { "Fifth", "Quinta" }, { "Major", "Maggiore" }, { "Minor", "Minore" },
+                { "Power", "Power" }, { "Low Pass", "Passa basso" }, { "High Pass", "Passa alto" }, { "Band Pass", "Passa banda" },
+                { "Digital", "Digitale" }, { "Tape Echo", "Eco a nastro" }, { "Ping-Pong", "Ping-pong" },
+                { "Room", "Stanza" }, { "Hall", "Sala" },
+                { "MOVEMENT", "MOVIMENTO" }, { "CIRCUIT", "CIRCUITO" }, { "NOISE & HUM", "RUMORE E RONZIO" },
+                { "VINTAGE CONVERTER", "CONVERTITORE VINTAGE" }, { "Tolerance", "Tolleranza" }, { "Noise Floor", "Rumore di fondo" },
+                { "Hum", "Ronzio" }, { "Bits", "Bit" }, { "Sample Rate", "Frequenza camp." },
+                { "Turns a clean digital synth into a worn analog one. At 0 nothing changes: the sound stays clean and digital.",
+                  "Trasforma un synth digitale pulito in uno analogico vissuto. A 0 non cambia nulla: il suono resta pulito e digitale." },
+                { "AGE raises drift, voice spread, tolerance, circuit saturation and a little noise and hum together. Each knob on the right also works on its own.",
+                  "AGE alza insieme drift, variazione voci, tolleranza, saturazione del circuito e un po' di rumore e ronzio. Ogni manopola a destra funziona anche da sola." },
+                { "Drift: slow wandering pitch. Voice Spread: every note slightly different. Tolerance: oscillators and filters never perfectly matched.",
+                  "Drift: intonazione che oscilla lentamente. Variazione voci: ogni nota un po' diversa. Tolleranza: oscillatori e filtri mai perfettamente uguali." },
+                { "Warm, slightly uneven saturation of the voice circuit.", "Saturazione calda e leggermente irregolare del circuito." },
+                { "Background hiss and mains hum, only while notes are sounding.", "Fruscio di fondo e ronzio di rete, solo mentre le note suonano." },
+                { "Lower bit depth and sample rate, like 80s samplers. Not part of AGE.", "Meno bit e frequenza di campionamento pi\xc3\xb9 bassa, come i campionatori anni '80. Non fa parte di AGE." },
+                { "STEPS", "STEP" }, { "LOCK", "BLOCCO" }, { "NOTE", "NOTA" }, { "VELOCITY", "VELOCITY" }, { "GATE", "GATE" },
+                { "ON", "ATTIVO" }, { "TIE", "LEGATO" }, { "ARP ON", "ARP ATTIVO" }, { "Latch", "Latch" }, { "Mode", "Modalit\xc3\xa0" },
+                { "Step Rate", "Divisione" }, { "Scale", "Scala" }, { "Key", "Tonica" }, { "Gate", "Gate" }, { "Swing", "Swing" },
+                { "Steps", "Step" }, { "Step Vel", "Vel. step" }, { "RANDOM", "RANDOM" }, { "CLEAR", "AZZERA" },
+                { "UNLOCK ALL", "SBLOCCA TUTTO" }, { "DRAG MIDI", "TRASCINA MIDI" },
+                { "New random pattern. Locked steps stay as they are.", "Nuovo pattern casuale. Gli step bloccati restano come sono." },
+                { "Drag onto a track in your DAW to get the pattern as MIDI. Click to save a .mid file.",
+                  "Trascinalo su una traccia della DAW per avere il pattern in MIDI. Clic per salvare un file .mid." },
+                { "Save arp pattern as MIDI", "Salva il pattern dell'arp come MIDI" },
+                { "NOTE = scale steps added to the played note (Sequencer mode plays them as a melody). Drag to edit, double-click to reset. Locked steps survive RANDOM.",
+                  "NOTA = gradi della scala aggiunti alla nota suonata (la modalit\xc3\xa0 Sequencer li suona come melodia). Trascina per modificare, doppio clic per azzerare. Gli step bloccati non cambiano con RANDOM." },
+                { "Up", "Su" }, { "Down", "Gi\xc3\xb9" }, { "Up-Down", "Su-Gi\xc3\xb9" }, { "Down-Up", "Gi\xc3\xb9-Su" },
+                { "As Played", "Come suonato" }, { "Chord", "Accordo" }, { "Sequencer", "Sequencer" },
+                { "Chromatic", "Cromatica" }, { "Harmonic Minor", "Minore armonica" }, { "Melodic Minor", "Minore melodica" },
+                { "Major Pentatonic", "Pentatonica maggiore" }, { "Minor Pentatonic", "Pentatonica minore" },
+                { "Whole Tone", "Esatonale" }, { "Diminished", "Diminuita" }, { "Phrygian Dominant", "Frigia dominante" },
+                { "Hungarian Minor", "Minore ungherese" }, { "Arabic", "Araba" },
+
             };
             return m;
         }
