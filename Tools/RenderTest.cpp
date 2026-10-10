@@ -1,0 +1,276 @@
+// Offline test: renders notes through PYRA and checks the audio (no host needed).
+#include <juce_audio_utils/juce_audio_utils.h>
+#include "PluginProcessor.h"
+#include "dsp/Wavetables.h"
+#include "Lang.h"
+
+using namespace pyra;
+
+namespace
+{
+    constexpr double kSr = 48000.0;
+    constexpr int kBlock = 256;
+    int failures = 0;
+
+    struct Note { double time, length; int note; float vel; int ch = 1; };
+
+    void set (PyraAudioProcessor& p, const juce::String& id, float value)
+    {
+        auto* param = p.apvts.getParameter (id);
+        if (param == nullptr) { std::printf ("  !! unknown parameter %s\n", id.toRawUTF8()); ++failures; return; }
+        param->setValueNotifyingHost (param->convertTo0to1 (value));
+    }
+
+    void resetAll (PyraAudioProcessor& p)
+    {
+        for (auto* param : p.getParameters())
+            if (auto* r = dynamic_cast<juce::RangedAudioParameter*> (param))
+                r->setValueNotifyingHost (r->getDefaultValue());
+    }
+
+    struct Result { float peak = 0, rms = 0; bool finite = true; double cpuRatio = 0; };
+
+    Result render (PyraAudioProcessor& p, const juce::String& name, double seconds, const std::vector<Note>& notes,
+                   std::function<void (juce::MidiBuffer&, int start, int len)> extraMidi = {})
+    {
+        p.prepareToPlay (kSr, kBlock);
+        const int total = (int) (seconds * kSr);
+        juce::AudioBuffer<float> out (2, total);
+        out.clear();
+        juce::AudioBuffer<float> block (2, kBlock);
+
+        const auto t0 = juce::Time::getHighResolutionTicks();
+        for (int pos = 0; pos < total; pos += kBlock)
+        {
+            const int len = std::min (kBlock, total - pos);
+            block.setSize (2, len, false, false, true);
+            juce::MidiBuffer midi;
+            for (auto& n : notes)
+            {
+                const int on = (int) (n.time * kSr), off = (int) ((n.time + n.length) * kSr);
+                if (on >= pos && on < pos + len) midi.addEvent (juce::MidiMessage::noteOn (n.ch, n.note, n.vel), on - pos);
+                if (off >= pos && off < pos + len) midi.addEvent (juce::MidiMessage::noteOff (n.ch, n.note), off - pos);
+            }
+            if (extraMidi) extraMidi (midi, pos, len);
+            p.processBlock (block, midi);
+            for (int c = 0; c < 2; ++c) out.copyFrom (c, pos, block, c, 0, len);
+        }
+        const auto t1 = juce::Time::getHighResolutionTicks();
+
+        Result r;
+        r.cpuRatio = juce::Time::highResolutionTicksToSeconds (t1 - t0) / seconds;
+        double sum = 0;
+        for (int c = 0; c < 2; ++c)
+            for (int i = 0; i < total; ++i)
+            {
+                const float v = out.getSample (c, i);
+                if (! std::isfinite (v)) r.finite = false;
+                r.peak = std::max (r.peak, std::abs (v));
+                sum += (double) v * v;
+            }
+        r.rms = (float) std::sqrt (sum / (2.0 * total));
+
+        auto file = juce::File::getCurrentWorkingDirectory().getChildFile ("renders").getChildFile (name + ".wav");
+        file.getParentDirectory().createDirectory();
+        file.deleteFile();
+        juce::WavAudioFormat wav;
+        if (auto stream = std::make_unique<juce::FileOutputStream> (file); stream->openedOk())
+            if (auto* w = wav.createWriterFor (stream.get(), kSr, 2, 24, {}, 0))
+            {
+                stream.release();
+                std::unique_ptr<juce::AudioFormatWriter> writer (w);
+                writer->writeFromAudioSampleBuffer (out, 0, total);
+            }
+
+        const bool ok = r.finite && r.peak > 0.001f && r.peak < 4.0f;
+        if (! ok) ++failures;
+        std::printf ("  %-26s peak %6.3f  rms %6.3f  cpu %5.1f%%  %s\n", name.toRawUTF8(), r.peak, r.rms,
+                     r.cpuRatio * 100.0, ok ? "ok" : "FAIL");
+        return r;
+    }
+
+    std::vector<Note> chord (double t, double len, std::initializer_list<int> ns, float vel = 0.8f)
+    {
+        std::vector<Note> v;
+        for (int n : ns) v.push_back ({ t, len, n, vel });
+        return v;
+    }
+}
+
+// Saves a PNG of every editor page (layout check without a DAW).
+static void snapshots (pyra::lang::Language language, const juce::String& suffix)
+{
+    pyra::lang::set (language);
+    PyraAudioProcessor p;
+    p.prepareToPlay (kSr, kBlock);
+    // a little modulation so rings are visible
+    set (p, "mod1_src", SrcLfo1); set (p, "mod1_dst", dFilt (0, FCutoff)); set (p, "mod1_amt", 0.3f);
+    set (p, "mod2_src", SrcEnv2); set (p, "mod2_dst", dOsc (0, OPos)); set (p, "mod2_amt", -0.25f);
+    set (p, "f1_cutoff", 2500.0f); set (p, "f1_res", 0.45f);
+    set (p, pid::osc (1, "on"), 1); set (p, pid::osc (1, "wt"), 10); set (p, pid::osc (1, "pos"), 0.4f);
+
+    std::unique_ptr<juce::AudioProcessorEditor> ed (p.createEditor());
+    ed->setSize (1280, 840);
+    auto* root = ed->getChildComponent (0);
+    juce::Array<juce::TextButton*> tabs;
+    for (auto* c : root->getChildren())
+        if (auto* b = dynamic_cast<juce::TextButton*> (c))
+            if (b->getButtonText().length() > 2) tabs.add (b);
+
+    for (int i = 0; i < tabs.size(); ++i)
+    {
+        if (tabs[i]->onClick) tabs[i]->onClick();
+        auto img = ed->createComponentSnapshot (ed->getLocalBounds(), true, 1.0f);
+        auto f = juce::File::getCurrentWorkingDirectory().getChildFile ("ui").getChildFile (
+            "page" + juce::String (i) + "_" + tabs[i]->getButtonText().removeCharacters (" ") + suffix + ".png");
+        f.getParentDirectory().createDirectory();
+        f.deleteFile();
+        juce::FileOutputStream os (f);
+        juce::PNGImageFormat().writeImageToStream (img, os);
+    }
+    std::printf ("UI snapshots written (%s)\n", suffix.toRawUTF8());
+}
+
+int main (int argc, char** argv)
+{
+    juce::ScopedJuceInitialiser_GUI init;
+    if (argc > 1 && juce::String (argv[1]) == "--ui")
+    {
+        snapshots (pyra::lang::English, "_en");
+        snapshots (pyra::lang::Italian, "_it");
+        pyra::lang::set (pyra::lang::English);
+        return 0;
+    }
+    auto start = juce::Time::getMillisecondCounterHiRes();
+    const auto& bank = Wavetables::get();
+    std::printf ("Wavetable bank: %d tables built in %.0f ms\n", bank.size(), juce::Time::getMillisecondCounterHiRes() - start);
+
+    PyraAudioProcessor p;
+    std::printf ("Parameters: %d\n\n", p.getParameters().size());
+
+    std::printf ("Scenarios\n");
+    resetAll (p);
+    render (p, "01_default_saw_chord", 3.0, chord (0.0, 2.0, { 48, 60, 64, 67 }));
+
+    // Supersaw pad with filter envelope
+    resetAll (p);
+    for (int o = 0; o < 3; ++o)
+    {
+        set (p, pid::osc (o, "on"), 1);
+        set (p, pid::osc (o, "voices"), 9);
+        set (p, pid::osc (o, "detune"), 0.3f);
+        set (p, pid::osc (o, "level"), 0.5f);
+    }
+    set (p, pid::osc (1, "oct"), -1);
+    set (p, pid::osc (2, "wt"), 5); // Analog Saw
+    set (p, "f1_type", FLp24); set (p, "f1_cutoff", 600); set (p, "f1_res", 0.4f); set (p, "f1_env", 0.45f);
+    set (p, "env2_att", 0.4f); set (p, "env2_dec", 1.5f);
+    set (p, "env1_att", 0.2f); set (p, "env1_rel", 1.0f);
+    render (p, "02_supersaw_pad", 4.0, chord (0.0, 2.5, { 48, 55, 60, 63, 67 }));
+
+    // Every filter type with an LFO sweeping the cutoff
+    for (int t = 0; t < FTypeCount; ++t)
+    {
+        resetAll (p);
+        set (p, "f1_type", (float) t); set (p, "f1_cutoff", 800); set (p, "f1_res", 0.7f); set (p, "f1_drive", 0.3f);
+        set (p, "mod1_src", SrcLfo1); set (p, "mod1_dst", dFilt (0, FCutoff)); set (p, "mod1_amt", 0.35f);
+        set (p, "lfo1_sync", 0); set (p, "lfo1_rate", 1.5f);
+        render (p, "03_filter_" + juce::String (t).paddedLeft ('0', 2) + "_" + choices::filterTypes()[t].replace (" ", ""),
+                1.5, chord (0.0, 1.2, { 45, 57 }));
+    }
+
+    // Warp modes + FM
+    for (int w = 0; w < WarpCount; ++w)
+    {
+        resetAll (p);
+        set (p, pid::osc (0, "warp"), (float) w);
+        set (p, pid::osc (0, "warpAmt"), 0.6f);
+        set (p, pid::osc (1, "on"), 1);
+        set (p, pid::osc (1, "wt"), 1);  // sine as FM carrier
+        set (p, pid::osc (1, "fmSrc"), FmOscA);
+        set (p, pid::osc (1, "fmAmt"), 0.4f);
+        set (p, "mod1_src", SrcEnv2); set (p, "mod1_dst", dOsc (0, OWarp)); set (p, "mod1_amt", 0.4f);
+        render (p, "04_warp_" + choices::warpModes()[w].replace (" ", "").replace ("+", "P").replace ("-", "M"), 1.2,
+                chord (0.0, 1.0, { 52 }));
+    }
+
+    // Mono legato glide bass with sub + noise
+    resetAll (p);
+    set (p, "voiceMode", ModeLegato); set (p, "glide", 0.12f);
+    set (p, "sub_on", 1); set (p, "noise_on", 1); set (p, "noise_type", 1); set (p, "noise_level", 0.1f);
+    set (p, "f1_type", FLadder); set (p, "f1_cutoff", 400); set (p, "f1_res", 0.5f);
+    {
+        std::vector<Note> line { { 0.0, 0.5, 36, 0.9f }, { 0.4, 0.5, 43, 0.9f }, { 0.8, 0.5, 39, 0.9f }, { 1.2, 0.8, 48, 0.9f } };
+        render (p, "05_mono_legato_glide", 2.6, line);
+    }
+
+    // All wavetables, middle position, with a WT-position LFO
+    resetAll (p);
+    {
+        std::vector<Note> seq;
+        for (int i = 0; i < bank.size(); ++i) seq.push_back ({ i * 0.35, 0.3, 60 + (i % 5) * 2, 0.8f });
+        set (p, "mod1_src", SrcLfo1); set (p, "mod1_dst", dOsc (0, OPos)); set (p, "mod1_amt", 0.5f);
+        set (p, pid::osc (0, "pos"), 0.25f);
+        // switch tables while playing
+        int idx = 0;
+        render (p, "06_all_wavetables", bank.size() * 0.35 + 0.5, seq, [&] (juce::MidiBuffer&, int pos, int)
+        {
+            const int want = std::min (bank.size() - 1, (int) (pos / kSr / 0.35));
+            if (want != idx) { idx = want; set (p, pid::osc (0, "wt"), (float) idx); }
+        });
+    }
+
+    // MPE: per-note bend on channel 2
+    resetAll (p);
+    set (p, "mpe", 1);
+    {
+        std::vector<Note> n { { 0.0, 1.5, 60, 0.8f, 2 }, { 0.0, 1.5, 64, 0.8f, 3 } };
+        render (p, "07_mpe_bend", 2.0, n, [] (juce::MidiBuffer& m, int pos, int len)
+        {
+            for (int i = 0; i < len; i += 64)
+            {
+                const double t = (pos + i) / kSr;
+                if (t > 0.2 && t < 1.2)
+                    m.addEvent (juce::MidiMessage::pitchWheel (2, 8192 + (int) (4000 * std::sin (t * 6.0))), i);
+            }
+        });
+    }
+
+    // Stress: 32 notes, 3 oscillators x 16 unison, 2 filters
+    resetAll (p);
+    set (p, "polyphony", 32);
+    for (int o = 0; o < 3; ++o) { set (p, pid::osc (o, "on"), 1); set (p, pid::osc (o, "voices"), 16); set (p, pid::osc (o, "level"), 0.2f); }
+    set (p, "f2_on", 1); set (p, "f2_type", FLadder); set (p, "filterRouting", 0);
+    {
+        std::vector<Note> many;
+        for (int i = 0; i < 32; ++i) many.push_back ({ 0.0, 2.0, 36 + i * 2, 0.5f });
+        auto r = render (p, "08_stress_32x3x16", 2.5, many);
+        std::printf ("     (worst case: 1536 oscillators at once, %.1f%% of one CPU core)\n", r.cpuRatio * 100.0);
+    }
+
+    // Aliasing check material: single high saw notes (analysed outside)
+    resetAll (p);
+    set (p, "f1_on", 0);
+    render (p, "10_saw_C7", 1.0, chord (0.0, 0.9, { 96 }));
+    set (p, pid::osc (0, "voices"), 7);
+    render (p, "11_unison_C6", 1.0, chord (0.0, 0.9, { 84 }));
+
+    // State save / restore round trip
+    {
+        resetAll (p);
+        set (p, "f1_cutoff", 1234.0f);
+        set (p, "mod3_src", SrcMacro2); set (p, "mod3_dst", dOsc (2, OPos)); set (p, "mod3_amt", -0.42f);
+        juce::MemoryBlock mb;
+        p.getStateInformation (mb);
+        PyraAudioProcessor q;
+        q.setStateInformation (mb.getData(), (int) mb.getSize());
+        const float c = q.apvts.getRawParameterValue ("f1_cutoff")->load();
+        const float a = q.apvts.getRawParameterValue ("mod3_amt")->load();
+        const bool ok = std::abs (c - 1234.0f) < 1.0f && std::abs (a + 0.42f) < 0.001f;
+        if (! ok) ++failures;
+        std::printf ("  %-26s %s (cutoff %.1f, amount %.3f)\n", "09_state_roundtrip", ok ? "ok" : "FAIL", c, a);
+    }
+
+    std::printf ("\n%s (%d failures)\n", failures == 0 ? "ALL PASSED" : "FAILURES", failures);
+    return failures == 0 ? 0 : 1;
+}

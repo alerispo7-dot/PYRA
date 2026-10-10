@@ -1,0 +1,27 @@
+PYRA - INSTALLAZIONE SU MAC (Apple Silicon e Intel)
+===================================================
+
+Metodo rapido
+1. Fai clic DESTRO su "install_mac.command" e scegli "Apri".
+   (Il primo avviso di macOS compare perche' PYRA e' gratuito e non ha la firma
+   a pagamento di Apple: scegli comunque "Apri".)
+2. Si apre il Terminale, copia PYRA nelle cartelle giuste e lo sblocca.
+3. Riapri la DAW e fai una nuova scansione dei plugin.
+
+Metodo manuale
+- PYRA.vst3      -> ~/Library/Audio/Plug-Ins/VST3/        (FL Studio, Ableton, ...)
+- PYRA.component -> ~/Library/Audio/Plug-Ins/Components/  (Logic Pro)
+- PYRA.app       -> Applicazioni (versione standalone, senza DAW)
+Poi nel Terminale:
+  xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/VST3/PYRA.vst3 ~/Library/Audio/Plug-Ins/Components/PYRA.component
+
+Nelle DAW
+- FL Studio: Options > Manage plugins > Find installed plugins, poi cerca PYRA.
+- Ableton: Impostazioni > Plug-in > attiva "Usa cartella VST3 di sistema" > Rescan.
+- Logic: si trova tra gli strumenti Audio Units.
+
+-----------------------------------------------------------------------------
+PYRA - INSTALLING ON MAC
+1. Right-click "install_mac.command" and choose "Open" (macOS warns because PYRA
+   is free and not notarised by Apple - choose Open anyway).
+2. Restart your DAW and rescan plugins.

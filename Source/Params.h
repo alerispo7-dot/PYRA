@@ -1,0 +1,190 @@
+#pragma once
+
+#include <juce_audio_processors/juce_audio_processors.h>
+#include <array>
+
+namespace pyra
+{
+constexpr int kNumOsc       = 3;
+constexpr int kNumFilters   = 2;
+constexpr int kNumEnv       = 4;
+constexpr int kNumLfo       = 4;
+constexpr int kNumMacros    = 4;
+constexpr int kNumModSlots  = 16;
+constexpr int kMaxVoices    = 64;
+constexpr int kMaxUnison    = 16;
+
+//==============================================================================
+// Parameter IDs
+namespace pid
+{
+    juce::String osc (int i, const char* p);      // oscA_level ...
+    juce::String filt (int i, const char* p);     // f1_cutoff ...
+    juce::String env (int i, const char* p);      // env1_att ...
+    juce::String lfo (int i, const char* p);      // lfo1_rate ...
+    juce::String mod (int i, const char* p);      // mod1_src ...
+    juce::String macro (int i);                   // macro1 ...
+}
+
+//==============================================================================
+// Choice lists (indices are saved in projects/presets: only ever append!)
+namespace choices
+{
+    const juce::StringArray& voiceModes();
+    const juce::StringArray& warpModes();
+    const juce::StringArray& fmSources();
+    const juce::StringArray& routes();
+    const juce::StringArray& subShapes();
+    const juce::StringArray& noiseTypes();
+    const juce::StringArray& filterTypes();
+    const juce::StringArray& filterRouting();
+    const juce::StringArray& lfoShapes();
+    const juce::StringArray& lfoModes();
+    const juce::StringArray& syncDivisions();
+    double syncDivisionBeats (int index);
+    const juce::StringArray& modSources();
+    const juce::StringArray& modDestinations();
+}
+
+enum WarpMode   { WarpOff, WarpSync, WarpBendPlus, WarpBendMinus, WarpPwm, WarpAsym, WarpMirror, WarpFold, WarpQuantize, WarpCount };
+enum FmSource   { FmOff, FmOscA, FmOscB, FmOscC, FmSub, FmNoise };
+enum Route      { RouteF1, RouteF2, RouteBoth, RouteDirect };
+enum FilterType { FLp12, FLp24, FLadder, FHp12, FHp24, FBp12, FBp24, FNotch, FPeak, FAllpass, FCombPlus, FCombMinus, FFormant, FPhaser, FTypeCount };
+enum LfoMode    { LfoRetrig, LfoFree, LfoEnvelope };
+enum VoiceMode  { ModePoly, ModeMono, ModeLegato };
+
+enum ModSource
+{
+    SrcNone = 0,
+    SrcEnv1, SrcEnv2, SrcEnv3, SrcEnv4,
+    SrcLfo1, SrcLfo2, SrcLfo3, SrcLfo4,
+    SrcVelocity, SrcNote, SrcRandom, SrcModWheel, SrcPressure, SrcPitchBend, SrcSlide,
+    SrcMacro1, SrcMacro2, SrcMacro3, SrcMacro4,
+    SrcCount
+};
+
+// Modulation destinations (append-only)
+enum OscField  { OLevel, OPan, OPitch, OFine, OPos, ODetune, OBlend, OWidth, OWarp, OFm, OCount };
+enum FiltField { FCutoff, FRes, FDrive, FMix, FEnv, FCount };
+
+enum Dest
+{
+    DNone        = 0,
+    DOscBase     = 1,
+    DSubLevel    = DOscBase + kNumOsc * OCount,
+    DNoiseLevel,
+    DNoiseColor,
+    DFiltBase,
+    DLfoRateBase = DFiltBase + kNumFilters * FCount,
+    DAmp         = DLfoRateBase + kNumLfo,
+    DCount
+};
+
+inline int dOsc (int osc, OscField f)    { return DOscBase + osc * OCount + f; }
+inline int dFilt (int flt, FiltField f)  { return DFiltBase + flt * FCount + f; }
+
+juce::String destParamId (int dest);   // empty for special destinations
+
+//==============================================================================
+// Plain, lock-free copy of every parameter, refreshed once per audio block.
+struct OscSettings
+{
+    bool on = false; int wt = 0; int oct = 0; int voices = 1;
+    float phase = 0, rand = 1; int warp = 0; int fmSrc = 0; int route = 0;
+};
+
+struct SubSettings    { bool on = false; int shape = 0; int oct = -1; int route = 0; float pan = 0; };
+struct NoiseSettings  { bool on = false; int type = 0; int route = 0; float pan = 0; };
+struct FilterSettings { bool on = false; int type = 0; float key = 0; };
+
+struct EnvSettings
+{
+    float dly = 0, att = 0.002f, hold = 0, dec = 1, sus = 1, rel = 0.15f;
+    float aCrv = 0.3f, dCrv = 0.6f, rCrv = 0.6f;
+};
+
+struct LfoSettings
+{
+    int shape = 0; float rate = 1; bool sync = true; int div = 7; int mode = 0;
+    float phase = 0, delay = 0, fade = 0; bool uni = false; float smooth = 0;
+};
+
+struct ModSlot { int src = 0; int dst = 0; float amt = 0; };
+
+struct DestConv
+{
+    enum Kind { Param, Linear, LfoRate, Amp };
+    Kind kind = Param;
+    float start = 0, end = 1;
+    const juce::NormalisableRange<float>* range = nullptr;
+
+    float toRaw (float norm) const
+    {
+        norm = juce::jlimit (0.0f, 1.0f, norm);
+        if (kind == Linear) return start + norm * (end - start);
+        return range->convertFrom0to1 (norm);
+    }
+};
+
+struct Settings
+{
+    // global
+    float masterGain = 1; int polyphony = 16; int voiceMode = 0;
+    float glide = 0; bool glideLegato = false;
+    int bendUp = 2, bendDown = 2; bool mpe = false; int mpeRange = 48;
+    float velAmp = 0.5f; int transpose = 0; float tune = 0;
+    float drift = 0, spread = 0; int filterRouting = 0;
+    float macros[kNumMacros] {};
+
+    OscSettings    osc[kNumOsc];
+    SubSettings    sub;
+    NoiseSettings  noise;
+    FilterSettings filt[kNumFilters];
+    EnvSettings    env[kNumEnv];
+    LfoSettings    lfo[kNumLfo];
+
+    ModSlot slots[kNumModSlots]; int numSlots = 0;   // only active slots
+    bool destModded[DCount] {};
+    bool envUsed[kNumEnv] {};
+    bool lfoUsed[kNumLfo] {};
+
+    float baseRaw[DCount] {};    // current value of each modulatable parameter
+    float baseNorm[DCount] {};   // same, 0..1
+    DestConv conv[DCount];
+};
+
+//==============================================================================
+class ParamRefs
+{
+public:
+    void init (juce::AudioProcessorValueTreeState& state);
+    void fill (Settings& s) const;
+
+private:
+    struct OscRefs  { std::atomic<float>* on, *wt, *oct, *voices, *phase, *rand, *warp, *fmSrc, *route; };
+    struct FiltRefs { std::atomic<float>* on, *type, *key; };
+    struct EnvRefs  { std::atomic<float>* dly, *att, *hold, *dec, *sus, *rel, *aCrv, *dCrv, *rCrv; };
+    struct LfoRefs  { std::atomic<float>* shape, *rate, *sync, *div, *mode, *phase, *delay, *fade, *uni, *smooth; };
+    struct SlotRefs { std::atomic<float>* src, *dst, *amt; };
+
+    std::atomic<float>* master {}, *polyphony {}, *voiceMode {}, *glide {}, *glideLegato {},
+        *bendUp {}, *bendDown {}, *mpe {}, *mpeRange {}, *velAmp {}, *transpose {}, *tune {},
+        *drift {}, *spread {}, *filterRouting {};
+    std::atomic<float>* macros[kNumMacros] {};
+    std::atomic<float>* subOn {}, *subShape {}, *subOct {}, *subRoute {}, *subPan {};
+    std::atomic<float>* noiseOn {}, *noiseType {}, *noiseRoute {}, *noisePan {};
+
+    OscRefs  osc[kNumOsc] {};
+    FiltRefs filt[kNumFilters] {};
+    EnvRefs  env[kNumEnv] {};
+    LfoRefs  lfo[kNumLfo] {};
+    SlotRefs slot[kNumModSlots] {};
+
+    std::atomic<float>* destRaw[DCount] {};
+    juce::RangedAudioParameter* destParam[DCount] {};
+    DestConv conv[DCount];
+};
+
+juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
+
+} // namespace pyra
