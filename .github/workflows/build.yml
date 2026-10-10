@@ -78,6 +78,7 @@ jobs:
           Copy-Item packaging/CREDITS.txt dist/PYRA/
           Copy-Item "$art/Standalone/PYRA.exe" dist/PYRA/
           Copy-Item packaging/INSTALL_WINDOWS.txt dist/PYRA/
+          Copy-Item packaging/install_windows.bat dist/PYRA/
           Compress-Archive -Path dist/PYRA -DestinationPath dist/PYRA-Windows.zip
 
       - name: Upload build

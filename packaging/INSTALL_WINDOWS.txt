@@ -1,21 +1,34 @@
 PYRA - INSTALLAZIONE SU WINDOWS
 ===============================
 
-1. Copia la cartella "PYRA.vst3" in:
-      C:\Program Files\Common Files\VST3
-   (se Windows chiede i permessi di amministratore, conferma).
-   Dentro PYRA.vst3 ci sono anche i suoni campionati (pianoforte, archi, fiati...):
-   copia la cartella intera, non solo una parte.
-2. Apri la DAW e fai una nuova scansione dei plugin:
-   - FL Studio: Options > Manage plugins > Find installed plugins, poi cerca PYRA.
-   - Ableton: Impostazioni > Plug-in > attiva "Usa cartella VST3 di sistema" > Rescan.
-3. PYRA.exe e' la versione standalone (funziona anche senza DAW).
-   Al primo avvio Windows puo' mostrare "PC protetto da Windows": clicca
-   "Ulteriori informazioni" > "Esegui comunque". Succede perche' PYRA e' gratuito
-   e non ha un certificato a pagamento.
+MODO FACILE (consigliato)
+1. Tasto destro su PYRA-Windows.zip > "Estrai tutto..." (non aprire i file
+   direttamente dentro lo zip).
+2. Nella cartella estratta fai doppio clic su  install_windows.bat
+   - Se compare "PC protetto da Windows": "Ulteriori informazioni" > "Esegui comunque".
+   - Quando chiede i permessi di amministratore, clicca "Si'".
+3. Apri FL Studio: Options > Manage plugins > "Find installed plugins".
+   Cerca PYRA nella lista e clicca la stellina: ora lo trovi nel browser dei plugin.
+   (Ableton: Impostazioni > Plug-in > "Usa cartella VST3 di sistema" > Rescan.)
+
+MODO MANUALE
+Copia la cartella intera "PYRA.vst3" dentro  C:\Program Files\Common Files\VST3
+Il percorso finale deve essere esattamente:
+   C:\Program Files\Common Files\VST3\PYRA.vst3\Contents\...
+(non C:\...\VST3\PYRA\PYRA.vst3 e non dentro un'altra cartella).
+
+SE FL STUDIO NON LO TROVA
+- In Manage plugins controlla che tra le cartelle di ricerca ci sia
+  C:\Program Files\Common Files\VST3 e che la ricerca VST3 sia attiva.
+- Usa FL Studio a 64 bit (PYRA non funziona nella versione a 32 bit).
+- Chiudi e riapri FL Studio dopo l'installazione.
+
+PYRA.exe e' la versione standalone (funziona anche senza DAW); l'installer
+crea anche un collegamento "PYRA" sul desktop.
 
 -----------------------------------------------------------------------------
 PYRA - INSTALLING ON WINDOWS
-1. Copy the "PYRA.vst3" folder to C:\Program Files\Common Files\VST3
-2. Rescan plugins in your DAW (FL Studio: Options > Manage plugins > Find installed plugins).
-3. PYRA.exe is the standalone version.
+1. Right click PYRA-Windows.zip > Extract All.
+2. Double click install_windows.bat in the extracted folder (allow admin rights).
+3. FL Studio: Options > Manage plugins > Find installed plugins, then star PYRA.
+Manual: copy the whole PYRA.vst3 folder to C:\Program Files\Common Files\VST3
