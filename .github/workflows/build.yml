@@ -81,6 +81,38 @@ jobs:
           Copy-Item packaging/install_windows.bat dist/PYRA/
           Compress-Archive -Path dist/PYRA -DestinationPath dist/PYRA-Windows.zip
 
+      - name: Validate with pluginval (like a DAW would)
+        id: pluginval
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          ART=build/PYRA_artefacts/Release
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            curl -sSL -o pv.zip https://github.com/Tracktion/pluginval/releases/latest/download/pluginval_macOS.zip
+            unzip -q pv.zip
+            PV=pluginval.app/Contents/MacOS/pluginval
+            TARGETS="$ART/VST3/PYRA.vst3"
+          else
+            curl -sSL -o pv.zip https://github.com/Tracktion/pluginval/releases/latest/download/pluginval_Windows.zip
+            unzip -q pv.zip
+            PV=./pluginval.exe
+            TARGETS="$ART/VST3/PYRA.vst3"
+          fi
+          for t in $TARGETS; do
+            echo "=== $t" | tee -a pluginval.log
+            "$PV" --strictness-level 5 --timeout-ms 600000 --validate-in-process --validate "$t" 2>&1 | tee -a pluginval.log
+          done
+
+      - name: Report pluginval result
+        if: steps.pluginval.outcome == 'failure'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          { echo "pluginval found problems on ${{ matrix.name }}"; echo '```'; grep -iE "fail|error|crash|assert|!!!" pluginval.log | head -60; echo '```'; } > pv.md
+          gh api repos/${{ github.repository }}/commits/${{ github.sha }}/comments -F body=@pv.md || true
+
       - name: Upload build
         uses: actions/upload-artifact@v4
         with:
