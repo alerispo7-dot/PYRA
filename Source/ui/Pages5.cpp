@@ -1,5 +1,6 @@
 // Phase 5 page: CHAOS / FOCUS / MOTION
 #include "Pages.h"
+#include "Prefs.h"
 #include "PyraLookAndFeel.h"
 #include "../Lang.h"
 #include "../PluginProcessor.h"
@@ -62,7 +63,7 @@ namespace
             const float v = (float) knob.slider.valueToProportionOfLength (knob.slider.getValue());
             if (std::abs (v - lastV) > 0.002f) repaint();
             // the lava keeps flowing (15 frames per second is plenty)
-            if (++frame % 2 == 0)
+            if (++frame % 2 == 0 && prefs::get (prefs::Animations) != 0)
             {
                 time += 0.066f;
                 knob.slider.getProperties().set ("time", time);

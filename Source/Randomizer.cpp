@@ -194,7 +194,7 @@ namespace
 
         for (int l = 0; l < kNumLfo; ++l)
         {
-            r.set (pid::lfo (l, "shape"), (float) r.pick (choices::lfoShapes().size()));
+            r.set (pid::lfo (l, "shape"), (float) r.pick (choices::lfoShapes().size() - 1));   // never the hand-drawn one
             r.set (pid::lfo (l, "sync"), r.chance (0.75f) ? 1.0f : 0.0f);
             r.set (pid::lfo (l, "div"), (float) r.oneOf ({ 3, 4, 5, 7, 8, 10, 11, 13 }));
             r.set (pid::lfo (l, "rate"), r.logRange (0.1f, 8.0f));
@@ -359,6 +359,8 @@ namespace
         const int steps = (int) std::lround (r.get ("arp_steps"));
         r.p.arpPattern.randomize (steps, (uint32_t) r.rnd.nextInt());
         r.set ("arp_mode", (float) r.oneOf ({ 0, 2, 4, 7, 7, 7 }));
+        r.set ("arp_scale", (float) r.oneOf ({ 0, 1, 2, 2, 5, 11, 10 }));
+        r.set ("arp_key", (float) r.pick (12));
     }
 }
 
@@ -653,6 +655,44 @@ void randomizeLayers (PyraAudioProcessor& master, bool variation, uint32_t seed)
         r.set (layerParam (k, "mute"), 0.0f);
         r.set (layerParam (k, "solo"), 0.0f);
     }
+}
+
+void randomizeParam (PyraAudioProcessor& p, const juce::String& id, bool variation, uint32_t seed)
+{
+    auto* q = dynamic_cast<juce::RangedAudioParameter*> (p.apvts.getParameter (id));
+    if (q == nullptr) return;
+    if (variation)
+    {
+        R r (p, seed);
+        const bool discrete = dynamic_cast<juce::AudioParameterChoice*> (q) != nullptr || dynamic_cast<juce::AudioParameterBool*> (q) != nullptr;
+        float n = q->getValue();
+        if (discrete) n = r.uni();
+        else n += (r.uni() + r.uni() + r.uni() - 1.5f) * 0.12f;
+        q->beginChangeGesture();
+        q->setValueNotifyingHost (juce::jlimit (0.0f, 1.0f, n));
+        q->endChangeGesture();
+        return;
+    }
+    // the page's musical randomizer runs on a hidden copy; only this one value is taken
+    Page page = Synth;
+    bool found = false;
+    for (auto pg : { Synth, Fx, Arp, Chords, Matrix, Chaos, Analog, Settings })
+        if (isPageParam (pg, id)) { page = pg; found = true; break; }
+    auto& shadow = p.getRandomShadow();
+    for (auto* ap : p.getParameters())
+        if (auto* src = dynamic_cast<juce::RangedAudioParameter*> (ap))
+            if (auto* t = shadow.apvts.getParameter (src->getParameterID())) t->setValueNotifyingHost (src->getValue());
+    if (found) randomize (shadow, page, false, seed);
+    auto* t = shadow.apvts.getParameter (id);
+    float n = t != nullptr ? t->getValue() : q->getValue();
+    if (! found || std::abs (n - q->getValue()) < 1.0e-6f)
+    {   // the page left it alone (or it is not on a page): any value in range
+        juce::Random rnd ((juce::int64) seed);
+        n = rnd.nextFloat();
+    }
+    q->beginChangeGesture();
+    q->setValueNotifyingHost (n);
+    q->endChangeGesture();
 }
 
 void randomizeGlitch (PyraAudioProcessor& p, uint32_t seed)

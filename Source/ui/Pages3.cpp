@@ -1,5 +1,6 @@
 // Phase 3 pages: FX, ANALOG, ARP
 #include "Pages.h"
+#include "Prefs.h"
 #include "PyraLookAndFeel.h"
 #include "HellArt.h"
 #include "../Lang.h"
@@ -544,9 +545,10 @@ namespace
             time += dt;
             const float sig = age->load() + drift->load() * 3.1f + spread->load() * 5.3f + tolerance->load() * 7.7f + circuit->load() * 11.0f
                               + noiseAmt->load() * 13.0f + hum->load() * 17.0f + humFreq->load() * 19.0f + bits->load() * 23.0f + rate->load() * 29.0f;
-            const bool animated = (kind == Movement && (drift->load() + spread->load()) > 0.01f)
+            bool animated = (kind == Movement && (drift->load() + spread->load()) > 0.01f)
                                   || (kind == Noise && (noiseAmt->load() + hum->load()) > 0.01f)
                                   || (kind == Circuit && circuit->load() > 0.01f);
+            if (prefs::get (prefs::Animations) == 0) animated = false;
             if (std::abs (sig - lastSig) > 1.0e-4f || animated) { lastSig = sig; repaint(); return true; }
             return false;
         }
@@ -975,7 +977,7 @@ namespace
                         g.setGradientFill (juce::ColourGradient (juce::Colour (0xffff9a5a).withMultipliedAlpha (a), 0.0f, bb.getY(),
                                                                  juce::Colour (0xff8a0c06).withMultipliedAlpha (a), 0.0f, bb.getBottom(), false));
                     else
-                        g.setGradientFill (juce::ColourGradient (juce::Colour (0xffcdbfb7).withMultipliedAlpha (a * 0.9f), 0.0f, bb.getY(),
+                        g.setGradientFill (juce::ColourGradient (juce::Colour (0xffa99b93).withMultipliedAlpha (a * 0.9f), 0.0f, bb.getY(),
                                                                  juce::Colour (0xff3e322e).withMultipliedAlpha (a), 0.0f, bb.getBottom(), false));
                     g.fillRect (bar);
                     g.setColour ((rr == RVel ? juce::Colour (0xffffd0b0) : juce::Colour (0xfff0e6df)).withMultipliedAlpha (a * 0.9f));
@@ -1144,12 +1146,36 @@ namespace
             randomBtn.setButtonText (tr ("RANDOM"));
             clearBtn.setButtonText (tr ("CLEAR"));
             unlockBtn.setButtonText (tr ("UNLOCK ALL"));
-            randomBtn.setTooltip (tr ("New random pattern. Locked steps stay as they are."));
+            randomBtn.setTooltip (tr ("New random pattern of steps. Locked steps stay as they are."));
             randomBtn.setColour (juce::TextButton::buttonColourId, colours::accent.darker (0.3f));
 
             auto* pr = &ui.proc;
+            top.addAndMakeVisible (randomAllBtn);
+            randomAllBtn.setButtonText (tr ("RANDOM ALL"));
+            randomAllBtn.setColour (juce::TextButton::buttonColourId, colours::hot.darker (0.4f));
+            randomAllBtn.setTooltip (tr ("New values for every ARP control (mode, rate, scale, key, octaves, gate, swing, steps) and a new pattern"));
+            randomAllBtn.onClick = [pr]
+            {
+                if (auto& hook = userActivityHook()) hook();
+                randomizer::randomize (*pr, randomizer::Arp, false, (uint32_t) juce::Random::getSystemRandom().nextInt());
+            };
+            // a small die next to every control: rolls just that one
+            const std::pair<juce::Component*, const char*> diceFor[] = { { mode, "arp_mode" }, { rate, "arp_rate" }, { scale, "arp_scale" },
+                { key, "arp_key" }, { oct, "arp_oct" }, { gate, "arp_gate" }, { swing, "arp_swing" }, { stepsK, "arp_steps" }, { vel, "arp_velamt" } };
+            for (auto& [comp, id] : diceFor)
+            {
+                auto* d = dice.add (new DiceButton());
+                d->setTooltip (tr ("Random value for this control only (right-click: small change)"));
+                d->onRoll = [pr, pid = juce::String (id)] (bool variation)
+                {
+                    randomizer::randomizeParam (*pr, pid, variation, (uint32_t) juce::Random::getSystemRandom().nextInt());
+                };
+                top.addAndMakeVisible (d);
+                diceTargets.add (comp);
+            }
             randomBtn.onClick = [pr]
             {
+                if (auto& hook = userActivityHook()) hook();
                 const int n = (int) std::lround (pr->apvts.getRawParameterValue ("arp_steps")->load());
                 pr->arpPattern.randomize (n, (uint32_t) juce::Random::getSystemRandom().nextInt());
                 // the random pattern is a melody: switch to Sequencer mode if a plain mode is selected
@@ -1189,15 +1215,22 @@ namespace
 
             on->setBounds (14, 34, 100, 26);
             latch->setBounds (14, 72, 100, 26);
-            mode->setBounds (126, 46, 130, 24);
-            rate->setBounds (266, 46, 90, 24);
-            scale->setBounds (126, 94, 130, 24);
-            key->setBounds (266, 94, 90, 24);
-            layoutGrid ({ oct, gate, swing, stepsK, vel }, { 370, 30, 420, 92 }, 5, 92);
-            randomBtn.setBounds (812, 34, 130, 38);
-            clearBtn.setBounds (952, 34, 96, 38);
-            unlockBtn.setBounds (1058, 34, 120, 38);
-            midiDrag.setBounds (812, 80, 366, 36);
+            mode->setBounds (122, 46, 122, 24);
+            rate->setBounds (274, 46, 84, 24);
+            scale->setBounds (122, 94, 122, 24);
+            key->setBounds (274, 94, 84, 24);
+            layoutGrid ({ oct, gate, swing, stepsK, vel }, { 392, 30, 410, 92 }, 5, 92);
+            for (int i = 0; i < dice.size(); ++i)
+            {
+                auto b = diceTargets[i]->getBounds();
+                if (dynamic_cast<Knob*> (diceTargets[i]) != nullptr) dice[i]->setBounds (b.getRight() - 22, b.getY() - 2, 20, 18);
+                else dice[i]->setBounds (b.getRight() + 4, b.getY() + 3, 20, 18);
+            }
+            randomBtn.setBounds (812, 34, 108, 38);
+            randomAllBtn.setBounds (926, 34, 150, 38);
+            clearBtn.setBounds (1082, 34, 92, 38);
+            midiDrag.setBounds (812, 80, 262, 36);
+            unlockBtn.setBounds (1082, 80, 160, 36);
         }
 
         void tick() override { editor.tick(); }
@@ -1209,7 +1242,9 @@ namespace
         ParamToggle* on, *latch;
         ParamCombo* mode, *rate, *scale, *key;
         Knob* oct, *gate, *swing, *stepsK, *vel;
-        juce::TextButton randomBtn, clearBtn, unlockBtn;
+        juce::TextButton randomBtn, randomAllBtn, clearBtn, unlockBtn;
+        juce::OwnedArray<DiceButton> dice;
+        juce::Array<juce::Component*> diceTargets;
     };
 }
 

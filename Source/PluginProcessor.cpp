@@ -52,16 +52,8 @@ void PyraAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     // notes played on the on-screen keyboard
     keyboardState.processNextMidiBuffer (midi, 0, buffer.getNumSamples(), true);
 
-    // LAYERS: keep what came in for the other layers; layer A (this sound) gets its own key / velocity / channel zone
-    if (! isLayerChild)
-    {
-        layerInput.clear();
-        layerInput.addEvents (midi, 0, buffer.getNumSamples(), 0);
-        routeLayerMidi (0, layerInput, layerMidi);
-        midi.swapWith (layerMidi);
-    }
-
     refs.fill (settings);
+    for (int k = 0; k < pyra::kNumLfo; ++k) settings.lfo[k].drawn = &lfoDrawn.lfo[(size_t) k];
 
     pyra::HostInfo host;
     if (auto* ph = getPlayHead())
@@ -71,10 +63,22 @@ void PyraAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
             if (auto ppq = pos->getPpqPosition()) { host.ppq = *ppq; host.ppqValid = true; }
             host.playing = pos->getIsPlaying();
         }
-
     hostBpm = host.bpm;
-    chords.process (midi, buffer.getNumSamples(), host);   // chords first, so the ARP can arpeggiate them
-    arp.process (midi, buffer.getNumSamples(), host);
+
+    // CHORDS first, so the ARP can arpeggiate them. In a layer, its own CHORDS / ARP only run when the
+    // main sound's ones are off (the main CHORDS / ARP already shaped the notes the layer receives).
+    if (! (isLayerChild && parentChordsOn.load())) chords.process (midi, buffer.getNumSamples(), host);
+    if (! (isLayerChild && parentArpOn.load()))    arp.process (midi, buffer.getNumSamples(), host);
+
+    // LAYERS: every layer gets the notes after CHORDS and ARP; layer A (this sound) gets its own key / velocity / channel zone
+    if (! isLayerChild)
+    {
+        layerInput.clear();
+        layerInput.addEvents (midi, 0, buffer.getNumSamples(), 0);
+        routeLayerMidi (0, layerInput, layerMidi);
+        midi.swapWith (layerMidi);
+    }
+
     const float masterGain = settings.masterGain;
     settings.masterGain = 1.0f;   // the output volume is applied after the FX chain (below)
     engine.process (buffer, midi, settings, host);

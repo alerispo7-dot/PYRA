@@ -200,6 +200,8 @@ void PyraAudioProcessor::mixLayers (juce::AudioBuffer<float>& out, const juce::M
         juce::AudioBuffer<float> view (layerBuf.getArrayOfWritePointers(), 2, n);
         view.clear();
         child->setPlayHead (getPlayHead());
+        child->parentChordsOn.store (apvts.getRawParameterValue ("chord_on")->load() > 0.5f);
+        child->parentArpOn.store (apvts.getRawParameterValue ("arp_on")->load() > 0.5f);
         child->processBlock (view, layerMidi);
 
         float gl, gr;
@@ -238,11 +240,12 @@ juce::ValueTree PyraAudioProcessor::captureState (bool withLayers)
 {
     auto state = apvts.copyState();
     state.setProperty ("pyraVersion", JucePlugin_VersionString, nullptr);
-    for (auto* name : { "ARP_PATTERN", "CHORD_PATTERN", "GLITCH_PATTERN", "LAYERS" })
+    for (auto* name : { "ARP_PATTERN", "CHORD_PATTERN", "GLITCH_PATTERN", "LFO_DRAWN", "LAYERS" })
         state.removeChild (state.getChildWithName (name), nullptr);
     state.appendChild (arpPattern.toTree(), nullptr);
     state.appendChild (chordPattern.toTree(), nullptr);
     state.appendChild (glitchPattern.toTree(), nullptr);
+    state.appendChild (lfoDrawn.toTree(), nullptr);
     state.setProperty ("presetId", presetId, nullptr);
     state.setProperty ("presetName", presetName, nullptr);
 
@@ -270,6 +273,7 @@ void PyraAudioProcessor::restoreState (const juce::ValueTree& source)
     arpPattern.fromTree (tree.getChildWithName ("ARP_PATTERN"));
     chordPattern.fromTree (tree.getChildWithName ("CHORD_PATTERN"));
     glitchPattern.fromTree (tree.getChildWithName ("GLITCH_PATTERN"));
+    lfoDrawn.fromTree (tree.getChildWithName ("LFO_DRAWN"));
     presetId = tree.getProperty ("presetId").toString();
     presetName = tree.getProperty ("presetName", "Init").toString();
     apvts.replaceState (tree);

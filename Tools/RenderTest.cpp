@@ -142,7 +142,11 @@ static void snapshots (pyra::lang::Language language, const juce::String& suffix
     juce::Array<juce::TextButton*> tabs;
     for (auto* c : root->getChildren())
         if (auto* b = dynamic_cast<juce::TextButton*> (c))
-            if (b->getButtonText() != "EN" && b->getButtonText() != "IT") tabs.add (b);
+        {
+            bool isLang = false;
+            for (int l = 0; l < pyra::lang::NumLanguages; ++l) isLang = isLang || b->getButtonText() == pyra::lang::code ((pyra::lang::Language) l);
+            if (! isLang) tabs.add (b);
+        }
 
     for (int i = 0; i < tabs.size(); ++i)
     {
@@ -373,10 +377,22 @@ int main (int argc, char** argv)
         if (argc > 4) { audition = juce::File (argv[4]); audition.createDirectory(); }
         return normalizeBank (juce::File (argv[2]), juce::File (argv[3]), audition);
     }
+    if (argc > 1 && juce::String (argv[1]) == "--params")
+    {
+        PyraAudioProcessor p;
+        for (auto* ap : p.getParameters())
+            if (auto* r = dynamic_cast<juce::RangedAudioParameter*> (ap))
+                std::printf ("%s\t%s\n", r->getParameterID().toRawUTF8(), r->getName (100).toRawUTF8());
+        return 0;
+    }
     if (argc > 1 && juce::String (argv[1]) == "--ui")
     {
         snapshots (pyra::lang::English, "_en");
         snapshots (pyra::lang::Italian, "_it");
+        snapshots (pyra::lang::Spanish, "_es");
+        snapshots (pyra::lang::French, "_fr");
+        snapshots (pyra::lang::German, "_de");
+        snapshots (pyra::lang::Portuguese, "_pt");
         pyra::lang::set (pyra::lang::English);
         return 0;
     }
@@ -594,7 +610,7 @@ int main (int argc, char** argv)
             set (p, "smp_on", 1); set (p, "smp_inst", (float) k);
             set (p, "env1_rel", 0.4f);
             bank.acquire (k);
-            for (int w = 0; w < 400 && bank.getStatus (k) != SampleBank::Ready && bank.getStatus (k) != SampleBank::Failed; ++w)
+            for (int w = 0; w < 3000 && bank.getStatus (k) != SampleBank::Ready && bank.getStatus (k) != SampleBank::Failed; ++w)
                 juce::Thread::sleep (10);
             render (p, "50_sample_" + SampleBank::ids()[k], 4.0, chord (0.0, 3.0, { 48, 55, 60, 64 }));
         }
@@ -1137,6 +1153,87 @@ int main (int argc, char** argv)
                 ok3 = ok3 && rr.peak > 0.001f;
                 if (! ok3) ++failures;
                 std::printf ("  %-26s %s (%d layers on after RANDOM)\n", "76_layers_state", ok3 ? "ok" : "FAIL", onCount);
+            }
+        }
+
+        // the layers follow the CHORDS (and ARP) of the main sound
+        {
+            PyraAudioProcessor m;
+            resetAll (m);
+            auto& b = m.getOrCreateLayer (1);
+            resetAll (b);
+            set (m, layerParam (1, "on"), 1);
+            set (m, "chord_on", 1);
+            m.prepareToPlay (kSr, kBlock);
+            juce::AudioBuffer<float> buf (2, kBlock);
+            juce::MidiBuffer mid;
+            mid.addEvent (juce::MidiMessage::noteOn (1, 60, 0.8f), 0);
+            int maxB = 0;
+            for (int i = 0; i < 200; ++i) { m.processBlock (buf, mid); mid.clear(); maxB = std::max (maxB, b.engine.uiVoices.load()); }
+            const bool okc = maxB >= 3;
+            set (m, "chord_on", 0); set (m, "arp_on", 1);
+            mid.addEvent (juce::MidiMessage::noteOff (1, 60), 0);
+            for (int i = 0; i < 50; ++i) { m.processBlock (buf, mid); mid.clear(); }
+            mid.addEvent (juce::MidiMessage::noteOn (1, 60, 0.8f), 0);
+            mid.addEvent (juce::MidiMessage::noteOn (1, 64, 0.8f), 0);
+            mid.addEvent (juce::MidiMessage::noteOn (1, 67, 0.8f), 0);
+            int changes = 0, last = -1;
+            for (int i = 0; i < 400; ++i)
+            {
+                m.processBlock (buf, mid); mid.clear();
+                const int v = b.engine.uiVoices.load();
+                if (v != last) { ++changes; last = v; }
+            }
+            const bool oka = changes >= 4 && b.apvts.getRawParameterValue ("arp_on")->load() < 0.5f;
+            if (! (okc && oka)) ++failures;
+            std::printf ("  %-26s %s (layer B voices with CHORDS: %d, ARP changes: %d)\n", "77_layers_follow", okc && oka ? "ok" : "FAIL", maxB, changes);
+        }
+
+        // every wavetable: finite, loud enough, never clipping
+        {
+            const auto& bank = Wavetables::get();
+            bool okw = bank.size() == Wavetables::names().size() && Wavetables::categoryOfEach().size() == bank.size();
+            int bad = 0;
+            for (int t = 0; t < bank.size(); ++t)
+            {
+                const auto& tab = bank.table (t);
+                for (int f = 0; f < tab.numFrames; ++f)
+                {
+                    const float* d = tab.level (f, 0);
+                    float pk = 0.0f;
+                    for (int i = 0; i < Wavetables::kBaseLen; ++i) { if (! std::isfinite (d[i])) pk = 99.0f; pk = std::max (pk, std::abs (d[i])); }
+                    if (pk < 0.3f || pk > 1.01f) { ++bad; if (bad < 6) std::printf ("    table %s frame %d peak %.3f\n", tab.name.toRawUTF8(), f, pk); }
+                }
+                if (! Wavetables::categories().contains (Wavetables::categoryOfEach()[t])) okw = false;
+            }
+            okw = okw && bad == 0;
+            if (! okw) ++failures;
+            std::printf ("  %-26s %s (%d tables)\n", "78_wavetables", okw ? "ok" : "FAIL", bank.size());
+        }
+
+        // new sub shapes, noise types and LFO shapes all make sound
+        {
+            for (int sh = 0; sh < choices::subShapes().size(); ++sh)
+            {
+                resetAll (p);
+                set (p, pid::osc (0, "on"), 0); set (p, "sub_on", 1); set (p, "sub_shape", (float) sh); set (p, "sub_level", 0.8f);
+                render (p, "79_sub_" + juce::String (sh).paddedLeft ('0', 2) + "_" + choices::subShapes()[sh].removeCharacters (" %+-"), 0.4,
+                        chord (0.0, 0.3, { 48 }));
+            }
+            for (int nt = 0; nt < choices::noiseTypes().size(); ++nt)
+            {
+                resetAll (p);
+                set (p, pid::osc (0, "on"), 0); set (p, "noise_on", 1); set (p, "noise_type", (float) nt); set (p, "noise_level", 0.8f);
+                render (p, "80_noise_" + juce::String (nt).paddedLeft ('0', 2) + "_" + choices::noiseTypes()[nt].removeCharacters (" -"), 1.5,
+                        chord (0.0, 1.4, { 60 }));
+            }
+            for (int ls = 0; ls < choices::lfoShapes().size(); ++ls)
+            {
+                resetAll (p);
+                set (p, "f1_cutoff", 800); set (p, "mod1_src", SrcLfo1); set (p, "mod1_dst", dFilt (0, FCutoff)); set (p, "mod1_amt", 0.4f);
+                set (p, "lfo1_shape", (float) ls); set (p, "lfo1_sync", 0); set (p, "lfo1_rate", 3.0f);
+                render (p, "81_lfo_" + juce::String (ls).paddedLeft ('0', 2) + "_" + choices::lfoShapes()[ls].removeCharacters (" %+-/()&"), 0.8,
+                        chord (0.0, 0.7, { 48 }));
             }
         }
     }

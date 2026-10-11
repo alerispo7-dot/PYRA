@@ -408,9 +408,12 @@ namespace
     {
     public:
         LayersPage (PyraAudioProcessor& m, std::function<void (int)> onEdit, std::function<int()> editing)
-            : panel (tr ("LAYERS"))
+            : panel (tr ("LAYERS")), link (m.apvts, "layer_link", tr ("LINK KNOBS"))
         {
             addAndMakeVisible (panel);
+            panel.addAndMakeVisible (link);
+            link.setTooltip (tr ("On: moving a knob moves the same knob on every layer that is on, so the whole layered sound changes together. "
+                                 "Off: each layer is edited on its own (EDIT)."));
             for (int k = 0; k < kNumLayers; ++k)
                 panel.addAndMakeVisible (rows.add (new LayerRow (m, k, onEdit, editing)));
             panel.tint = colours::accent;
@@ -424,16 +427,17 @@ namespace
         void paintOverChildren (juce::Graphics& g) override
         {
             // the hint in the header of the panel
-            auto hb = panel.getBounds().removeFromTop (Panel::headerH).withTrimmedLeft (130).withTrimmedRight (14);
+            auto hb = panel.getBounds().removeFromTop (Panel::headerH).withTrimmedLeft (130).withTrimmedRight (170);
             g.setColour (colours::textDim);
             g.setFont (PyraLookAndFeel::font (12.0f));
-            g.drawText (tr ("Up to 8 complete sounds in one PYRA. Each layer has its own preset, FX, ARP and CHORDS: EDIT opens it in every page."),
+            g.drawText (tr ("Up to 8 complete sounds in one PYRA, played together. CHORDS and ARP drive all the layers. EDIT opens a layer in every page."),
                         hb, juce::Justification::centredRight, true);
         }
 
         void resized() override
         {
             panel.setBounds (getLocalBounds().reduced (8, 6));
+            link.setBounds (panel.getWidth() - 160, 3, 150, 20);
             auto area = panel.getLocalBounds().withTrimmedTop (Panel::headerH + 4).reduced (8, 4);
             const int h = area.getHeight() / kNumLayers;
             for (int k = 0; k < rows.size(); ++k)
@@ -442,6 +446,7 @@ namespace
 
     private:
         Panel panel;
+        ParamToggle link;
         juce::OwnedArray<LayerRow> rows;
     };
 }

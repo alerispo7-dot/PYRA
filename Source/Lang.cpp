@@ -10,24 +10,28 @@ namespace lang
     namespace
     {
         const char* aboutEn =
-            "PYRA - wavetable synthesizer\n\n"
-            "Wavetable oscillators, filters, envelopes, LFOs, mod matrix, MPE, 14 effects (including GLITCH, GRANULAR and SHIFTER), "
-            "ANALOG section, ARP, CHORDS generator with emotions, LAYERS (up to 8 sounds in one PYRA), CHAOS / FOCUS / MOTION, "
-            "sampled instruments and 540 presets.\n\n"
+            "PYRA - wavetable synthesizer\n"
+            "\n"
+            "Wavetable oscillators (100+ tables in categories), filters, envelopes, LFOs (you can draw your own), mod matrix, MPE, 14 effects (including GLITCH, GRANULAR and SHIFTER), ANALOG section, ARP, CHORDS generator with emotions, LAYERS (up to 8 sounds in one PYRA), CHAOS / FOCUS / MOTION, sampled instruments and 540 presets.\n"
+            "\n"
             "Quick tips\n"
+            "- Rest the mouse on a control to see what it does (SETTINGS > PERSONALIZE can switch the help off).\n"
             "- Click the number under a knob to type an exact value. Double-click a knob to reset it, right-click for options.\n"
+            "- Drag directly in the screens: envelope points, LFO shape, filter point, wavetable position.\n"
             "- The arrows next to the preset name undo / redo your changes.\n"
             "- RANDOM (next to the arrows) works on the page you are looking at. Right-click it for a small variation.\n"
             "- Drag ENV / LFO / MACRO badges onto knobs to modulate them.\n"
             "- Drag the window corner to resize.";
 
         const char* aboutIt =
-            "PYRA - sintetizzatore wavetable\n\n"
-            "Oscillatori wavetable, filtri, inviluppi, LFO, matrice di modulazione, MPE, 14 effetti (compresi GLITCH, GRANULARE e SHIFTER), "
-            "sezione ANALOG, ARP, generatore di ACCORDI con le emozioni, LAYER (fino a 8 suoni in un solo PYRA), CHAOS / FOCUS / MOTION, "
-            "strumenti campionati e 540 preset.\n\n"
+            "PYRA - sintetizzatore wavetable\n"
+            "\n"
+            "Oscillatori wavetable (oltre 100 tabelle in categorie), filtri, inviluppi, LFO (puoi disegnare i tuoi), matrice di modulazione, MPE, 14 effetti (compresi GLITCH, GRANULARE e SHIFTER), sezione ANALOG, ARP, generatore di ACCORDI con le emozioni, LAYER (fino a 8 suoni in un solo PYRA), CHAOS / FOCUS / MOTION, strumenti campionati e 540 preset.\n"
+            "\n"
             "Consigli rapidi\n"
+            "- Ferma il mouse su un controllo per vedere a cosa serve (in IMPOSTAZIONI > PERSONALIZZA puoi spegnere l'aiuto).\n"
             "- Clicca il numero sotto una manopola per scrivere un valore preciso. Doppio clic per azzerarla, clic destro per le opzioni.\n"
+            "- Trascina direttamente negli schermi: punti dell'inviluppo, forma dell'LFO, punto del filtro, posizione della wavetable.\n"
             "- Le frecce accanto al nome del preset annullano / ripetono le modifiche.\n"
             "- RANDOM (accanto alle frecce) agisce sulla pagina che stai guardando. Clic destro per una piccola variazione.\n"
             "- Trascina i badge ENV / LFO / MACRO sulle manopole per modularle.\n"
@@ -244,7 +248,7 @@ namespace lang
 
         Language& currentLang()
         {
-            static Language l = settings().getIntValue ("language", (int) English) == (int) Italian ? Italian : English;
+            static Language l = (Language) juce::jlimit (0, (int) NumLanguages - 1, settings().getIntValue ("language", (int) English));
             return l;
         }
     }
@@ -266,6 +270,18 @@ namespace lang
 
     Language current() { return currentLang(); }
 
+    juce::String code (Language l)
+    {
+        static const char* c[] = { "EN", "IT", "ES", "FR", "DE", "PT" };
+        return c[juce::jlimit (0, (int) NumLanguages - 1, (int) l)];
+    }
+
+    juce::String nativeName (Language l)
+    {
+        static const char* n[] = { "English", "Italiano", "Espa\xc3\xb1ol", "Fran\xc3\xa7" "ais", "Deutsch", "Portugu\xc3\xaas" };
+        return juce::String::fromUTF8 (n[juce::jlimit (0, (int) NumLanguages - 1, (int) l)]);
+    }
+
     void set (Language l)
     {
         currentLang() = l;
@@ -275,17 +291,32 @@ namespace lang
 
     juce::String tr (const juce::String& english)
     {
+        if ((english == "SAMPLE_CREDITS" || english == "ABOUT_TEXT") && current() != English && current() != Italian)
+        {
+            const auto& t = table (current());
+            auto it = t.find (english);
+            if (it != t.end()) return juce::String::fromUTF8 (it->second);
+        }
         if (english == "SAMPLE_CREDITS")
             return juce::String::fromUTF8 (current() == Italian ? "Gli strumenti campionati di PYRA vengono da due librerie gratuite che ne permettono la distribuzione:\n\nPianoforte a coda: Salamander Grand Piano di Alexander Holm, licenza CC-BY 3.0.\n\nTutti gli altri strumenti: VS Chamber Orchestra: Community Edition di Versilian Studios (Sam Gossner) e Ivy Audio (Simon Dalzell) - vis.versilstudios.net/vsco-community.html\n\nGrazie agli autori. I campioni sono stati adattati per PYRA (tagliati, accordati, messi in loop, bilanciati)." : "PYRA's sampled instruments come from two free libraries that allow redistribution:\n\nGrand Piano: Salamander Grand Piano by Alexander Holm, licensed CC-BY 3.0.\n\nAll other instruments: VS Chamber Orchestra: Community Edition by Versilian Studios (Sam Gossner) and Ivy Audio (Simon Dalzell) - vis.versilstudios.net/vsco-community.html\n\nThank you to the authors. The samples were edited for PYRA (trimmed, tuned, looped, levelled).");
         if (english == "ABOUT_TEXT")
             return juce::String::fromUTF8 (current() == Italian ? aboutIt : aboutEn);
         if (current() == English) return english;
+        if (current() != Italian)
+        {
+            const auto& t = table (current());
+            auto it = t.find (english);
+            return it != t.end() ? juce::String::fromUTF8 (it->second) : english;
+        }
         const auto& m = italian();
         auto it = m.find (english);
         if (it != m.end()) return juce::String::fromUTF8 (it->second);
         const auto& m2 = italianExtra();
         auto it2 = m2.find (english);
-        return it2 != m2.end() ? juce::String::fromUTF8 (it2->second) : english;
+        if (it2 != m2.end()) return juce::String::fromUTF8 (it2->second);
+        const auto& m3 = table (Italian);   // strings added after 0.7
+        auto it3 = m3.find (english);
+        return it3 != m3.end() ? juce::String::fromUTF8 (it3->second) : english;
     }
 }
 }

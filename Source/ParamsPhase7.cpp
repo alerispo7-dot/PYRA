@@ -19,6 +19,9 @@ void addPhase7Parameters (juce::AudioProcessorValueTreeState::ParameterLayout& l
 {
     l.add (std::make_unique<juce::AudioParameterChoice> (juce::ParameterID { "chord_mood", 1 }, "Chords Emotion", chordMoodNames(), 0));
 
+    // LINK: moving a knob moves the same knob on every layer that is on (all layers change together)
+    l.add (std::make_unique<juce::AudioParameterBool> (juce::ParameterID { "layer_link", 1 }, "Layers Link Knobs", true));
+
     auto noteName = [] (int n, int) { return juce::MidiMessage::getMidiNoteName (n, true, true, 3); };
     for (int k = 0; k < kNumLayers; ++k)
     {

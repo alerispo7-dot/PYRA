@@ -104,6 +104,7 @@ public:
         done = false;
         phase = s.phase;
         held = rng.bi(); prev = held; nextVal = rng.bi();
+        drawnNow = s.drawn;
         smoothed = currentShape (s.shape, phase);
         started = true;
     }
@@ -141,6 +142,7 @@ public:
             lastPhase = ph;
         }
 
+        drawnNow = s.drawn;
         float v = currentShape (s.shape, ph);
 
         if (s.smooth > 0.0f)
@@ -162,8 +164,10 @@ public:
 
     float getValue() const noexcept { return out; }
 
-    static float shapeValue (int shape, float p, float held = 0, float prev = 0, float nextV = 0) noexcept
+    static float shapeValue (int shape, float p, float held = 0, float prev = 0, float nextV = 0, const LfoDrawn* drawn = nullptr) noexcept
     {
+        auto fr = [] (float x) { return x - std::floor (x); };
+        auto tri = [] (float x) { return x < 0.25f ? 4.0f * x : (x < 0.75f ? 2.0f - 4.0f * x : 4.0f * x - 4.0f); };
         switch (shape)
         {
             case 0:  return std::sin (kTwoPi * p);
@@ -177,12 +181,41 @@ public:
             case 8:  return 2.0f * (std::exp2 ((1.0f - p) * 4.0f) - 1.0f) / 15.0f - 1.0f;
             case 9:  return held;
             case 10: { const float t = 0.5f - 0.5f * std::cos (kPi * p); return prev + (nextV - prev) * t; }
+            case 11: return 2.0f * std::sin (kPi * p) - 1.0f;                                       // half sine
+            case 12: return p < 0.125f ? 1.0f : -1.0f;                                              // pulse 12%
+            case 13: return std::log2 (1.0f + 15.0f * p) * 0.5f - 1.0f;                             // log up
+            case 14: return std::log2 (1.0f + 15.0f * (1.0f - p)) * 0.5f - 1.0f;                    // log down
+            case 15: return 2.0f * p * p * (3.0f - 2.0f * p) - 1.0f;                                // S-curve up
+            case 16: { const float q = 1.0f - p; return 2.0f * q * q * (3.0f - 2.0f * q) - 1.0f; } // S-curve down
+            case 17: return 2.0f * p * p * p - 1.0f;                                                // swell
+            case 18: return 2.0f * std::exp (-6.0f * p) - 1.0f;                                     // pluck
+            case 19: return std::floor (p * 8.0f) / 3.5f - 1.0f;                                    // stairs 8
+            case 20: { const float s = std::floor (p * 8.0f); return (s < 4.0f ? s : 8.0f - s) * 0.5f - 1.0f; }
+            case 21: return fr (p * 2.0f) < 0.5f ? 1.0f : -1.0f;
+            case 22: return fr (p * 3.0f) < 0.5f ? 1.0f : -1.0f;
+            case 23: return fr (p * 4.0f) < 0.5f ? 1.0f : -1.0f;
+            case 24: return ((int) (p * 16.0f) % 3) == 0 ? 1.0f : -1.0f;                            // dotted gate
+            case 25: { static const int pat[16] = { 1,0,1,1, 0,1,1,0, 1,1,0,1, 0,1,1,1 }; return pat[(int) (p * 16.0f) & 15] ? 1.0f : -1.0f; }
+            case 26: return p < 0.5f ? 1.0f : (fr (p * 16.0f) < 0.5f ? 1.0f : -1.0f);               // stutter
+            case 27: return 2.0f * std::abs (std::sin (kPi * p * 4.0f)) * (1.0f - p) - 1.0f;        // bounce
+            case 28: return -1.0f + 2.0f * std::min (1.0f, std::exp (-std::pow ((p - 0.1f) / 0.03f, 2.0f))
+                                                    + 0.7f * std::exp (-std::pow ((p - 0.28f) / 0.04f, 2.0f)));
+            case 29: return std::sin (kTwoPi * 2.0f * p);
+            case 30: return std::sin (kTwoPi * 3.0f * p);
+            case 31: return std::sin (kTwoPi * 4.0f * p);
+            case 32: return (std::sin (kTwoPi * p) + 0.5f * std::sin (kTwoPi * 3.0f * p)) / 1.25f;
+            case 33: return p < 0.5f ? 2.0f * (1.0f - std::exp (-8.0f * p)) / (1.0f - std::exp (-4.0f)) - 1.0f : 1.0f - 4.0f * (p - 0.5f);
+            case 34: return tri (fr (p * 3.0f));
+            case 35: return std::sin (kTwoPi * 5.0f * p) * std::exp (-4.0f * p);
+            case 36: return 2.0f * (1.0f - std::exp (-5.0f * p)) - 1.0f;                            // sidechain pump
+            case 37: return p < 0.2f ? -1.0f + 2.0f * p / 0.2f : 1.0f - 2.0f * (p - 0.2f) / 0.8f;
+            case kLfoShapeCustom: return drawn != nullptr ? drawn->read (p) : std::sin (kTwoPi * p);
             default: return 0.0f;
         }
     }
 
 private:
-    float currentShape (int shape, float p) const noexcept { return shapeValue (shape, p, held, prev, nextVal); }
+    float currentShape (int shape, float p) const noexcept { return shapeValue (shape, p, held, prev, nextVal, drawnNow); }
 
     void newRandom() noexcept
     {
@@ -194,6 +227,7 @@ private:
     float sr = 44100.0f;
     float phase = 0, traveled = 0, elapsed = 0, out = 0, smoothed = 0, lastPhase = 0;
     float held = 0, prev = 0, nextVal = 0;
+    const LfoDrawn* drawnNow = nullptr;
     bool done = false, started = false;
     Rng rng;
 };

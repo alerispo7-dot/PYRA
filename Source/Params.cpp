@@ -21,11 +21,43 @@ namespace choices
     const juce::StringArray& warpModes()     { static juce::StringArray a { "Off", "Sync", "Bend +", "Bend -", "PWM", "Asym", "Mirror", "Fold", "Quantize" }; return a; }
     const juce::StringArray& fmSources()     { static juce::StringArray a { "Off", "Osc A", "Osc B", "Osc C", "Sub", "Noise" }; return a; }
     const juce::StringArray& routes()        { static juce::StringArray a { "Filter 1", "Filter 2", "Filter 1+2", "Direct" }; return a; }
-    const juce::StringArray& subShapes()     { static juce::StringArray a { "Sine", "Triangle", "Saw", "Square" }; return a; }
-    const juce::StringArray& noiseTypes()    { static juce::StringArray a { "White", "Pink", "Brown", "Crackle", "Digital" }; return a; }
-    const juce::StringArray& filterTypes()   { static juce::StringArray a { "LP 12", "LP 24", "LP Ladder", "HP 12", "HP 24", "BP 12", "BP 24", "Notch", "Peak", "All Pass", "Comb +", "Comb -", "Formant", "Phaser" }; return a; }
+    const juce::StringArray& subShapes()
+    {
+        static juce::StringArray a { "Sine", "Triangle", "Saw", "Square",
+                                     // 0.8 (append only)
+                                     "Pulse 25%", "Pulse 10%", "Rounded Square", "Half Sine", "Full-wave Sine", "Sine + Octave",
+                                     "Sine + Twelfth", "Organ Sub", "Driven Sine", "808 Sub", "Warm Saw", "Soft Triangle" };
+        return a;
+    }
+    const juce::StringArray& noiseTypes()
+    {
+        static juce::StringArray a { "White", "Pink", "Brown", "Crackle", "Digital",
+                                     // 0.8 (append only)
+                                     "Blue", "Violet", "Vinyl", "Tape Hiss", "Breath", "Wind", "Ocean", "Rain", "Fire", "Bit-crushed",
+                                     "Static", "Geiger" };
+        return a;
+    }
+    const juce::StringArray& filterTypes()
+    {
+        static juce::StringArray a { "LP 12", "LP 24", "LP Ladder", "HP 12", "HP 24", "BP 12", "BP 24", "Notch", "Peak", "All Pass", "Comb +",
+                                     "Comb -", "Formant", "Phaser",
+                                     // 0.8 (append only)
+                                     "LP 6", "HP 6", "LP 36", "HP 36", "Notch 24", "Low Shelf", "High Shelf", "Diode LP", "MS-20 LP",
+                                     "Dual BP", "Resonator" };
+        return a;
+    }
     const juce::StringArray& filterRouting() { static juce::StringArray a { "Serial", "Parallel" }; return a; }
-    const juce::StringArray& lfoShapes()     { static juce::StringArray a { "Sine", "Triangle", "Saw Up", "Saw Down", "Square", "Pulse", "Stairs", "Exp Up", "Exp Down", "S&H", "Smooth Random" }; return a; }
+    const juce::StringArray& lfoShapes()
+    {
+        static juce::StringArray a { "Sine", "Triangle", "Saw Up", "Saw Down", "Square", "Pulse", "Stairs", "Exp Up", "Exp Down", "S&H",
+                                     "Smooth Random",
+                                     // 0.8 (append only)
+                                     "Half Sine", "Pulse 12%", "Log Up", "Log Down", "S-Curve Up", "S-Curve Down", "Swell", "Pluck",
+                                     "Stairs 8", "Stairs Up-Down", "Gate 1/2", "Gate 1/3", "Gate 1/4", "Dotted Gate", "Trance Gate",
+                                     "Stutter", "Bounce", "Heartbeat", "Wobble 2x", "Wobble 3x", "Wobble 4x", "Sine + Harmonic",
+                                     "Shark Fin", "Zigzag", "Elastic", "Sidechain Pump", "Triangle Skew", "Custom (drawn)" };
+        return a;
+    }
     const juce::StringArray& lfoModes()      { static juce::StringArray a { "Retrig", "Free", "Envelope" }; return a; }
 
     static const std::pair<const char*, double> kDivs[] = {

@@ -37,6 +37,7 @@ namespace presetdata
         if (patternUsed) obj->setProperty ("arp", steps);
         if (! p.chordPattern.isDefault()) obj->setProperty ("chords", p.chordPattern.toVar());
         if (! p.glitchPattern.isEmpty()) obj->setProperty ("glitch", p.glitchPattern.toVar());
+        if (! p.lfoDrawn.isDefault()) obj->setProperty ("lfoDraw", p.lfoDrawn.toVar());
         return juce::var (obj);
     }
 
@@ -75,6 +76,7 @@ namespace presetdata
 
         if (data.hasProperty ("chords")) p.chordPattern.fromVar (data["chords"]); else p.chordPattern.clear();
         p.glitchPattern.fromVar (data["glitch"]);
+        p.lfoDrawn.fromVar (data["lfoDraw"]);
     }
 }
 

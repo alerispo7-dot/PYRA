@@ -1,6 +1,6 @@
 #pragma once
 
-// Artwork for the PYRA look: cracked dark stone, lava veins, the headphones logo, the PYRA wordmark, the ballroom.
+// Artwork for the PYRA look: cracked dark stone, lava veins, the headphones logo, the PYRA wordmark.
 #include <juce_gui_basics/juce_gui_basics.h>
 
 namespace pyra
@@ -10,7 +10,6 @@ namespace art
     // pictures (embedded)
     const juce::Image& logo();       // horned headphones (transparent)
     const juce::Image& wordmark();   // PYRA in cracked stone (transparent)
-    const juce::Image& ballroom();   // the infernal ballroom (SETTINGS)
     const juce::Image& stone();      // seamless cracked stone, for panels / buttons / knobs
     const juce::Image& lava (int size = 512);   // charcoal stone with glowing lava veins (big knobs)
 

@@ -1,0 +1,170 @@
+340|Quanto gira una manopola per ogni movimento del mouse (Maiusc = ancora più fine)|Cuánto gira una perilla por cada movimiento del ratón (Mayús = aún más fino)|De combien tourne un bouton à chaque mouvement de la souris (Maj = encore plus fin)|Wie weit sich ein Regler pro Mausbewegung dreht (Umschalt = extra fein)|Quanto um botão gira a cada movimento do mouse (Shift = ainda mais fino)
+341|Quanto sono distanti le voci unisono.|Cuánto se separan en afinación las voces unísono.|Écart d'accord entre les voix unisson.|Wie weit die Unisono-Stimmen auseinander gestimmt sind.|Quanto as vozes uníssono se afastam na afinação.
+342|Quanto indietro nel tempo vengono presi i grani.|Cuánto atrás en el tiempo se toman los granos.|D'où, dans le passé, les grains sont pris.|Wie weit zurück in der Zeit die Grains genommen werden.|Quanto para trás no tempo os grãos são tirados.
+343|Quanto piega in giù la rotella del pitch, in semitoni.|Cuánto baja la rueda de pitch, en semitonos.|De combien la molette de pitch descend, en demi-tons.|Wie weit das Pitch-Rad nach unten biegt, in Halbtönen.|Quanto a roda de pitch abaixa, em semitons.
+344|Quanto piega in su la rotella del pitch, in semitoni.|Cuánto sube la rueda de pitch, en semitonos.|De combien la molette de pitch monte, en demi-tons.|Wie weit das Pitch-Rad nach oben biegt, in Halbtönen.|Quanto a roda de pitch sobe, em semitons.
+345|Quanto si muove questo bersaglio.|Cuánto se mueve este destino.|De combien bouge cette cible.|Wie weit sich dieses Ziel bewegt.|Quanto este alvo se move.
+346|=|Qué tan rápido se mueve el caos|Vitesse du chaos|Wie schnell sich das Chaos bewegt|Quão rápido o caos se move
+347|Quanto velocemente si muove il caos.|Qué tan rápido se mueve el caos.|Vitesse à laquelle le chaos bouge.|Wie schnell sich das Chaos bewegt.|Quão rápido o caos se move.
+348|Quanto velocemente il compressore rilascia.|Qué tan rápido suelta el compresor.|Vitesse à laquelle le compresseur relâche.|Wie schnell der Kompressor loslässt.|Quão rápido o compressor solta.
+349|Quanto velocemente il compressore reagisce.|Qué tan rápido reacciona el compresor.|Vitesse de réaction du compresseur.|Wie schnell der Kompressor reagiert.|Quão rápido o compressor reage.
+350|Quanto forte il suono viene spinto nella distorsione.|Cuánto se empuja el sonido hacia la distorsión.|À quel point le son est poussé dans la distorsion.|Wie stark der Klang in die Verzerrung getrieben wird.|Quanto o som é empurrado para a distorção.
+351|=|Cuánto rompe el sonido la parte alta de CHAOS: repeticiones glitch, reverse, tape stop, granos, saltos de octava. A 0 el caos se queda suave.|À quel point le haut du bouton CHAOS casse le son : répétitions glitch, reverse, arrêts de bande, grains, sauts d'octave. À 0 le chaos reste doux.|Wie stark der obere Bereich von CHAOS den Klang zerlegt: Glitch-Wiederholungen, Rückwärts, Bandstopps, Grains, Oktavsprünge. Bei 0 bleibt das Chaos sanft.|Quanto a parte alta do CHAOS quebra o som: repetições glitch, reverse, paradas de fita, grãos, saltos de oitava. Em 0 o caos fica suave.
+352|=|Cuánto dura cada acorde (cada tarjeta puede ser 1/4x, 1/2x, 1x o 2x de esto)|Durée de chaque accord (chaque carte peut valoir 1/4x, 1/2x, 1x ou 2x)|Wie lange jeder Akkord dauert (jede Karte kann 1/4x, 1/2x, 1x oder 2x davon sein)|Quanto dura cada acorde (cada cartão pode ser 1/4x, 1/2x, 1x ou 2x disso)
+353|Quanto dura ogni accordo.|Cuánto dura cada acorde.|Durée de chaque accord.|Wie lange jeder Akkord dauert.|Quanto dura cada acorde.
+354|Quanto deve restare fermo il mouse prima che appaia il riquadro di aiuto|Cuánto tiene que quedarse quieto el ratón antes de que aparezca la ayuda|Combien de temps la souris doit rester immobile avant que la bulle apparaisse|Wie lange die Maus ruhen muss, bis die Hilfe-Blase erscheint|Quanto tempo o mouse precisa ficar parado antes do balão de ajuda aparecer
+355|Quanto a lungo risuona il risonatore.|Cuánto suena el resonador.|Durée de résonance du résonateur.|Wie lange der Resonator nachklingt.|Por quanto tempo o ressonador soa.
+356|Quanto dura la coda del riverbero.|Cuánto dura la cola de la reverb.|Durée de la queue de réverbération.|Wie lange die Hallfahne dauert.|Quanto dura a cauda do reverb.
+357|Di quanti Hz viene spostato il suono (metallico, inarmonico).|Cuántos Hz se desplaza el sonido (metálico, inarmónico).|De combien de Hz le son est décalé (métallique, inharmonique).|Um wie viele Hz der Klang verschoben wird (metallisch, unharmonisch).|Quantos Hz o som é deslocado (metálico, inarmônico).
+358|Quanti accordi ci sono nella progressione.|Cuántos acordes hay en la progresión.|Nombre d'accords dans la progression.|Wie viele Akkorde die Progression hat.|Quantos acordes há na progressão.
+359|=|Cuántos acordes en la progresión|Nombre d'accords dans la progression|Wie viele Akkorde in der Progression|Quantos acordes na progressão
+360|Quanti grani suonano insieme.|Cuántos granos suenan a la vez.|Nombre de grains joués en même temps.|Wie viele Grains gleichzeitig spielen.|Quantos grãos tocam ao mesmo tempo.
+361|Quante note possono suonare contemporaneamente.|Cuántas notas pueden sonar a la vez.|Combien de notes peuvent sonner en même temps.|Wie viele Noten gleichzeitig klingen können.|Quantas notas podem soar ao mesmo tempo.
+362|Quante ottave copre l'arpeggio.|Cuántas octavas cubre el arpegio.|Nombre d'octaves couvertes par l'arpège.|Wie viele Oktaven das Arpeggio umfasst.|Quantas oitavas o arpejo cobre.
+363|=|Cuánto toca el caos la garra: warp, FM, resonancia, drive, distorsión|À quel point le chaos touche le mordant : warp, FM, résonance, drive, distorsion|Wie stark das Chaos den Biss trifft: Warp, FM, Resonanz, Drive, Verzerrung|Quanto o caos toca a agressividade: warp, FM, ressonância, drive, distorção
+364|=|Cuánto toca el caos el espacio: estéreo, anchura, reverb, delay|À quel point le chaos touche l'espace : stéréo, largeur, réverbération, delay|Wie stark das Chaos den Raum trifft: Stereo, Breite, Hall, Delay|Quanto o caos toca o espaço: estéreo, largura, reverb, delay
+365|Quanto l'inviluppo 2 muove il taglio.|Cuánto mueve la envolvente 2 el corte.|De combien l'enveloppe 2 déplace la coupure.|Wie stark Hüllkurve 2 den Cutoff bewegt.|Quanto o envelope 2 move o corte.
+366|Quanto suonare più forte rende il suono più alto.|Cuánto sube el volumen al tocar más fuerte.|À quel point jouer plus fort rend le son plus fort.|Wie viel lauter der Klang wird, wenn du härter spielst.|Quanto tocar mais forte deixa o som mais alto.
+367|Quanto il caos muove il suono nello spazio stereo e negli effetti.|Cuánto mueve el caos el sonido en el espacio estéreo y en los efectos.|À quel point le chaos déplace le son dans l'espace stéréo et les effets.|Wie stark das Chaos den Klang im Stereoraum und in den Effekten bewegt.|Quanto o caos move o som no espaço estéreo e nos efeitos.
+368|Quanto le velocity degli step cambiano il volume.|Cuánto cambian el volumen las velocidades de los pasos.|À quel point les vélocités des pas changent le volume.|Wie stark die Step-Velocities die Lautstärke ändern.|Quanto as velocidades dos passos mudam o volume.
+369|Quanto la velocity passa tra registrazioni piano e forte.|Cuánto cambia la velocidad entre grabaciones suaves y fuertes.|À quel point la vélocité passe d'enregistrements doux à forts.|Wie stark die Anschlagstärke zwischen leisen und lauten Aufnahmen wechselt.|Quanto a velocidade alterna entre gravações suaves e fortes.
+370|=|Cuánto elige tu fuerza al tocar las grabaciones suaves o fuertes|À quel point votre force de jeu choisit les enregistrements doux ou forts|Wie stark deine Anschlagstärke leise oder laute Aufnahmen wählt|Quanto a força com que você toca escolhe as gravações suaves ou fortes
+371|Quanto, e in che direzione, la sorgente muove la destinazione.|Cuánto, y en qué dirección, la fuente mueve el destino.|De combien, et dans quel sens, la source déplace la destination.|Wie stark und in welche Richtung die Quelle das Ziel bewegt.|Quanto, e em que direção, a fonte move o destino.
+372|Quanto sono bruschi i salti del caos.|Qué tan bruscos son los saltos del caos.|Netteté des sauts du chaos.|Wie scharf die Sprünge des Chaos sind.|Quão bruscos são os saltos do caos.
+373|Quanto vengono abbassate le parti forti.|Cuánto se bajan las partes fuertes.|À quel point les passages forts sont baissés.|Wie stark laute Stellen abgesenkt werden.|Quanto as partes fortes são abaixadas.
+374|=|Cómo se tocan los acordes: sostenidos, pulsantes, a contratiempo, sincopados...|Comment les accords sont joués : tenus, pulsés, à contretemps, syncopés...|Wie die Akkorde gespielt werden: gehalten, pulsierend, Offbeats, synkopiert...|Como os acordes são tocados: sustentados, pulsantes, no contratempo, sincopados...
+375|Come vengono suonati gli accordi: tenuti, pulsanti, in levare...|Cómo se tocan los acordes: sostenidos, pulsantes, a contratiempo...|Comment les accords sont joués : tenus, pulsés, à contretemps...|Wie die Akkorde gespielt werden: gehalten, pulsierend, Offbeats...|Como os acordes são tocados: sustentados, pulsantes, no contratempo...
+376|Come cresce il movimento lungo la manopola (partenza dolce o rapida).|Cómo crece el movimiento a lo largo de la perilla (inicio suave o rápido).|Comment le mouvement croît le long du bouton (départ doux ou rapide).|Wie die Bewegung über den Regler wächst (sanfter oder schneller Anfang).|Como o movimento cresce ao longo do botão (início suave ou rápido).
+377|=|Cómo se reparten las notas: juntas o separadas|Répartition des notes : serrées ou écartées|Wie die Noten verteilt sind: eng oder weit|Como as notas se espalham: juntas ou afastadas
+378|Come sono distribuite le note: vicine o larghe.|Cómo se reparten las notas: juntas o separadas.|Répartition des notes : serrées ou écartées.|Wie die Noten verteilt sind: eng zusammen oder weit auseinander.|Como as notas se espalham: juntas ou afastadas.
+379|Quanto diventa selvaggio CHAOS verso l'alto: glitch, grani, reverse.|Qué tan salvaje se vuelve CHAOS arriba: glitches, granos, reversos.|À quel point CHAOS devient sauvage en haut : glitches, grains, inversions.|Wie wild CHAOS oben wird: Glitches, Grains, Rückwärts.|Quão selvagem o CHAOS fica no alto: glitches, grãos, reversos.
+380|Come giri una manopola con il mouse|Cómo giras una perilla con el ratón|Comment tourner un bouton à la souris|Wie du einen Regler mit der Maus drehst|Como você gira um botão com o mouse
+381|=|Zumbido|Ronflement|Brummen|Zumbido
+382|=|Humanizar|Humaniser|Humanisieren|Humanizar
+383|=|Menor húngara|Mineure hongroise|Ungarisch Moll|Menor húngara
+384|=|INIT (sonido vacío)|INIT (son vide)|INIT (leerer Klang)|INIT (som vazio)
+385|=|INSTRUMENTOS|INSTRUMENTS|INSTRUMENTE|INSTRUMENTOS
+386|Strumenti|Instrumentos|Instruments|Instrumente|Instrumentos
+387|=|Inversión|Renversement|Umkehrung|Inversão
+388|Rivolto: Smooth sceglie quello più vicino all'accordo precedente.|Inversión: Smooth elige la más cercana al acorde anterior.|Renversement : Smooth choisit le plus proche de l'accord précédent.|Umkehrung: Smooth wählt die, die dem vorigen Akkord am nächsten ist.|Inversão: Smooth escolhe a mais próxima do acorde anterior.
+389|=|Jazz|Jazzy|Jazzig|Jazz
+390|=|ZONA DE TECLAS|ZONE DE TOUCHES|TASTENZONE|ZONA DE TECLAS
+391|=|TECLADOS|CLAVIERS|TASTEN|TECLADOS
+392|Continua a suonare dopo che lasci i tasti.|Sigue sonando al soltar las teclas.|Continue à jouer quand vous relâchez les touches.|Spielt weiter, wenn du die Tasten loslässt.|Continua tocando quando você solta as teclas.
+393|=|Tónica|Tonique|Grundton|Tônica
+394|=|Seguimiento de tecla|Suivi de clavier|Key-Tracking|Acompanhamento de tecla
+395|Tonalità della progressione.|Tonalidad de la progresión.|Tonalité de la progression.|Tonart der Progression.|Tonalidade da progressão.
+396|Tonica della scala.|Tónica de la escala.|Tonique de la gamme.|Grundton der Skala.|Tônica da escala.
+397|Key tracking: le note più alte aprono di più il filtro.|Seguimiento de tecla: las notas más agudas abren más el filtro.|Suivi de clavier : les notes aiguës ouvrent davantage le filtre.|Key-Tracking: höhere Noten öffnen den Filter mehr.|Acompanhamento de tecla: notas mais agudas abrem mais o filtro.
+398|=|Zona de teclas: la capa suena solo entre estas teclas. Arrastra los extremos o el centro. Doble clic: todo el teclado.|Zone de touches : la couche ne joue qu'entre ces touches. Glissez les bords ou le milieu. Double-clic : tout le clavier.|Tastenzone: Die Ebene spielt nur zwischen diesen Tasten. Zieh die Enden oder die Mitte. Doppelklick: ganze Tastatur.|Zona de teclas: a camada só toca entre estas teclas. Arraste as pontas ou o meio. Duplo clique: teclado inteiro.
+399|=|Teclados|Claviers|Tasten|Teclados
+400|Tipo di distorsione: soft o hard clip, valvola, fold, bitcrush...|Tipo de distorsión: recorte suave o duro, válvula, pliegue, bitcrush...|Type de distorsion : écrêtage doux ou dur, lampe, repli, bitcrush...|Art der Verzerrung: weiches oder hartes Clipping, Röhre, Falten, Bitcrush...|Tipo de distorção: corte suave ou duro, válvula, dobra, bitcrush...
+401|Tipo di movimento: pump, gate, sweep, wobble, auto-pan...|Tipo de movimiento: bombeo, gate, barrido, wobble, auto-pan...|Type de mouvement : pompage, gate, balayage, wobble, auto-pan...|Art der Bewegung: Pumpen, Gate, Sweep, Wobble, Auto-Pan...|Tipo de movimento: bombeamento, gate, varredura, wobble, auto-pan...
+402|Tipo di rumore: colori, texture (vinile, vento, pioggia...) o digitale.|Tipo de ruido: colores, texturas (vinilo, viento, lluvia...) o digital.|Type de bruit : couleurs, textures (vinyle, vent, pluie...) ou numérique.|Art des Rauschens: Farben, Texturen (Vinyl, Wind, Regen...) oder digital.|Tipo de ruído: cores, texturas (vinil, vento, chuva...) ou digital.
+403|Trascinamento manopole|Arrastre de perillas|Glisser les boutons|Regler ziehen|Arrasto dos botões
+404|Velocità manopole|Velocidad de perillas|Vitesse des boutons|Regler-Tempo|Velocidade dos botões
+405|=|IDIOMA|LANGUE|SPRACHE|IDIOMA
+406|=|CAPA|COUCHE|EBENE|CAMADA
+407|=|CAPAS|COUCHES|EBENEN|CAMADAS
+408|*
+409|*
+410|*
+411|*
+412|Forma dell'LFO, divisa in categorie. Per disegnarne una tua, disegna direttamente nello schermo.|Forma del LFO, ordenada en categorías. Para dibujar la tuya, dibuja directamente en la pantalla.|Forme du LFO, classée en catégories. Pour dessiner la vôtre, dessinez directement dans l'écran.|LFO-Form, nach Kategorien sortiert. Um deine eigene zu zeichnen, zeichne einfach im Display.|Forma do LFO, separada em categorias. Para desenhar a sua, desenhe direto na tela.
+413|Velocità dell'LFO in Hz (quando Sync è spento).|Velocidad del LFO en Hz (con Sync apagado).|Vitesse du LFO en Hz (Sync éteint).|LFO-Tempo in Hz (wenn Sync aus ist).|Velocidade do LFO em Hz (com Sync desligado).
+414|Velocità dell'LFO in valori di nota (quando Sync è acceso).|Velocidad del LFO en valores de nota (con Sync activo).|Vitesse du LFO en valeurs de note (Sync allumé).|LFO-Tempo in Notenwerten (wenn Sync an ist).|Velocidade do LFO em valores de nota (com Sync ligado).
+415|COLLEGA MANOPOLE|ENLAZAR PERILLAS|LIER LES BOUTONS|REGLER KOPPELN|LIGAR BOTÕES
+416|=|BLOQUEO|VERROU|SPERRE|BLOQUEIO
+417|*
+418|*
+419|*
+420|*
+421|LP Ladder|LP Ladder|LP Ladder|LP Ladder|LP Ladder
+422|Lingua|Idioma|Langue|Sprache|Idioma
+423|Ultima pagina usata|Última página usada|Dernière page utilisée|Zuletzt benutzte Seite|Última página usada
+424|=|Latch|Latch|Latch|Latch
+425|=|Capa|Couche|Ebene|Camada
+426|=|Capa encendida / apagada|Couche allumée / éteinte|Ebene an / aus|Camada ligada / desligada
+427|=|Lead|Lead|Lead|Lead
+428|Posizione sinistra / destra del rumore.|Posición izquierda / derecha del ruido.|Position gauche / droite du bruit.|Links / rechts-Position des Rauschens.|Posição esquerda / direita do ruído.
+429|Posizione sinistra / destra del campione.|Posición izquierda / derecha de la muestra.|Position gauche / droite de l'échantillon.|Links / rechts-Position des Samples.|Posição esquerda / direita da amostra.
+430|Posizione sinistra / destra del sub oscillatore.|Posición izquierda / derecha del suboscilador.|Position gauche / droite du sous-oscillateur.|Links / rechts-Position des Sub-Oszillators.|Posição esquerda / direita do suboscilador.
+431|Posizione sinistra / destra di questo layer.|Posición izquierda / derecha de esta capa.|Position gauche / droite de cette couche.|Links / rechts-Position dieser Ebene.|Posição esquerda / direita desta camada.
+432|Posizione sinistra / destra di questo oscillatore.|Posición izquierda / derecha de este oscilador.|Position gauche / droite de cet oscillateur.|Links / rechts-Position dieses Oszillators.|Posição esquerda / direita deste oscilador.
+433|=|Legato|Legato|Legato|Legato
+434|=|Duración|Durée|Länge|Duração
+435|Durata di ogni colpo dell'accordo.|Duración de cada golpe del acorde.|Durée de chaque frappe d'accord.|Länge jedes Akkordanschlags.|Duração de cada toque do acorde.
+436|Durata di ogni step del glitch.|Duración de cada paso del glitch.|Durée de chaque pas du glitch.|Länge jedes Glitch-Steps.|Duração de cada passo do glitch.
+437|Durata di ogni grano.|Duración de cada grano.|Durée de chaque grain.|Länge jedes Grains.|Duração de cada grão.
+438|Durata di ogni nota (corta = staccato).|Duración de cada nota (corta = staccato).|Durée de chaque note (courte = staccato).|Länge jeder Note (kurz = staccato).|Duração de cada nota (curta = staccato).
+439|=|Duración de un paso|Durée d'un pas|Länge eines Steps|Duração de um passo
+440|Lunghezza del pattern di step.|Longitud del patrón de pasos.|Longueur du motif de pas.|Länge des Step-Patterns.|Comprimento do padrão de passos.
+441|=|Nivel|Niveau|Pegel|Nível
+442|Livello sopra il quale il compressore comincia a lavorare.|Nivel por encima del cual el compresor empieza a actuar.|Niveau au-dessus duquel le compresseur commence à agir.|Pegel, ab dem der Kompressor zu arbeiten beginnt.|Nível acima do qual o compressor começa a agir.
+443|=|Cargando las grabaciones en memoria...|Chargement des enregistrements en mémoire...|Aufnahmen werden in den Speicher geladen...|Carregando as gravações na memória...
+444|=|Bloquea los pasos que te gustan, aleatoriza los demás|Verrouillez les pas qui vous plaisent, rendez les autres aléatoires|Sperre die Steps, die du magst, und würfle die anderen|Bloqueie os passos de que gosta, aleatorize os outros
+445|Aggancia l'LFO al tempo della tua DAW.|Sincroniza el LFO con el tempo de tu DAW.|Cale le LFO sur le tempo de votre DAW.|Koppelt den LFO an das Tempo deiner DAW.|Sincroniza o LFO com o andamento da sua DAW.
+446|Aggancia il tempo del delay al tempo della tua DAW.|Sincroniza el tiempo del delay con el tempo de tu DAW.|Cale le temps du delay sur le tempo de votre DAW.|Koppelt die Delayzeit an das Tempo deiner DAW.|Sincroniza o tempo do delay com o andamento da sua DAW.
+447|=|Locria|Locrien|Lokrisch|Lócria
+448|Log giù|Log abajo|Log bas|Log ab|Log baixo
+449|Log su|Log arriba|Log haut|Log auf|Log cima
+450|=|Solitario|Solitaire|Einsam|Solitário
+451|=|Corte de graves|Coupe-graves|Bass-Cut|Corte de graves
+452|=|Frec. graves|Fréq. graves|Bass-Freq.|Freq. graves
+453|=|Gan. graves|Gain graves|Bass-Gain|Ganho graves
+454|=|Pasa bajos|Passe-bas|Tiefpass|Passa-baixa
+455|Shelving bassi|Shelf graves|Plateau grave|Low-Shelf|Shelf graves
+456|=|Menos bits y frecuencia de muestreo más baja, como los samplers de los 80. No forma parte de AGE.|Moins de bits et fréquence d'échantillonnage plus basse, comme les samplers des années 80. Ne fait pas partie d'AGE.|Weniger Bits und niedrigere Abtastrate, wie Sampler der 80er. Nicht Teil von AGE.|Menos bits e taxa de amostragem mais baixa, como os samplers dos anos 80. Não faz parte do AGE.
+457|Meno bit, come i vecchi campionatori.|Menos bits, como los samplers antiguos.|Moins de bits, comme les vieux samplers.|Weniger Bits, wie alte Sampler.|Menos bits, como samplers antigos.
+458|Frequenza di campionamento più bassa, come i vecchi campionatori (aliasing).|Frecuencia de muestreo más baja, como los samplers antiguos (aliasing).|Fréquence d'échantillonnage plus basse, comme les vieux samplers (repliement).|Niedrigere Abtastrate, wie alte Sampler (Aliasing).|Taxa de amostragem mais baixa, como samplers antigos (aliasing).
+459|Il tasto più basso che questo layer suona.|La tecla más grave que toca esta capa.|La touche la plus basse que joue cette couche.|Die tiefste Taste, die diese Ebene spielt.|A tecla mais grave que esta camada toca.
+460|=|Lidia|Lydien|Lydisch|Lídia
+461|=|EFECTOS PRINCIPALES|EFFETS PRINCIPAUX|HAUPTEFFEKTE|EFEITOS PRINCIPAIS
+462|=|MATRIZ|MATRICE|MATRIX|MATRIZ
+463|=|Canal MIDI que escucha esta capa (Omni = todos)|Canal MIDI qu'écoute cette couche (Omni = tous)|MIDI-Kanal, auf den diese Ebene hört (Omni = alle)|Canal MIDI que esta camada escuta (Omni = todos)
+464|Canale MIDI che questo layer ascolta.|Canal MIDI que escucha esta capa.|Canal MIDI qu'écoute cette couche.|MIDI-Kanal, auf den diese Ebene hört.|Canal MIDI que esta camada escuta.
+465|=|MATRIZ DE MODULACIÓN|MATRICE DE MODULATION|MODULATIONSMATRIX|MATRIZ DE MODULAÇÃO
+466|=|MOVIMIENTO|MOUVEMENT|BEWEGUNG|MOVIMENTO
+467|=|MPE activo|MPE actif|MPE an|MPE ligado
+468|*
+469|=|MIS ETIQUETAS|MES TAGS|MEINE TAGS|MINHAS TAGS
+470|*
+471|*
+472|*
+473|*
+474|Manopola macro: assegnala nella MATRICE (o trascina il suo badge sulle manopole) per muovere tante cose insieme.|Perilla macro: asígnala en la MATRIZ (o arrastra su etiqueta sobre las perillas) para mover muchas cosas a la vez.|Bouton macro : assignez-le dans la MATRICE (ou glissez son badge sur des boutons) pour bouger plusieurs choses à la fois.|Makro-Regler: weise ihn in der MATRIX zu (oder zieh sein Abzeichen auf Regler), um vieles gleichzeitig zu bewegen.|Botão macro: atribua na MATRIZ (ou arraste o selo para os botões) para mover muitas coisas de uma vez.
+475|Ronzio di rete mentre le note suonano.|Zumbido eléctrico mientras suenan las notas.|Ronflement secteur pendant que les notes jouent.|Netzbrummen, während Noten spielen.|Zumbido da rede enquanto as notas tocam.
+476|*
+477|=|Mayor|Majeure|Dur|Maior
+478|=|Pentatónica mayor|Pentatonique majeure|Dur-Pentatonik|Pentatônica maior
+479|=|Ganancia|Gain|Aufholverstärkung|Ganho
+480|=|Mangle|Mangle|Mangle|Mangle
+481|=|Marimba|Marimba|Marimba|Marimba
+482|=|Melancólico|Mélancolique|Melancholisch|Melancólico
+483|=|Menor melódica|Mineure mélodique|Melodisch Moll|Menor melódica
+484|=|Frec. medios|Fréq. médiums|Mitten-Freq.|Freq. médios
+485|=|Gan. medios|Gain médiums|Mitten-Gain|Ganho médios
+486|=|Q medios|Q médiums|Mitten-Q|Q médios
+487|*
+488|=|Menor|Mineure|Moll|Menor
+489|=|Pentatónica menor|Pentatonique mineure|Moll-Pentatonik|Pentatônica menor
+490|Specchio|Espejo|Miroir|Spiegel|Espelho
+491|=|Mezcla|Mix|Mix|Mix
+492|=|Mixto|Mixte|Gemischt|Misto
+493|=|Mixolidia|Mixolydien|Mixolydisch|Mixolídia
+494|=|Rueda de modulación|Molette de modulation|Modulationsrad|Roda de modulação
+495|=|Modo|Mode|Modus|Modo
+496|Sorgente di modulazione (LFO, inviluppo, macro, velocity...).|Fuente de modulación (LFO, envolvente, macro, velocidad...).|Source de modulation (LFO, enveloppe, macro, vélocité...).|Modulationsquelle (LFO, Hüllkurve, Makro, Anschlag...).|Fonte de modulação (LFO, envelope, macro, velocidade...).
+497|=|Mono|Mono|Mono|Mono
+498|=|Más fuentes de modulación: arrástralas sobre una perilla|Plus de sources de modulation : glissez-les sur un bouton|Weitere Modulationsquellen: zieh sie auf einen Regler|Mais fontes de modulação: arraste para um botão
+499|=|Más: INIT, copiar el sonido de otra capa, restablecer la mezcla|Plus : INIT, copier le son d'une autre couche, réinitialiser le mix|Mehr: INIT, Klang einer anderen Ebene kopieren, Mix zurücksetzen|Mais: INIT, copiar o som de outra camada, redefinir a mixagem
+500|=|Motion|Motion|Motion|Motion
+501|Rotella del mouse sulle manopole|Rueda del ratón en las perillas|Molette de la souris sur les boutons|Mausrad auf Reglern|Roda do mouse nos botões
+502|Movimento|Movimiento|Mouvement|Bewegung|Movimento
+503|Sposta gli accordi su o giù di ottave.|Sube o baja los acordes por octavas.|Monte ou descend les accords par octaves.|Verschiebt die Akkorde um Oktaven nach oben oder unten.|Sobe ou desce os acordes em oitavas.
+504|Sposta tutto il suono su o giù in semitoni.|Sube o baja todo el sonido en semitonos.|Monte ou descend tout le son en demi-tons.|Verschiebt den ganzen Klang in Halbtönen nach oben oder unten.|Sobe ou desce todo o som em semitons.
+505|Sposta questo oscillatore su o giù di ottave.|Sube o baja este oscilador por octavas.|Monte ou descend cet oscillateur par octaves.|Verschiebt diesen Oszillator um Oktaven.|Sobe ou desce este oscilador em oitavas.
+506|Sposta questo oscillatore su o giù di semitoni.|Sube o baja este oscilador por semitonos.|Monte ou descend cet oscillateur par demi-tons.|Verschiebt diesen Oszillator um Halbtöne.|Sobe ou desce este oscilador em semitons.
+507|Muovere una manopola muove la stessa manopola su ogni layer acceso.|Mover una perilla mueve la misma perilla en cada capa encendida.|Tourner un bouton tourne le même bouton sur chaque couche allumée.|Ein Regler bewegt denselben Regler auf jeder eingeschalteten Ebene.|Mover um botão move o mesmo botão em cada camada ligada.
+508|Lava che si muove, oscilloscopio e immagini luminose. Spento risparmia un po' di CPU.|Lava en movimiento, osciloscopio e imágenes brillantes. Apagado ahorra un poco de CPU.|Lave qui bouge, oscilloscope et images lumineuses. Éteint, économise un peu de CPU.|Fließende Lava, Oszilloskop und leuchtende Bilder. Aus spart etwas CPU.|Lava em movimento, osciloscópio e imagens brilhantes. Desligado economiza um pouco de CPU.
+509|=|Silencio|Muet|Stumm|Mudo

@@ -48,6 +48,7 @@ public:
     pyra::ChordPattern chordPattern;
     pyra::ChordGenerator chords;
     pyra::GlitchPattern glitchPattern;
+    pyra::LfoDrawnSet lfoDrawn;   // the hand-drawn LFO shapes
     std::atomic<double> hostBpm { 120.0 };
 
     // current preset (message thread only); saved with the project
@@ -69,6 +70,8 @@ public:
     // LAYERS: layer A is this sound; layers B..H are complete PYRA sounds living inside this one
     // (own preset, oscillators, FX, ARP, CHORDS), played by the same MIDI and mixed into the output.
     bool isLayerChild = false;
+    /** Set by the main sound before each block: its CHORDS / ARP are on, so this layer's own stay quiet. */
+    std::atomic<bool> parentChordsOn { false }, parentArpOn { false };
     /** 0 = this processor; 1..7 = the extra layer (nullptr if never used). */
     PyraAudioProcessor* getLayer (int k) const;
     /** Creates the layer the first time it is needed (message thread). */

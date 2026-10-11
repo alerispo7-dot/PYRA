@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(PYRA VERSION 0.7.0 LANGUAGES C CXX)
+project(PYRA VERSION 0.8.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -70,6 +70,10 @@ set(PYRA_SOURCES
     Source/dsp/Samples.cpp
     Source/Lang.cpp
     Source/LangExtra.cpp
+    Source/LangTables.cpp
+    Source/ParamHelp.cpp
+    Source/ParamHelpTable.cpp
+    Source/ui/Prefs.cpp
     Source/dsp/Wavetables.cpp
     Source/dsp/Voice.cpp
     Source/dsp/Engine.cpp
@@ -86,7 +90,7 @@ juce_add_binary_data(PyraData SOURCES Resources/FactoryPresets.json.gz
     Resources/Fonts/Barlow-Medium.ttf Resources/Fonts/Barlow-SemiBold.ttf
     Resources/Fonts/BarlowCondensed-SemiBold.ttf Resources/Fonts/BarlowCondensed-Bold.ttf
     Resources/Fonts/UnifrakturCook-Bold.ttf Resources/Fonts/NewRocker-Regular.ttf
-    Resources/Art/logo.png Resources/Art/wordmark.png Resources/Art/ballroom.jpg
+    Resources/Art/logo.png Resources/Art/wordmark.png
     Resources/Art/stone.jpg Resources/Art/magma.jpg Resources/Art/bg.jpg)
 set_target_properties(PyraData PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
@@ -128,7 +132,7 @@ if(PYRA_BUILD_TESTS)
     target_include_directories(PyraRenderTest PRIVATE Source)
     target_compile_definitions(PyraRenderTest PRIVATE ${PYRA_DEFINITIONS}
         JucePlugin_Name="PYRA" JucePlugin_IsSynth=1 JucePlugin_WantsMidiInput=1
-        JucePlugin_ProducesMidiOutput=0 JucePlugin_IsMidiEffect=0 JucePlugin_VersionString="0.7.0"
+        JucePlugin_ProducesMidiOutput=0 JucePlugin_IsMidiEffect=0 JucePlugin_VersionString="0.8.0"
         JUCE_STANDALONE_APPLICATION=1)
     target_link_libraries(PyraRenderTest PRIVATE
         PyraData juce::juce_audio_utils juce::juce_dsp

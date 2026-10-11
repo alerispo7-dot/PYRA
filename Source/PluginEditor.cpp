@@ -2,13 +2,14 @@
 #include "Lang.h"
 #include "Randomizer.h"
 #include "ui/HellArt.h"
+#include "ui/Prefs.h"
 
 using pyra::lang::tr;
 namespace colours = pyra::colours;
 
 namespace
 {
-    enum PageIndex { PageSynth, PagePresets, PageLayers, PageFx, PageArp, PageChords, PageMatrix, PageChaos, PageAnalog, PageSettings, PageCount };
+    enum PageIndex { PageSynth, PagePresets, PageLayers, PageChords, PageArp, PageFx, PageChaos, PageAnalog, PageMatrix, PageSettings, PageCount };
 }
 
 PyraAudioProcessorEditor::PyraAudioProcessorEditor (PyraAudioProcessor& p)
@@ -21,6 +22,9 @@ PyraAudioProcessorEditor::PyraAudioProcessorEditor (PyraAudioProcessor& p)
     keyboard.setScrollButtonsVisible (false);
     keyboard.setWantsKeyboardFocus (false);
 
+    currentPage = pyra::prefs::get (pyra::prefs::StartPage) == 1 ? 0 : juce::jlimit (0, 9, pyra::lang::settings().getIntValue ("lastPage", 0));
+    prefsSignature = pyra::prefs::get (pyra::prefs::KnobDrag) * 100 + pyra::prefs::get (pyra::prefs::KnobSpeed) * 10
+                     + pyra::prefs::get (pyra::prefs::WheelKnobs) + pyra::prefs::get (pyra::prefs::ShowValues) * 1000;
     buildUi();
 
     setResizable (true, true);
@@ -32,12 +36,16 @@ PyraAudioProcessorEditor::PyraAudioProcessorEditor (PyraAudioProcessor& p)
     setSize (w, juce::roundToInt ((float) w * (float) baseH / (float) baseW));
 
     root.addMouseListener (this, true);
+    pyra::prefs::broadcaster().addChangeListener (this);
+    applyPrefs();
     startTimerHz (30);
 }
 
 PyraAudioProcessorEditor::~PyraAudioProcessorEditor()
 {
     stopTimer();
+    pyra::prefs::broadcaster().removeChangeListener (this);
+    tooltips.reset();
     pyra::userActivityHook() = nullptr;
     root.removeMouseListener (this);
     pages.clear();
@@ -54,10 +62,14 @@ void PyraAudioProcessorEditor::buildUi()
     auto& tgt = target();
     matrix = std::make_unique<pyra::ModMatrixAccess> (tgt.apvts);
     ui.reset (new pyra::UiContext { tgt, tgt.apvts, *matrix, {} });
+    // CHORDS and ARP belong to the whole sound: they always show the main PYRA, whatever layer is being edited
+    masterMatrix = std::make_unique<pyra::ModMatrixAccess> (proc.apvts);
+    masterUi.reset (new pyra::UiContext { proc, proc.apvts, *masterMatrix, {} });
     juce::Component::SafePointer<PyraAudioProcessorEditor> safeEditor (this);
-    pyra::userActivityHook() = [safeEditor] { if (safeEditor != nullptr) safeEditor->target().history.noteUserActivity(); };
+    pyra::userActivityHook() = [safeEditor] { if (safeEditor != nullptr) safeEditor->noteActivity(); };
+    linkSnapshot.clear();
 
-    const juce::StringArray names { "SYNTH", tr ("PRESETS"), tr ("LAYERS"), "FX", "ARP", tr ("CHORDS"), tr ("MATRIX"), "CHAOS", "ANALOG", tr ("SETTINGS") };
+    const juce::StringArray names { "SYNTH", tr ("PRESETS"), tr ("LAYERS"), tr ("CHORDS"), "ARP", "FX", "CHAOS", "ANALOG", tr ("MATRIX"), tr ("SETTINGS") };
     tabNames = names;
     for (int i = 0; i < names.size(); ++i)
     {
@@ -70,13 +82,14 @@ void PyraAudioProcessorEditor::buildUi()
     pages.push_back (pyra::createSynthPage (*ui));
     pages.push_back (pyra::createPresetPage (*ui, presetFilter, [this] { openSaveDialog(); }));
     pages.push_back (pyra::createLayersPage (proc, [this] (int k) { editLayerSound (k); }, [this] { return editLayer; }));
+    pages.push_back (pyra::createChordsPage (*masterUi));
+    pages.push_back (pyra::createArpPage (*masterUi));
     pages.push_back (pyra::createFxPage (*ui));
-    pages.push_back (pyra::createArpPage (*ui));
-    pages.push_back (pyra::createChordsPage (*ui));
-    pages.push_back (pyra::createMatrixPage (*ui));
     pages.push_back (pyra::createChaosPage (*ui));
     pages.push_back (pyra::createAnalogPage (*ui));
-    pages.push_back (pyra::createGlobalPage (*ui, [this] { buildUi(); resized(); }));
+    pages.push_back (pyra::createMatrixPage (*ui));
+    pages.push_back (pyra::createGlobalPage (*ui, [this] { buildUi(); resized(); },
+                                             [this] (float scale) { setSize (juce::roundToInt ((float) baseW * scale), juce::roundToInt ((float) baseH * scale)); }));
 
     for (auto& pg : pages) root.addChildComponent (*pg);
 
@@ -89,15 +102,20 @@ void PyraAudioProcessorEditor::buildUi()
     presetBar->onRandom = [this] (bool variation) { randomizeCurrentPage (variation); };
     root.addAndMakeVisible (*presetBar);
 
-    langButton.setButtonText (pyra::lang::current() == pyra::lang::English ? "EN" : "IT");
-    langButton.setTooltip ("English / Italiano");
+    langButton.setButtonText (pyra::lang::code (pyra::lang::current()));
+    langButton.setTooltip (tr ("Language"));
     juce::Component::SafePointer<PyraAudioProcessorEditor> safeThis (this);
     langButton.onClick = [safeThis]
     {
-        pyra::lang::set (pyra::lang::current() == pyra::lang::English ? pyra::lang::Italian : pyra::lang::English);
-        juce::MessageManager::callAsync ([safe = safeThis]
+        if (safeThis == nullptr) return;
+        juce::PopupMenu menu;
+        for (int l = 0; l < pyra::lang::NumLanguages; ++l)
+            menu.addItem (l + 1, pyra::lang::nativeName ((pyra::lang::Language) l), true, l == (int) pyra::lang::current());
+        menu.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (&safeThis->langButton), [safeThis] (int r)
         {
-            if (safe != nullptr) { safe->buildUi(); safe->resized(); }
+            if (safeThis == nullptr || r <= 0 || r - 1 == (int) pyra::lang::current()) return;
+            pyra::lang::set ((pyra::lang::Language) (r - 1));
+            juce::MessageManager::callAsync ([safe = safeThis] { if (safe != nullptr) { safe->buildUi(); safe->resized(); } });
         });
     };
     root.addAndMakeVisible (langButton);
@@ -154,8 +172,8 @@ void PyraAudioProcessorEditor::randomizeCurrentPage (bool variation)
         case PagePresets:  if (presetBar != nullptr) presetBar->loadRandomPreset(); break;
         case PageLayers:   randomizeLayers (this->proc, variation, seed); break;
         case PageFx:       randomize (proc, Fx, variation, seed); break;
-        case PageArp:      randomize (proc, Arp, variation, seed); break;
-        case PageChords:   randomize (proc, Chords, variation, seed); break;
+        case PageArp:      randomize (this->proc, Arp, variation, seed); break;
+        case PageChords:   randomize (this->proc, Chords, variation, seed); break;
         case PageMatrix:   randomize (proc, Matrix, variation, seed); break;
         case PageChaos:    randomize (proc, Chaos, variation, seed); break;
         case PageAnalog:   randomize (proc, Analog, variation, seed); break;
@@ -164,14 +182,90 @@ void PyraAudioProcessorEditor::randomizeCurrentPage (bool variation)
     }
 }
 
-void PyraAudioProcessorEditor::mouseDown (const juce::MouseEvent&)       { target().history.noteUserActivity(); }
-void PyraAudioProcessorEditor::mouseUp (const juce::MouseEvent&)         { target().history.noteUserActivity(); }
-void PyraAudioProcessorEditor::mouseDrag (const juce::MouseEvent&)       { target().history.noteUserActivity(); }
-void PyraAudioProcessorEditor::mouseWheelMove (const juce::MouseEvent&, const juce::MouseWheelDetails&) { target().history.noteUserActivity(); }
+void PyraAudioProcessorEditor::applyPrefs()
+{
+    using namespace pyra::prefs;
+    if (get (HelpBubbles) != 0)
+    {
+        if (tooltips == nullptr) tooltips = std::make_unique<juce::TooltipWindow> (this, helpDelayMs());
+        tooltips->setMillisecondsBeforeTipAppears (helpDelayMs());
+    }
+    else tooltips.reset();
+}
+
+void PyraAudioProcessorEditor::changeListenerCallback (juce::ChangeBroadcaster*)
+{
+    using namespace pyra::prefs;
+    applyPrefs();
+    // knob behaviour is set when the knobs are built: rebuild the window if it changed
+    const int sig = get (KnobDrag) * 100 + get (KnobSpeed) * 10 + get (WheelKnobs) + get (ShowValues) * 1000;
+    if (prefsSignature >= 0 && sig != prefsSignature)
+    {
+        juce::Component::SafePointer<PyraAudioProcessorEditor> safe (this);
+        juce::MessageManager::callAsync ([safe] { if (safe != nullptr) { safe->buildUi(); safe->resized(); } });
+    }
+    prefsSignature = sig;
+    root.repaint();
+}
+
+void PyraAudioProcessorEditor::noteActivity()
+{
+    target().history.noteUserActivity();
+    if (editLayer != 0) proc.history.noteUserActivity();
+    lastActivityMs = juce::Time::getMillisecondCounterHiRes();
+}
+
+void PyraAudioProcessorEditor::mouseDown (const juce::MouseEvent&)       { noteActivity(); }
+void PyraAudioProcessorEditor::mouseUp (const juce::MouseEvent&)         { noteActivity(); }
+void PyraAudioProcessorEditor::mouseDrag (const juce::MouseEvent&)       { noteActivity(); }
+void PyraAudioProcessorEditor::mouseWheelMove (const juce::MouseEvent&, const juce::MouseWheelDetails&) { noteActivity(); }
+
+void PyraAudioProcessorEditor::linkLayers()
+{
+    // LINK: a knob moved by hand on the sound being edited moves the same knob on every other layer that is on,
+    // by the same amount (each layer keeps its own character). Presets, RANDOM and undo (many changes at once) are not copied.
+    auto& tgt = target();
+    const auto& params = tgt.getParameters();
+    if ((int) linkSnapshot.size() != params.size())
+    {
+        linkSnapshot.clear();
+        for (auto* p : params) linkSnapshot.push_back (p->getValue());
+        return;
+    }
+    std::vector<std::pair<int, float>> moved;
+    for (int i = 0; i < params.size(); ++i)
+    {
+        const float v = params[i]->getValue();
+        const float d = v - linkSnapshot[(size_t) i];
+        if (std::abs (d) > 1.0e-6f) { moved.push_back ({ i, d }); linkSnapshot[(size_t) i] = v; }
+    }
+    if (moved.empty() || moved.size() > 4) return;
+    if (proc.apvts.getRawParameterValue ("layer_link")->load() < 0.5f) return;
+    if (juce::Time::getMillisecondCounterHiRes() - lastActivityMs > 600.0) return;   // automation from the DAW: not linked
+
+    for (int k = 0; k < pyra::kNumLayers; ++k)
+    {
+        if (k == editLayer || proc.apvts.getRawParameterValue (pyra::layerParam (k, "on"))->load() < 0.5f) continue;
+        auto* other = proc.getLayer (k);
+        if (other == nullptr) continue;
+        const auto& op = other->getParameters();
+        for (auto [i, d] : moved)
+        {
+            auto* src = dynamic_cast<juce::RangedAudioParameter*> (params[i]);
+            if (src == nullptr || src->getParameterID().startsWith ("layer")) continue;
+            if (dynamic_cast<juce::AudioParameterChoice*> (src) != nullptr || dynamic_cast<juce::AudioParameterBool*> (src) != nullptr) continue;
+            if (i >= op.size()) continue;
+            auto* dst = op[i];
+            const float nv = juce::jlimit (0.0f, 1.0f, dst->getValue() + d);
+            if (std::abs (nv - dst->getValue()) > 1.0e-7f) dst->setValueNotifyingHost (nv);
+        }
+    }
+}
 
 void PyraAudioProcessorEditor::showPage (int index)
 {
     currentPage = index;
+    pyra::lang::settings().setValue ("lastPage", index);
     if (presetBar != nullptr && juce::isPositiveAndBelow (index, tabNames.size()))
         presetBar->setRandomLabel (index == PagePresets ? tr ("PRESET") : tabNames[index]);
     for (int i = 0; i < (int) pages.size(); ++i)
@@ -200,11 +294,13 @@ void PyraAudioProcessorEditor::timerCallback()
         pages[(size_t) currentPage]->tick();
 
     for (auto* k : ui->knobs) k->refreshModulation();
+    if (masterUi != nullptr && masterUi.get() != ui.get()) for (auto* k : masterUi->knobs) k->refreshModulation();
 
     const int v = proc.totalVoices();
     if (v != lastVoices) { lastVoices = v; root.repaint (baseW - 330, 0, 140, topH); }
 
     // the breathing glow behind the logo and the scope (only those corners of the top bar are redrawn)
+    if (pyra::prefs::get (pyra::prefs::Animations) != 0)
     {
         const float peak = proc.uiPeak.exchange (0.0f);
         const float target = juce::jlimit (0.0f, 1.0f, std::sqrt (peak) * 1.2f);
@@ -214,9 +310,12 @@ void PyraAudioProcessorEditor::timerCallback()
         if (++animCounter >= 3) { animCounter = 0; root.repaint (0, 0, 46, 45); }
     }
 
+    linkLayers();
+
     if (++historyCounter >= 3)
     {
         historyCounter = 0;
+        if (editLayer != 0) proc.history.tick();
         target().history.tick();
         if (presetBar != nullptr) presetBar->updateUndoButtons();
     }

@@ -100,7 +100,8 @@ enum GlitchEffect { GOff, GRepeat, GStutter, GReverse, GTapeStop, GSlow, GPitchU
 enum WarpMode   { WarpOff, WarpSync, WarpBendPlus, WarpBendMinus, WarpPwm, WarpAsym, WarpMirror, WarpFold, WarpQuantize, WarpCount };
 enum FmSource   { FmOff, FmOscA, FmOscB, FmOscC, FmSub, FmNoise };
 enum Route      { RouteF1, RouteF2, RouteBoth, RouteDirect };
-enum FilterType { FLp12, FLp24, FLadder, FHp12, FHp24, FBp12, FBp24, FNotch, FPeak, FAllpass, FCombPlus, FCombMinus, FFormant, FPhaser, FTypeCount };
+enum FilterType { FLp12, FLp24, FLadder, FHp12, FHp24, FBp12, FBp24, FNotch, FPeak, FAllpass, FCombPlus, FCombMinus, FFormant, FPhaser,
+                  FLp6, FHp6, FLp36, FHp36, FNotch24, FLowShelf, FHighShelf, FDiode, FMs20, FDualBp, FResonator, FTypeCount };
 enum LfoMode    { LfoRetrig, LfoFree, LfoEnvelope };
 enum VoiceMode  { ModePoly, ModeMono, ModeLegato };
 
@@ -156,10 +157,62 @@ struct EnvSettings
     float aCrv = 0.3f, dCrv = 0.6f, rCrv = 0.6f;
 };
 
+/** A hand-drawn LFO shape (the "Custom (drawn)" shape): 32 points, -1..1, read with linear interpolation. */
+constexpr int kLfoPoints = 32;
+struct LfoDrawn
+{
+    std::array<std::atomic<float>, kLfoPoints> pts;
+    LfoDrawn() { reset(); }
+    void reset() { for (int i = 0; i < kLfoPoints; ++i) pts[(size_t) i].store (std::sin (6.2831853f * (float) i / (float) kLfoPoints)); }
+    float read (float p) const noexcept
+    {
+        const float x = (p - std::floor (p)) * (float) kLfoPoints;
+        const int i0 = (int) x % kLfoPoints, i1 = (i0 + 1) % kLfoPoints;
+        const float a = pts[(size_t) i0].load (std::memory_order_relaxed), b = pts[(size_t) i1].load (std::memory_order_relaxed);
+        return a + (b - a) * (x - std::floor (x));
+    }
+    bool isDefault() const
+    {
+        for (int i = 0; i < kLfoPoints; ++i)
+            if (std::abs (pts[(size_t) i].load() - std::sin (6.2831853f * (float) i / (float) kLfoPoints)) > 1.0e-4f) return false;
+        return true;
+    }
+};
+
+struct LfoDrawnSet
+{
+    std::array<LfoDrawn, kNumLfo> lfo;
+    std::atomic<int> changeCounter { 0 };
+    bool isDefault() const { for (auto& l : lfo) if (! l.isDefault()) return false; return true; }
+    juce::var toVar() const
+    {
+        juce::Array<juce::var> all;
+        for (auto& l : lfo) { juce::Array<juce::var> a; for (auto& p : l.pts) a.add (p.load()); all.add (a); }
+        return all;
+    }
+    void fromVar (const juce::var& v)
+    {
+        auto* all = v.getArray();
+        for (int k = 0; k < kNumLfo; ++k)
+        {
+            auto* a = (all != nullptr && k < all->size()) ? all->getReference (k).getArray() : nullptr;
+            if (a == nullptr || a->size() != kLfoPoints) { lfo[(size_t) k].reset(); continue; }
+            for (int i = 0; i < kLfoPoints; ++i) lfo[(size_t) k].pts[(size_t) i].store (juce::jlimit (-1.0f, 1.0f, (float) a->getReference (i)));
+        }
+        ++changeCounter;
+    }
+    juce::ValueTree toTree() const { juce::ValueTree t ("LFO_DRAWN"); t.setProperty ("pts", juce::JSON::toString (toVar(), true), nullptr); return t; }
+    void fromTree (const juce::ValueTree& t) { if (t.isValid()) fromVar (juce::JSON::parse (t.getProperty ("pts").toString())); else { for (auto& l : lfo) l.reset(); ++changeCounter; } }
+};
+
+/** Index of the "Custom (drawn)" LFO shape (last of choices::lfoShapes). */
+constexpr int kLfoShapeCustom = 38;
+
 struct LfoSettings
 {
     int shape = 0; float rate = 1; bool sync = true; int div = 7; int mode = 0;
     float phase = 0, delay = 0, fade = 0; bool uni = false; float smooth = 0;
+    const LfoDrawn* drawn = nullptr;
 };
 
 struct ModSlot { int src = 0; int dst = 0; float amt = 0; };

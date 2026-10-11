@@ -1,0 +1,144 @@
+830|Accende o spegne il phaser.|Enciende o apaga el phaser.|Active ou désactive le phaser.|Schaltet den Phaser ein oder aus.|Liga ou desliga o phaser.
+831|Accende o spegne il risonatore.|Enciende o apaga el resonador.|Active ou désactive le résonateur.|Schaltet den Resonator ein oder aus.|Liga ou desliga o ressonador.
+832|Accende o spegne il riverbero.|Enciende o apaga la reverb.|Active ou désactive la réverbération.|Schaltet den Hall ein oder aus.|Liga ou desliga o reverb.
+833|Accende o spegne lo strumento campionato.|Enciende o apaga la capa de instrumento sampleado.|Active ou désactive la couche d'instrument échantillonné.|Schaltet die Ebene mit gesampeltem Instrument ein oder aus.|Liga ou desliga a camada de instrumento sampleado.
+834|Accende o spegne il sub oscillatore.|Enciende o apaga el suboscilador.|Active ou désactive le sous-oscillateur.|Schaltet den Sub-Oszillator ein oder aus.|Liga ou desliga o suboscilador.
+835|Accende o spegne l'effetto nastro.|Enciende o apaga el efecto de cinta.|Active ou désactive l'effet bande.|Schaltet den Band-Effekt ein oder aus.|Liga ou desliga o efeito de fita.
+836|Accende o spegne questo filtro.|Enciende o apaga este filtro.|Active ou désactive ce filtre.|Schaltet diesen Filter ein oder aus.|Liga ou desliga este filtro.
+837|Accende o spegne questo layer.|Enciende o apaga esta capa.|Active ou désactive cette couche.|Schaltet diese Ebene ein oder aus.|Liga ou desliga esta camada.
+838|Accende o spegne questo oscillatore.|Enciende o apaga este oscilador.|Active ou désactive cet oscillateur.|Schaltet diesen Oszillator ein oder aus.|Liga ou desliga este oscilador.
+839|=|Sync|Sync|Sync|Sync
+840|=|Sincopado|Syncopé|Synkopiert|Sincopado
+841|=|ETIQUETAS|TAGS|TAGS|TAGS
+842|=|ETIQUETAS (separadas por comas)|TAGS (séparés par des virgules)|TAGS (durch Kommas getrennt)|TAGS (separadas por vírgulas)
+843|=|ETIQUETAS...|TAGS...|TAGS...|TAGS...
+844|=|CINTA|BANDE|BAND|FITA
+845|=|DESTINO|CIBLE|ZIEL|ALVO
+846|=|LIGADURA|LIAISON|BINDUNG|LIGADURA
+847|=|CONSEJO|ASTUCE|TIPP|DICA
+848|=|Eco de cinta|Écho à bande|Bandecho|Eco de fita
+849|Fruscio del nastro|Soplido de cinta|Souffle de bande|Bandrauschen|Chiado de fita
+850|=|Parada de cinta|Arrêt de bande|Bandstopp|Parada de fita
+851|=|Eco de cinta y delay, 3 reverbs (habitación, sala, shimmer)|Écho à bande et delay, 3 réverbérations (pièce, salle, shimmer)|Bandecho und Delay, 3 Hallarten (Raum, Saal, Shimmer)|Eco de fita e delay, 3 reverbs (sala pequena, salão, shimmer)
+852|=|Tenso|Tendu|Angespannt|Tenso
+853|Texture|Texturas|Textures|Texturen|Texturas
+854|La rotella del mouse gira la manopola sotto il mouse|La rueda del ratón gira la perilla que está debajo|La molette tourne le bouton sous la souris|Das Mausrad dreht den Regler unter der Maus|A roda do mouse gira o botão sob o mouse
+855|=|La capa de muestras pasa por los mismos filtros, envolventes y efectos que los osciladores.|La couche d'échantillons passe par les mêmes filtres, enveloppes et effets que les oscillateurs.|Die Sample-Ebene läuft durch dieselben Filter, Hüllkurven und Effekte wie die Oszillatoren.|A camada de amostras passa pelos mesmos filtros, envelopes e efeitos que os osciladores.
+856|La wavetable che suona questo oscillatore, divisa in categorie (Analogico, Digitale, Voce...).|La wavetable que toca este oscilador, ordenada en categorías (Analógico, Digital, Voz...).|La wavetable jouée par cet oscillateur, classée en catégories (Analogique, Numérique, Voix...).|Die Wavetable dieses Oszillators, nach Kategorien sortiert (Analog, Digital, Stimme...).|A wavetable que este oscilador toca, separada em categorias (Analógico, Digital, Voz...).
+857|=|Umbral|Seuil|Schwelle|Limiar
+858|=|Tiempo|Temps|Zeit|Tempo
+859|Tempo prima che l'LFO cominci a muoversi.|Tiempo antes de que el LFO empiece a moverse.|Temps avant que le LFO commence à bouger.|Zeit, bevor sich der LFO zu bewegen beginnt.|Tempo antes de o LFO começar a se mover.
+860|Tempo di entrata graduale dell'LFO.|Tiempo para que el LFO entre gradualmente.|Temps de fondu d'entrée du LFO.|Zeit, in der der LFO eingeblendet wird.|Tempo para o LFO entrar gradualmente.
+861|Tempo in cui l'inviluppo resta al massimo dopo l'attacco.|Tiempo que la envolvente se queda al máximo tras el ataque.|Temps pendant lequel l'enveloppe reste au maximum après l'attaque.|Zeit, die die Hüllkurve nach dem Attack auf vollem Pegel bleibt.|Tempo que o envelope fica no máximo depois do ataque.
+862|=|Consejo: los tres también aparecen como fuentes de modulación (Chaos, Focus, Motion) en la MATRIZ.|Astuce : les trois sont aussi des sources de modulation (Chaos, Focus, Motion) dans la MATRICE.|Tipp: Alle drei gibt es auch als Modulationsquellen (Chaos, Focus, Motion) in der MATRIX.|Dica: os três também aparecem como fontes de modulação (Chaos, Focus, Motion) na MATRIZ.
+863|=|Consejo: en la página SYNTH puedes arrastrar ENV, LFO, MACRO o cualquier etiqueta de fuente directamente sobre una perilla.|Astuce : sur la page SYNTH, vous pouvez glisser ENV, LFO, MACRO ou tout badge de source directement sur un bouton.|Tipp: Auf der SYNTH-Seite kannst du ENV, LFO, MACRO oder jedes Quellen-Abzeichen direkt auf einen Regler ziehen.|Dica: na página SYNTH você pode arrastar ENV, LFO, MACRO ou qualquer selo de fonte direto para um botão.
+864|=|Tolerancia|Tolérance|Toleranz|Tolerância
+865|=|Tono|Tonalité|Klang|Tom
+866|=|Trance gate|Trance gate|Trance-Gate|Trance gate
+867|=|Transposición|Transposition|Transponieren|Transposição
+868|=|Transporta esta capa en semitonos (-12 = una octava abajo)|Transpose cette couche en demi-tons (-12 = une octave plus bas)|Transponiert diese Ebene in Halbtönen (-12 = eine Oktave tiefer)|Transpõe esta camada em semitons (-12 = uma oitava abaixo)
+869|Trasporta questo layer in semitoni.|Transporta esta capa en semitonos.|Transpose cette couche en demi-tons.|Transponiert diese Ebene in Halbtönen.|Transpõe esta camada em semitons.
+870|=|Tríadas|Triades|Dreiklänge|Tríades
+871|=|Tríadas, séptimas, novenas, sus, power chords o una mezcla|Triades, septièmes, neuvièmes, sus, power chords ou un mélange|Dreiklänge, Septimen, Nonen, Sus, Powerchords oder eine Mischung|Tríades, sétimas, nonas, sus, power chords ou uma mistura
+872|Triadi, settime, none, sus, power chord o un mix.|Tríadas, séptimas, novenas, sus, power chords o una mezcla.|Triades, septièmes, neuvièmes, sus, power chords ou un mélange.|Dreiklänge, Septimen, Nonen, Sus, Powerchords oder eine Mischung.|Tríades, sétimas, nonas, sus, power chords ou uma mistura.
+873|=|Triángulo|Triangle|Dreieck|Triângulo
+874|Triangolo asimmetrico|Triángulo asimétrico|Triangle asymétrique|Schiefes Dreieck|Triângulo assimétrico
+875|=|Trombón|Trombone|Posaune|Trombone
+876|=|Trompeta|Trompette|Trompete|Trompete
+877|=|Tuba|Tuba|Tuba|Tuba
+878|=|Válvula|Lampe|Röhre|Válvula
+879|=|Afinación|Accord|Stimmung|Afinação
+880|=|Sube CHAOS al máximo (con MANGLE) y estos tres efectos entran solos: el sonido se corta, se invierte, se estira y se dispersa.|Montez CHAOS au maximum (avec MANGLE) et ces trois effets arrivent d'eux-mêmes : le son est coupé, inversé, étiré et éparpillé.|Dreh CHAOS ganz auf (mit MANGLE), und diese drei Effekte kommen von selbst: Der Klang wird zerschnitten, umgedreht, gedehnt und verstreut.|Suba o CHAOS ao máximo (com MANGLE) e estes três efeitos entram sozinhos: o som é cortado, invertido, esticado e espalhado.
+881|=|Enciende solo lo que necesitas: los efectos apagados no usan CPU.|N'allumez que ce dont vous avez besoin : les effets éteints n'utilisent pas de CPU.|Schalte nur ein, was du brauchst: Ausgeschaltete Effekte brauchen keine CPU.|Ligue só o que precisa: efeitos desligados não usam CPU.
+882|Trasforma un synth digitale pulito in uno analogico vissuto (drift, variazione, saturazione, rumore).|Convierte un sintetizador digital limpio en uno analógico gastado (deriva, variación, saturación, ruido).|Transforme un synthé numérique propre en analogique usé (dérive, variation, saturation, bruit).|Macht aus einem sauberen Digitalsynth einen abgenutzten Analogen (Drift, Streuung, Sättigung, Rauschen).|Transforma um sintetizador digital limpo num analógico gasto (drift, variação, saturação, ruído).
+883|=|Convierte un sintetizador digital limpio en uno analógico gastado. A 0 no cambia nada: el sonido sigue limpio y digital.|Transforme un synthé numérique propre en analogique usé. À 0 rien ne change : le son reste propre et numérique.|Macht aus einem sauberen Digitalsynth einen abgenutzten Analogen. Bei 0 ändert sich nichts: Der Klang bleibt sauber und digital.|Transforma um sintetizador digital limpo num analógico gasto. Em 0 nada muda: o som fica limpo e digital.
+884|Attiva l'MPE: intonazione, pressione e slide per ogni nota dai controller MPE.|Activa MPE: afinación, presión y slide por nota desde controladores MPE.|Active le MPE : hauteur, pression et glissement par note depuis les contrôleurs MPE.|Schaltet MPE ein: Tonhöhe, Druck und Slide pro Note von MPE-Controllern.|Liga o MPE: afinação, pressão e slide por nota a partir de controladores MPE.
+885|=|Escribe un valor y pulsa Intro (p. ej. 2.5k, 120 ms, -6). Esc cancela.|Tapez une valeur et appuyez sur Entrée (ex. 2.5k, 120 ms, -6). Échap annule.|Gib einen Wert ein und drücke Enter (z. B. 2.5k, 120 ms, -6). Esc bricht ab.|Digite um valor e aperte Enter (ex. 2.5k, 120 ms, -6). Esc cancela.
+886|=|Escribe un valor...|Taper une valeur...|Wert eingeben...|Digite um valor...
+887|Tipo del filtro FX.|Tipo del filtro FX.|Type du filtre FX.|Typ des FX-Filters.|Tipo do filtro FX.
+888|=|DESBLOQUEAR TODO|TOUT DÉVERROUILLER|ALLE ENTSPERREN|DESBLOQUEAR TUDO
+889|Sotto le manopole|Bajo las perillas|Sous les boutons|Unter den Reglern|Embaixo dos botões
+890|=|Deshacer (volver un cambio atrás)|Annuler (revenir d'un changement)|Rückgängig (eine Änderung zurück)|Desfazer (voltar uma mudança)
+891|=|Unipolar|Unipolaire|Unipolar|Unipolar
+892|Unipolare: l'LFO sale solo da zero invece di andare su e giù.|Unipolar: el LFO solo sube desde cero en vez de subir y bajar.|Unipolaire : le LFO monte seulement à partir de zéro au lieu de monter et descendre.|Unipolar: Der LFO geht nur von null nach oben statt auf und ab.|Unipolar: o LFO só sobe a partir do zero em vez de subir e descer.
+893|=|Unísono|Unisson|Unisono|Uníssono
+894|Unisono: quante copie dell'oscillatore suonano insieme (suono più largo e spesso).|Unísono: cuántas copias del oscilador suenan juntas (sonido más ancho y grueso).|Unisson : combien de copies de l'oscillateur jouent ensemble (son plus large et plus épais).|Unisono: wie viele Kopien des Oszillators zusammen spielen (breiter, dicker Klang).|Uníssono: quantas cópias do oscilador tocam juntas (som mais largo e encorpado).
+895|=|Arriba|Haut|Auf|Para cima
+896|Su / giù|Arriba / abajo|Haut / bas|Auf / ab|Cima / baixo
+897|Fino a 8 suoni completi in un solo PYRA, suonati insieme. ACCORDI e ARP guidano tutti i layer. EDIT apre un layer in tutte le pagine.|Hasta 8 sonidos completos en un solo PYRA, tocados a la vez. ACORDES y ARP mueven todas las capas. EDIT abre una capa en todas las páginas.|Jusqu'à 8 sons complets dans un seul PYRA, joués ensemble. ACCORDS et ARP pilotent toutes les couches. EDIT ouvre une couche dans toutes les pages.|Bis zu 8 komplette Klänge in einem PYRA, zusammen gespielt. AKKORDE und ARP steuern alle Ebenen. EDIT öffnet eine Ebene auf allen Seiten.|Até 8 sons completos num só PYRA, tocados juntos. ACORDES e ARP comandam todas as camadas. EDIT abre uma camada em todas as páginas.
+898|=|Hasta 8 sonidos completos en un solo PYRA. Cada capa tiene su preset, FX, ARP y ACORDES: EDIT la abre en todas las páginas.|Jusqu'à 8 sons complets dans un seul PYRA. Chaque couche a son preset, ses FX, son ARP et ses ACCORDS : EDIT l'ouvre dans toutes les pages.|Bis zu 8 komplette Klänge in einem PYRA. Jede Ebene hat eigenes Preset, FX, ARP und AKKORDE: EDIT öffnet sie auf allen Seiten.|Até 8 sons completos num só PYRA. Cada camada tem seu preset, FX, ARP e ACORDES: EDIT a abre em todas as páginas.
+899|=|Arriba-Abajo|Haut-Bas|Auf-Ab|Cima-Baixo
+900|=|Piano vertical|Piano droit|Klavier|Piano vertical
+901|=|Usuario|Utilisateur|Benutzer|Usuário
+902|=|VELOCIDAD|VÉLOCITÉ|ANSCHLAG|VELOCIDADE
+903|=|CONVERTIDOR VINTAGE|CONVERTISSEUR VINTAGE|VINTAGE-WANDLER|CONVERSOR VINTAGE
+904|=|VOZ|VOIX|STIMME|VOZ
+905|=|VOZ Y PORTAMENTO|VOIX ET PORTAMENTO|STIMME & PORTAMENTO|VOZ E PORTAMENTO
+906|Valori (nomi al passaggio del mouse)|Valores (nombres al pasar el ratón)|Valeurs (noms au survol)|Werte (Namen beim Darüberfahren)|Valores (nomes ao passar o mouse)
+907|=|Vel > Volumen|Vél > Volume|Anschlag > Pegel|Vel > Volume
+908|=|Capas de vel.|Couches de vél.|Anschlagsebenen|Camadas de vel.
+909|=|Velocidad|Vélocité|Anschlag|Velocidade
+910|Velocity delle note degli accordi.|Velocidad de las notas de los acordes.|Vélocité des notes des accords.|Anschlagstärke der Akkordnoten.|Velocidade das notas dos acordes.
+911|=|Zona de velocidad: la capa suena solo cuando tocas con esta fuerza. Doble clic: todas las velocidades.|Zone de vélocité : la couche ne joue que si vous frappez les touches avec cette force. Double-clic : toutes les vélocités.|Anschlagszone: Die Ebene spielt nur bei dieser Anschlagstärke. Doppelklick: alle Anschlagstärken.|Zona de velocidade: a camada só toca quando você toca com esta força. Duplo clique: todas as velocidades.
+912|Vinile|Vinilo|Vinyle|Vinyl|Vinil
+913|=|Violas|Altos|Bratschen|Violas
+914|Violetto|Violeta|Violet|Violett|Violeta
+915|=|Violines|Violons|Violinen|Violinos
+916|Voce e formanti|Voz y formantes|Voix et formants|Stimme & Formant|Voz e formantes
+917|=|Variación de voces|Variation des voix|Stimmenstreuung|Variação de vozes
+918|=|Voces|Voix|Stimmen|Vozes
+919|=|Disposición|Voicing|Voicing|Disposição
+920|=|Volumen|Volume|Lautstärke|Volume
+921|Volume aggiunto dopo la compressione.|Volumen añadido tras la compresión.|Volume ajouté après la compression.|Lautstärke, die nach der Kompression wieder hinzukommt.|Volume adicionado depois da compressão.
+922|Volume del rumore.|Volumen del ruido.|Volume du bruit.|Lautstärke des Rauschens.|Volume do ruído.
+923|Volume del campione.|Volumen de la muestra.|Volume de l'échantillon.|Lautstärke des Samples.|Volume da amostra.
+924|Volume del sub oscillatore.|Volumen del suboscilador.|Volume du sous-oscillateur.|Lautstärke des Sub-Oszillators.|Volume do suboscilador.
+925|Volume di questo layer.|Volumen de esta capa.|Volume de cette couche.|Lautstärke dieser Ebene.|Volume desta camada.
+926|Volume di questo oscillatore.|Volumen de este oscilador.|Volume de cet oscillateur.|Lautstärke dieses Oszillators.|Volume deste oscilador.
+927|=|Pos. WT|Pos. WT|WT-Pos.|Pos. WT
+928|Tempo di attesa prima che l'inviluppo parta.|Tiempo de espera antes de que empiece la envolvente.|Temps d'attente avant que l'enveloppe démarre.|Wartezeit, bevor die Hüllkurve startet.|Tempo de espera antes de o envelope começar.
+929|Dente di sega caldo|Sierra cálida|Dent de scie chaude|Warmer Sägezahn|Dente de serra quente
+930|Saturazione calda del nastro.|Saturación cálida de cinta.|Saturation chaude de la bande.|Warme Bandsättigung.|Saturação quente de fita.
+931|=|Saturación cálida y algo irregular del circuito de voz.|Saturation chaude et un peu irrégulière du circuit de voix.|Warme, leicht ungleichmäßige Sättigung der Stimmschaltung.|Saturação quente e levemente irregular do circuito de voz.
+932|=|Warp|Warp|Warp|Warp
+933|Modalità warp: piega la forma d'onda (sync, bend, PWM, specchio, fold...).|Modo warp: dobla la forma de onda (sync, bend, PWM, espejo, pliegue...).|Mode warp : déforme l'onde (sync, bend, PWM, miroir, repli...).|Warp-Modus: verbiegt die Wellenform (Sync, Bend, PWM, Spiegel, Falten...).|Modo warp: dobra a forma de onda (sync, bend, PWM, espelho, dobra...).
+934|Forma d'onda del sub oscillatore, divisa in categorie.|Forma de onda del suboscilador, ordenada en categorías.|Forme d'onde du sous-oscillateur, classée en catégories.|Wellenform des Sub-Oszillators, nach Kategorien sortiert.|Forma de onda do suboscilador, separada em categorias.
+935|Cosa è scritto sotto le manopole|Lo que se escribe bajo las perillas|Ce qui est écrit sous les boutons|Was unter den Reglern steht|O que aparece embaixo dos botões
+936|Cosa muove la sorgente.|Lo que mueve la fuente.|Ce que la source déplace.|Was die Quelle bewegt.|O que a fonte move.
+937|Cosa muove questo slot di FOCUS.|Lo que mueve esta ranura de FOCUS.|Ce que déplace cet emplacement FOCUS.|Was dieser FOCUS-Slot bewegt.|O que este slot do FOCUS move.
+938|Dove inizia il ciclo dell'LFO.|Dónde empieza el ciclo del LFO.|Où commence le cycle du LFO.|Wo der LFO-Zyklus beginnt.|Onde começa o ciclo do LFO.
+939|Dove va il rumore: filtro 1, filtro 2, entrambi, o diretto in uscita.|A dónde va el ruido: filtro 1, filtro 2, ambos, o directo a la salida.|Où va le bruit : filtre 1, filtre 2, les deux, ou directement en sortie.|Wohin das Rauschen geht: Filter 1, Filter 2, beide oder direkt raus.|Para onde vai o ruído: filtro 1, filtro 2, ambos, ou direto para a saída.
+940|Dove va il campione: filtro 1, filtro 2, entrambi, o diretto in uscita.|A dónde va la muestra: filtro 1, filtro 2, ambos, o directo a la salida.|Où va l'échantillon : filtre 1, filtre 2, les deux, ou directement en sortie.|Wohin das Sample geht: Filter 1, Filter 2, beide oder direkt raus.|Para onde vai a amostra: filtro 1, filtro 2, ambos, ou direto para a saída.
+941|Dove inizia il campione (salta parte dell'attacco).|Dónde empieza la muestra (salta parte del ataque).|Où commence l'échantillon (saute une partie de l'attaque).|Wo das Sample beginnt (überspringt einen Teil des Anschlags).|Onde a amostra começa (pula parte do ataque).
+942|Dove va il sub: filtro 1, filtro 2, entrambi, o diretto in uscita.|A dónde va el sub: filtro 1, filtro 2, ambos, o directo a la salida.|Où va le sub : filtre 1, filtre 2, les deux, ou directement en sortie.|Wohin der Sub geht: Filter 1, Filter 2, beide oder direkt raus.|Para onde vai o sub: filtro 1, filtro 2, ambos, ou direto para a saída.
+943|Dove parte la forma d'onda a ogni nota.|Dónde empieza la forma de onda en cada nota.|Où commence l'onde à chaque note.|Wo die Wellenform bei jeder Note beginnt.|Onde a forma de onda começa a cada nota.
+944|Dove va questo oscillatore: filtro 1, filtro 2, entrambi, o diretto in uscita.|A dónde va este oscilador: filtro 1, filtro 2, ambos, o directo a la salida.|Où va cet oscillateur : filtre 1, filtre 2, les deux, ou directement en sortie.|Wohin dieser Oszillator geht: Filter 1, Filter 2, beide oder direkt raus.|Para onde vai este oscilador: filtro 1, filtro 2, ambos, ou direto para a saída.
+945|Quale pagina si apre quando apri PYRA|Qué página se abre al abrir PYRA|Quelle page s'ouvre à l'ouverture de PYRA|Welche Seite beim Öffnen von PYRA erscheint|Qual página abre quando você abre o PYRA
+946|Quale sorgente modula l'intonazione di questo oscillatore (FM).|Qué fuente modula la afinación de este oscilador (FM).|Quelle source module la hauteur de cet oscillateur (FM).|Welche Quelle die Tonhöhe dieses Oszillators moduliert (FM).|Qual fonte modula a afinação deste oscilador (FM).
+947|=|Blanco|Blanc|Weiß|Branco
+948|=|Tonos enteros|Par tons|Ganzton|Tons inteiros
+949|=|Anchura|Largeur|Breite|Largura
+950|Larghezza della banda media (più alto = più stretta).|Anchura de la banda media (más alto = más estrecha).|Largeur de la bande médium (plus haut = plus étroite).|Breite des mittleren Bands (höher = schmaler).|Largura da banda média (mais alto = mais estreita).
+951|Vento|Viento|Vent|Wind|Vento
+952|Dimensione finestra|Tamaño de ventana|Taille de la fenêtre|Fenstergröße|Tamanho da janela
+953|=|Wobble|Wobble|Wobble|Wobble
+954|Wobble 2x|Wobble 2x|Wobble 2x|Wobble 2x|Wobble 2x
+955|Wobble 3x|Wobble 3x|Wobble 3x|Wobble 3x|Wobble 3x
+956|Wobble 4x|Wobble 4x|Wobble 4x|Wobble 4x|Wobble 4x
+957|=|Wow|Wow|Wow|Wow
+958|=|Tus etiquetas para|Vos tags pour|Deine Tags für|Suas tags para
+959|=|Tu preset|Votre preset|Dein Preset|Seu preset
+960|Zig-zag|Zigzag|Zigzag|Zickzack|Zigue-zague
+961|=|actividad del caos|activité du chaos|Chaos-Aktivität|atividade do caos
+962|=|clic para añadir|cliquez pour ajouter|klicken zum Hinzufügen|clique para adicionar
+963|=|arrastra sobre una perilla para modularla|glissez sur un bouton pour le moduler|auf einen Regler ziehen zum Modulieren|arraste para um botão para modulá-lo
+964|trascina su/giù = posizione|arrastra arriba/abajo = posición|glisser haut/bas = position|auf/ab ziehen = Position|arraste cima/baixo = posição
+965|trascina: su/giù = posizione, sinistra/destra = warp|arrastra: arriba/abajo = posición, izquierda/derecha = warp|glisser : haut/bas = position, gauche/droite = warp|ziehen: auf/ab = Position, links/rechts = Warp|arraste: cima/baixo = posição, esquerda/direita = warp
+966|disegna con il mouse - clic destro: strumenti|dibuja con el ratón - clic derecho: herramientas|dessinez à la souris - clic droit : outils|mit der Maus zeichnen - Rechtsklick: Werkzeuge|desenhe com o mouse - clique direito: ferramentas
+967|=|p. ej. oscuro, trap, mi canción|ex. sombre, trap, mon morceau|z. B. düster, Trap, mein Song|ex. sombrio, trap, minha música
+968|=|cargando...|chargement...|lädt...|carregando...
+969|=|de la duración del acorde|de la durée de l'accord|der Akkordlänge|da duração do acorde
+970|=|un ciclo = la velocidad de arriba|un cycle = la vitesse ci-dessus|ein Zyklus = die Rate oben|um ciclo = a velocidade acima
+971|=|tuyo|perso|eigenes|seu
+972|=|violeta = suma, rojo = resta, más grueso = más|violet = ajoute, rouge = retire, plus épais = plus|Violett = addiert, Rot = subtrahiert, dicker = mehr|violeta = soma, vermelho = subtrai, mais grosso = mais
+973|=|se moverá a la Papelera.|sera mis à la Corbeille.|wird in den Papierkorb verschoben.|será movido para a Lixeira.

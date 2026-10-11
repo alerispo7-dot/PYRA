@@ -30,6 +30,9 @@ public:
     };
 
     static const juce::StringArray& names();
+    /** Category of every table (same order as names()) and the list of categories, for the menus. */
+    static const juce::StringArray& categoryOfEach();
+    static const juce::StringArray& categories();
 
     /** Lazily-built shared bank (built once, the first time it is needed). */
     static const Wavetables& get();

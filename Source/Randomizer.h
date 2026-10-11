@@ -28,6 +28,9 @@ namespace randomizer
     /** One layer only: a random preset (of the same category as now when possible). */
     void randomizeLayer (PyraAudioProcessor& master, int layer, bool variation, uint32_t seed);
 
+    /** One parameter only (the small dice next to a control): a musical value for it. */
+    void randomizeParam (PyraAudioProcessor&, const juce::String& paramId, bool variation, uint32_t seed);
+
     /** GLITCH pattern only. */
     void randomizeGlitch (PyraAudioProcessor&, uint32_t seed);
 }

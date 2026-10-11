@@ -4,6 +4,8 @@
 #include "../dsp/Wavetables.h"
 #include "../dsp/Envelope.h"
 #include "HellArt.h"
+#include "Prefs.h"
+#include "../ParamHelp.h"
 
 namespace pyra
 {
@@ -86,10 +88,12 @@ Knob::Knob (juce::AudioProcessorValueTreeState& state, const juce::String& id, c
     param = st.getParameter (paramId);
     jassert (param != nullptr);
 
-    slider.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
+    // SETTINGS > PERSONALIZE: drag up/down or around the knob, its speed, and the mouse wheel
+    slider.setSliderStyle (prefs::get (prefs::KnobDrag) == 1 ? juce::Slider::Rotary : juce::Slider::RotaryHorizontalVerticalDrag);
     slider.setTextBoxStyle (juce::Slider::NoTextBox, false, 0, 0);
     slider.setRotaryParameters (juce::MathConstants<float>::pi * 1.25f, juce::MathConstants<float>::pi * 2.75f, true);
-    slider.setMouseDragSensitivity (220);
+    { const int sp = prefs::get (prefs::KnobSpeed); slider.setMouseDragSensitivity (sp == 0 ? 600 : (sp == 2 ? 110 : 220)); }
+    slider.setScrollWheelEnabled (prefs::get (prefs::WheelKnobs) != 0);
     slider.setVelocityBasedMode (false);
     slider.setPopupDisplayEnabled (false, false, nullptr);
     slider.onValueChange = [this] { repaint(); };
@@ -102,7 +106,9 @@ Knob::Knob (juce::AudioProcessorValueTreeState& state, const juce::String& id, c
 
     dest = matrix != nullptr ? ModMatrixAccess::destForParam (paramId) : -1;
     slider.addMouseListener (this, false);
-    setTooltip (param->getName (64) + (dest > 0 ? "\n" + tr ("Drag a mod source here to modulate. Right-click for options.") : juce::String()));
+    const auto help = paramHelp (paramId);
+    setTooltip ((help.isNotEmpty() ? help : param->getName (64))
+                + (dest > 0 ? "\n" + tr ("Drag a mod source here to modulate. Right-click for options.") : juce::String()));
 }
 
 void Knob::resized()
@@ -115,7 +121,9 @@ void Knob::resized()
 
 void Knob::paint (juce::Graphics& g)
 {
-    const bool showValue = slider.isMouseButtonDown() || slider.isMouseOverOrDragging() || isMouseOver (true);
+    const bool hovering = slider.isMouseButtonDown() || slider.isMouseOverOrDragging() || isMouseOver (true);
+    // SETTINGS > PERSONALIZE "values under the knobs": values all the time, the name when the mouse is over it
+    const bool showValue = prefs::get (prefs::ShowValues) != 0 ? (slider.isMouseButtonDown() || ! hovering) : hovering;
     const bool big = (bool) getProperties().getWithDefault ("bigLabel", false);
     auto r = getLocalBounds().removeFromBottom (big ? 24 : 15);
     if (big && ! showValue)
@@ -354,23 +362,100 @@ void Knob::refreshModulation()
 }
 
 //==============================================================================
-ParamCombo::ParamCombo (juce::AudioProcessorValueTreeState& state, const juce::String& id, bool translateItems)
+ParamCombo::ParamCombo (juce::AudioProcessorValueTreeState& state, const juce::String& id, bool translateItems, const Groups* groups)
 {
-    if (auto* p = dynamic_cast<juce::AudioParameterChoice*> (state.getParameter (id)))
+    auto* choice = dynamic_cast<juce::AudioParameterChoice*> (state.getParameter (id));
+    if (choice != nullptr && groups != nullptr)
     {
-        int i = 1;
-        for (auto& c : p->choices)
-            addItem (translateItems ? tr (c) : c, i++);
+        // a browser-like menu: one submenu per category (item id = choice index + 1, whatever the order in the menu)
+        std::vector<bool> placed ((size_t) choice->choices.size(), false);
+        auto* root = getRootMenu();
+        for (auto& [name, items] : *groups)
+        {
+            juce::PopupMenu sub;
+            for (int idx : items)
+                if (juce::isPositiveAndBelow (idx, choice->choices.size()))
+                {
+                    sub.addItem (idx + 1, translateItems ? tr (choice->choices[idx]) : choice->choices[idx]);
+                    placed[(size_t) idx] = true;
+                }
+            if (sub.getNumItems() > 0) root->addSubMenu (tr (name), sub);
+        }
+        juce::PopupMenu other;
+        for (int i = 0; i < choice->choices.size(); ++i)
+            if (! placed[(size_t) i]) other.addItem (i + 1, translateItems ? tr (choice->choices[i]) : choice->choices[i]);
+        if (other.getNumItems() > 0) root->addSubMenu (tr ("Other"), other);
+
+        groupedAttachment = std::make_unique<juce::ParameterAttachment> (*choice, [this] (float v)
+        {
+            setSelectedId (juce::roundToInt (v) + 1, juce::dontSendNotification);
+        });
+        onChange = [this] { if (getSelectedId() > 0) groupedAttachment->setValueAsCompleteGesture ((float) (getSelectedId() - 1)); };
+        groupedAttachment->sendInitialUpdate();
     }
-    attachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment> (state, id, *this);
-    if (auto* p = state.getParameter (id)) setTooltip (p->getName (64));
+    else
+    {
+        if (choice != nullptr)
+        {
+            int i = 1;
+            for (auto& c : choice->choices)
+                addItem (translateItems ? tr (c) : c, i++);
+        }
+        attachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment> (state, id, *this);
+    }
+    if (auto* p = state.getParameter (id)) setTooltip (paramHelp (id).isNotEmpty() ? paramHelp (id) : p->getName (64));
+}
+
+const ParamCombo::Groups* ParamCombo::groupsFor (const juce::String& kind)
+{
+    static const Groups lfo {
+        { "Basic", { 0, 1, 2, 3, 4, 5, 11, 12, 37 } },
+        { "Curves", { 7, 8, 13, 14, 15, 16, 17, 18, 33, 36 } },
+        { "Steps & Gates", { 6, 19, 20, 21, 22, 23, 24, 25, 26 } },
+        { "Random", { 9, 10 } },
+        { "Movement", { 27, 28, 29, 30, 31, 32, 34, 35 } },
+        { "Custom", { kLfoShapeCustom } } };
+    static const Groups filter {
+        { "Low Pass", { FLp6, FLp12, FLp24, FLp36, FLadder, FDiode, FMs20 } },
+        { "High Pass", { FHp6, FHp12, FHp24, FHp36 } },
+        { "Band Pass", { FBp12, FBp24, FDualBp, FResonator } },
+        { "Notch & EQ", { FNotch, FNotch24, FPeak, FLowShelf, FHighShelf, FAllpass } },
+        { "Special", { FCombPlus, FCombMinus, FFormant, FPhaser } } };
+    static const Groups sub {
+        { "Basic", { 0, 1, 2, 3, 15 } },
+        { "Pulse", { 4, 5, 6 } },
+        { "Harmonic", { 7, 8, 9, 10, 11 } },
+        { "Driven", { 12, 13, 14 } } };
+    static const Groups noise {
+        { "Colours", { 0, 1, 2, 5, 6 } },
+        { "Textures", { 7, 8, 9, 10, 11, 12, 13 } },
+        { "Digital", { 4, 14, 15, 3, 16 } } };
+    static const Groups wt = []
+    {
+        Groups g;
+        const auto& cats = Wavetables::categories();
+        const auto& each = Wavetables::categoryOfEach();
+        for (auto& c : cats)
+        {
+            std::vector<int> items;
+            for (int i = 0; i < each.size(); ++i) if (each[i] == c) items.push_back (i);
+            g.push_back ({ c, items });
+        }
+        return g;
+    }();
+    if (kind == "lfo") return &lfo;
+    if (kind == "filter") return &filter;
+    if (kind == "sub") return &sub;
+    if (kind == "noise") return &noise;
+    if (kind == "wt") return &wt;
+    return nullptr;
 }
 
 ParamToggle::ParamToggle (juce::AudioProcessorValueTreeState& state, const juce::String& id, const juce::String& text)
 {
     setButtonText (text);
     attachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment> (state, id, *this);
-    if (auto* p = state.getParameter (id)) setTooltip (p->getName (64));
+    if (auto* p = state.getParameter (id)) setTooltip (paramHelp (id).isNotEmpty() ? paramHelp (id) : p->getName (64));
 }
 
 //==============================================================================
@@ -558,7 +643,10 @@ WavetableView::WavetableView (juce::AudioProcessorValueTreeState& s, int o)
     on = s.getRawParameterValue (pid::osc (o, "on"));
     warp = s.getRawParameterValue (pid::osc (o, "warp"));
     warpAmt = s.getRawParameterValue (pid::osc (o, "warpAmt"));
-    setInterceptsMouseClicks (false, false);
+    posG.p = s.getParameter (pid::osc (o, "pos"));
+    warpG.p = s.getParameter (pid::osc (o, "warpAmt"));
+    setMouseCursor (juce::MouseCursor::UpDownLeftRightResizeCursor);
+    setTooltip (tr ("Drag up / down to move through the wavetable, left / right to change the WARP amount. Double-click: back to the first frame."));
     refresh();
 }
 
@@ -567,11 +655,42 @@ void WavetableView::refresh()
     const int w = (int) std::lround (wt->load());
     const float p = pos->load();
     const bool o = on->load() > 0.5f;
-    if (w != lastWt || std::abs (p - lastPos) > 0.0005f || o != lastOn)
+    const float wa = warpAmt->load() * (warp->load() > 0.5f ? 1.0f : 0.0f);
+    if (w != lastWt || std::abs (p - lastPos) > 0.0005f || o != lastOn || std::abs (wa - lastWarp) > 0.001f)
     {
-        lastWt = w; lastPos = p; lastOn = o;
+        lastWt = w; lastPos = p; lastOn = o; lastWarp = wa;
         repaint();
     }
+}
+
+void WavetableView::mouseDown (const juce::MouseEvent&)
+{
+    if (auto& hook = userActivityHook()) hook();
+    posG.begin(); warpG.begin();
+}
+
+void WavetableView::mouseDrag (const juce::MouseEvent& e)
+{
+    const float dy = (float) -e.getDistanceFromDragStartY() / (float) std::max (40, getHeight()) * 0.8f;
+    const float dx = (float) e.getDistanceFromDragStartX() / (float) std::max (60, getWidth()) * 0.8f;
+    const float fine = e.mods.isShiftDown() ? 0.2f : 1.0f;
+    posG.set (posG.start + dy * fine);
+    if (warp->load() > 0.5f) warpG.set (warpG.start + dx * fine);
+    if (auto& hook = userActivityHook()) hook();
+}
+
+void WavetableView::mouseUp (const juce::MouseEvent&) { posG.end(); warpG.end(); }
+
+void WavetableView::mouseDoubleClick (const juce::MouseEvent&)
+{
+    posG.begin(); posG.set (0.0f); posG.end();
+}
+
+void WavetableView::mouseWheelMove (const juce::MouseEvent&, const juce::MouseWheelDetails& w)
+{
+    posG.begin();
+    posG.set (posG.p != nullptr ? posG.p->getValue() + w.deltaY * 0.15f : 0.0f);
+    posG.end();
 }
 
 void WavetableView::paint (juce::Graphics& g)
@@ -633,10 +752,16 @@ void WavetableView::paint (juce::Graphics& g)
     if (frames > 1)
         g.drawText (juce::String (juce::roundToInt (lastPos * (float) (frames - 1)) + 1) + "/" + juce::String (frames),
                     r.reduced (6.0f, 3.0f), juce::Justification::topRight);
+    if (isMouseOver (true))
+        g.drawText (warp->load() > 0.5f ? tr ("drag: up/down = position, left/right = warp") : tr ("drag up/down = position"),
+                    r.reduced (6.0f, 3.0f), juce::Justification::bottomLeft);
 }
 
 //==============================================================================
-EnvelopeView::EnvelopeView (juce::AudioProcessorValueTreeState& s) : st (s) { setInterceptsMouseClicks (false, false); }
+EnvelopeView::EnvelopeView (juce::AudioProcessorValueTreeState& s) : st (s)
+{
+    setTooltip (tr ("Drag the points: attack (top), decay and sustain (middle), release (end). Drag the middle of a curve up or down to bend it. Double-click a point to reset it."));
+}
 
 void EnvelopeView::refresh (bool force)
 {
@@ -646,14 +771,9 @@ void EnvelopeView::refresh (bool force)
     if (force || sig != signature) { signature = sig; repaint(); }
 }
 
-void EnvelopeView::paint (juce::Graphics& g)
+void EnvelopeView::layout (juce::Path& p, juce::Point<float>* hs)
 {
     auto r = getLocalBounds().toFloat();
-    g.setColour (colours::display);
-    g.fillRoundedRectangle (r, 5.0f);
-    g.setColour (colours::edge.withAlpha (0.7f));
-    g.drawRoundedRectangle (r.reduced (0.5f), 5.0f, 1.0f);
-
     auto val = [this] (const char* n) { return st.getRawParameterValue (pid::env (env, n))->load(); };
     const float times[] = { val ("dly"), val ("att"), val ("hold"), val ("dec"), 0.0f, val ("rel") };
     float widths[6];
@@ -671,17 +791,119 @@ void EnvelopeView::paint (juce::Graphics& g)
     auto X = [&] (float units) { return area.getX() + units / total * area.getWidth(); };
     auto Y = [&] (float v) { return area.getBottom() - v * area.getHeight(); };
 
-    juce::Path p;
+    p.clear();
     float u = 0.0f;
     p.startNewSubPath (X (0), Y (0));
     u += widths[0]; p.lineTo (X (u), Y (0));
     for (int i = 1; i <= 24; ++i) { const float t = (float) i / 24.0f; p.lineTo (X (u + widths[1] * t), Y (curveShape (t, aC))); }
+    hs[CAttack] = { X (u + widths[1] * 0.5f), Y (curveShape (0.5f, aC)) };
     u += widths[1];
+    hs[HAttack] = { X (u), Y (1) };
     u += widths[2]; p.lineTo (X (u), Y (1));
     for (int i = 1; i <= 24; ++i) { const float t = (float) i / 24.0f; p.lineTo (X (u + widths[3] * t), Y (1.0f - (1.0f - sus) * curveShape (t, dC))); }
+    hs[CDecay] = { X (u + widths[3] * 0.5f), Y (1.0f - (1.0f - sus) * curveShape (0.5f, dC)) };
     u += widths[3];
+    hs[HDecay] = { X (u), Y (sus) };
     u += widths[4]; p.lineTo (X (u), Y (sus));
     for (int i = 1; i <= 24; ++i) { const float t = (float) i / 24.0f; p.lineTo (X (u + widths[5] * t), Y (sus * (1.0f - curveShape (t, rC)))); }
+    hs[CRelease] = { X (u + widths[5] * 0.5f), Y (sus * (1.0f - curveShape (0.5f, rC))) };
+    u += widths[5];
+    hs[HRelease] = { X (u), Y (0) };
+}
+
+int EnvelopeView::handleAt (juce::Point<float> pt)
+{
+    juce::Path p; juce::Point<float> hs[HCount];
+    layout (p, hs);
+    int best = -1; float bestD = 12.0f;
+    for (int i = 0; i < HCount; ++i)
+    {
+        const float d = hs[i].getDistanceFrom (pt) * (i >= CAttack ? 1.25f : 1.0f);   // points win over curves
+        if (d < bestD) { bestD = d; best = i; }
+    }
+    return best;
+}
+
+void EnvelopeView::mouseMove (const juce::MouseEvent& e)
+{
+    const int h = handleAt (e.position);
+    if (h != hover) { hover = h; repaint(); }
+    setMouseCursor (h < 0 ? juce::MouseCursor::NormalCursor : (h >= CAttack ? juce::MouseCursor::UpDownResizeCursor
+                                                                             : juce::MouseCursor::DraggingHandCursor));
+}
+
+void EnvelopeView::mouseDown (const juce::MouseEvent& e)
+{
+    dragging = handleAt (e.position);
+    downPos = e.position;
+    gx = {}; gy = {};
+    auto param = [this] (const char* n) { return st.getParameter (pid::env (env, n)); };
+    switch (dragging)
+    {
+        case HAttack:  gx.p = param ("att"); break;
+        case HDecay:   gx.p = param ("dec"); gy.p = param ("sus"); break;
+        case HRelease: gx.p = param ("rel"); break;
+        case CAttack:  gy.p = param ("aCrv"); break;
+        case CDecay:   gy.p = param ("dCrv"); break;
+        case CRelease: gy.p = param ("rCrv"); break;
+        default: return;
+    }
+    gx.begin(); gy.begin();
+    if (auto& hook = userActivityHook()) hook();
+}
+
+void EnvelopeView::mouseDrag (const juce::MouseEvent& e)
+{
+    if (dragging < 0) return;
+    const float fine = e.mods.isShiftDown() ? 0.25f : 1.0f;
+    const float dx = (e.position.x - downPos.x) / (float) std::max (60, getWidth()) * 1.2f * fine;
+    const float dy = (downPos.y - e.position.y) / (float) std::max (40, getHeight() - 20) * fine;
+    if (gx.p != nullptr) gx.set (gx.start + dx);
+    if (dragging == HDecay && gy.p != nullptr)
+    {   // sustain follows the mouse directly
+        const float level = juce::jlimit (0.0f, 1.0f, (getHeight() - 10.0f - e.position.y) / (float) std::max (10, getHeight() - 20));
+        gy.set (gy.p->convertTo0to1 (level));
+    }
+    else if (gy.p != nullptr)
+    {   // bend: up = the curve bulges up
+        const bool invert = dragging == CDecay || dragging == CRelease;
+        gy.set (gy.start + (invert ? -dy : dy) * 0.8f);
+    }
+    if (auto& hook = userActivityHook()) hook();
+}
+
+void EnvelopeView::mouseUp (const juce::MouseEvent&) { gx.end(); gy.end(); dragging = -1; }
+
+void EnvelopeView::mouseDoubleClick (const juce::MouseEvent& e)
+{
+    const int h = handleAt (e.position);
+    auto reset = [this] (const char* n)
+    {
+        if (auto* p = st.getParameter (pid::env (env, n))) { p->beginChangeGesture(); p->setValueNotifyingHost (p->getDefaultValue()); p->endChangeGesture(); }
+    };
+    switch (h)
+    {
+        case HAttack: reset ("att"); break;
+        case HDecay: reset ("dec"); reset ("sus"); break;
+        case HRelease: reset ("rel"); break;
+        case CAttack: reset ("aCrv"); break;
+        case CDecay: reset ("dCrv"); break;
+        case CRelease: reset ("rCrv"); break;
+        default: break;
+    }
+}
+
+void EnvelopeView::paint (juce::Graphics& g)
+{
+    auto r = getLocalBounds().toFloat();
+    g.setColour (colours::display);
+    g.fillRoundedRectangle (r, 5.0f);
+    g.setColour (colours::edge.withAlpha (0.7f));
+    g.drawRoundedRectangle (r.reduced (0.5f), 5.0f, 1.0f);
+
+    auto area = r.reduced (8.0f, 10.0f);
+    juce::Path p; juce::Point<float> hs[HCount];
+    layout (p, hs);
 
     juce::Path fill (p);
     fill.lineTo (area.getRight(), area.getBottom());
@@ -693,20 +915,135 @@ void EnvelopeView::paint (juce::Graphics& g)
     g.setColour (colours::lavaCore);
     g.strokePath (p, juce::PathStrokeType (1.8f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
 
+    // the points you can drag
+    const bool over = isMouseOver (true) || dragging >= 0;
+    for (int i = 0; i < HCount; ++i)
+    {
+        const bool curve = i >= CAttack;
+        if (curve && ! over) continue;
+        const bool hot = i == hover || i == dragging;
+        const float rad = curve ? 3.0f : (hot ? 5.5f : 4.0f);
+        g.setColour (hot ? colours::accent.withAlpha (0.35f) : juce::Colours::transparentBlack);
+        g.fillEllipse (hs[i].x - rad * 2.0f, hs[i].y - rad * 2.0f, rad * 4.0f, rad * 4.0f);
+        g.setColour (curve ? colours::textDim.withAlpha (0.8f) : juce::Colour (0xfff0e6df));
+        g.fillEllipse (hs[i].x - rad, hs[i].y - rad, rad * 2.0f, rad * 2.0f);
+        g.setColour (colours::accent);
+        g.drawEllipse (hs[i].x - rad, hs[i].y - rad, rad * 2.0f, rad * 2.0f, 1.2f);
+    }
+
     if (live > 0.001f)
     {
         g.setColour (colours::mod);
-        g.fillEllipse (area.getRight() - 6.0f, Y (live) - 3.0f, 6.0f, 6.0f);
+        g.fillEllipse (area.getRight() - 6.0f, area.getBottom() - live * area.getHeight() - 3.0f, 6.0f, 6.0f);
     }
 }
 
 //==============================================================================
-LfoView::LfoView (juce::AudioProcessorValueTreeState& s) : st (s) { setInterceptsMouseClicks (false, false); }
+LfoView::LfoView (juce::AudioProcessorValueTreeState& s, LfoDrawnSet* d) : st (s), drawn (d)
+{
+    if (drawn != nullptr)
+    {
+        setMouseCursor (juce::MouseCursor::CrosshairCursor);
+        setTooltip (tr ("Draw your own LFO shape with the mouse (it becomes the Custom shape). Right-click: tools (smooth, flip, reverse, random...)."));
+    }
+    else setInterceptsMouseClicks (false, false);
+}
 
 void LfoView::refresh (bool force)
 {
     const int shape = (int) std::lround (st.getRawParameterValue (pid::lfo (lfo, "shape"))->load());
-    if (force || shape != lastShape) { lastShape = shape; repaint(); }
+    const int counter = drawn != nullptr ? drawn->changeCounter.load() : 0;
+    if (force || shape != lastShape || counter != lastCounter) { lastShape = shape; lastCounter = counter; repaint(); }
+}
+
+void LfoView::makeCustom()
+{
+    if (drawn == nullptr) return;
+    const int shape = (int) std::lround (st.getRawParameterValue (pid::lfo (lfo, "shape"))->load());
+    if (shape == kLfoShapeCustom) return;
+    // start from what is on the screen now, then switch the LFO to the drawn shape
+    auto& t = drawn->lfo[(size_t) lfo];
+    for (int i = 0; i < kLfoPoints; ++i)
+        t.pts[(size_t) i].store (Lfo::shapeValue (shape, (float) i / (float) kLfoPoints, 0.3f, -0.4f, 0.6f));
+    if (auto* p = st.getParameter (pid::lfo (lfo, "shape")))
+    {
+        p->beginChangeGesture();
+        p->setValueNotifyingHost (p->convertTo0to1 ((float) kLfoShapeCustom));
+        p->endChangeGesture();
+    }
+    ++drawn->changeCounter;
+}
+
+void LfoView::drawAt (juce::Point<float> pt, bool connect)
+{
+    auto a = plotArea();
+    const int idx = juce::jlimit (0, kLfoPoints - 1, (int) std::floor ((pt.x - a.getX()) / a.getWidth() * (float) kLfoPoints));
+    const float v = juce::jlimit (-1.0f, 1.0f, (a.getCentreY() - pt.y) / (a.getHeight() * 0.48f));
+    auto& t = drawn->lfo[(size_t) lfo];
+    if (connect && lastIndex >= 0 && lastIndex != idx)
+    {
+        const int step = idx > lastIndex ? 1 : -1;
+        for (int i = lastIndex; i != idx; i += step)
+            t.pts[(size_t) i].store (lastValue + (v - lastValue) * (float) (i - lastIndex) / (float) (idx - lastIndex));
+    }
+    t.pts[(size_t) idx].store (v);
+    lastIndex = idx; lastValue = v;
+    ++drawn->changeCounter;
+    if (auto& hook = userActivityHook()) hook();
+    refresh();
+}
+
+void LfoView::mouseDown (const juce::MouseEvent& e)
+{
+    if (drawn == nullptr) return;
+    if (e.mods.isPopupMenu()) { showTools(); return; }
+    makeCustom();
+    lastIndex = -1;
+    drawAt (e.position, false);
+}
+
+void LfoView::mouseDrag (const juce::MouseEvent& e)
+{
+    if (drawn == nullptr || e.mods.isPopupMenu()) return;
+    drawAt (e.position, true);
+}
+
+void LfoView::mouseUp (const juce::MouseEvent&) { lastIndex = -1; }
+
+void LfoView::showTools()
+{
+    juce::PopupMenu m;
+    m.addItem (1, tr ("Draw: start from the current shape"));
+    m.addSeparator();
+    m.addItem (2, tr ("Smooth"));
+    m.addItem (3, tr ("Flip (upside down)"));
+    m.addItem (4, tr ("Reverse (back to front)"));
+    m.addItem (5, tr ("Random"));
+    m.addItem (6, tr ("Reset to sine"));
+    juce::Component::SafePointer<LfoView> safe (this);
+    m.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (this), [safe] (int r)
+    {
+        if (safe == nullptr || r <= 0) return;
+        auto& self = *safe;
+        self.makeCustom();
+        auto& t = self.drawn->lfo[(size_t) self.lfo];
+        float v[kLfoPoints];
+        for (int i = 0; i < kLfoPoints; ++i) v[i] = t.pts[(size_t) i].load();
+        juce::Random rnd;
+        for (int i = 0; i < kLfoPoints; ++i)
+        {
+            float n = v[i];
+            if (r == 2) n = (v[(i + kLfoPoints - 1) % kLfoPoints] + 2.0f * v[i] + v[(i + 1) % kLfoPoints]) * 0.25f;
+            if (r == 3) n = -v[i];
+            if (r == 4) n = v[kLfoPoints - 1 - i];
+            if (r == 5) n = rnd.nextFloat() * 2.0f - 1.0f;
+            if (r == 6) n = std::sin (6.2831853f * (float) i / (float) kLfoPoints);
+            t.pts[(size_t) i].store (n);
+        }
+        ++self.drawn->changeCounter;
+        if (auto& hook = userActivityHook()) hook();
+        self.refresh (true);
+    });
 }
 
 void LfoView::paint (juce::Graphics& g)
@@ -716,17 +1053,18 @@ void LfoView::paint (juce::Graphics& g)
     g.fillRoundedRectangle (r, 5.0f);
     g.setColour (colours::edge.withAlpha (0.7f));
     g.drawRoundedRectangle (r.reduced (0.5f), 5.0f, 1.0f);
-    auto area = r.reduced (8.0f, 10.0f);
+    auto area = plotArea();
 
     g.setColour (colours::edge);
     g.drawHorizontalLine ((int) area.getCentreY(), area.getX(), area.getRight());
 
     const int shape = lastShape < 0 ? 0 : lastShape;
+    const LfoDrawn* table = drawn != nullptr ? &drawn->lfo[(size_t) lfo] : nullptr;
     juce::Path p;
     const int points = 200;
     Rng rng; rng.seed (99);
     float held = rng.bi(), prev = rng.bi(), next = rng.bi();
-    const int cycles = (shape >= 9) ? 3 : 1;
+    const int cycles = (shape == 9 || shape == 10) ? 3 : 1;
     int lastCyc = 0;
     for (int i = 0; i <= points; ++i)
     {
@@ -734,7 +1072,7 @@ void LfoView::paint (juce::Graphics& g)
         const int cyc = (int) x;
         if (cyc != lastCyc) { lastCyc = cyc; held = rng.bi(); prev = next; next = rng.bi(); }
         const float ph = x - (float) cyc;
-        const float v = Lfo::shapeValue (shape, ph, held, prev, next);
+        const float v = Lfo::shapeValue (shape, std::min (ph, 0.9999f), held, prev, next, table);
         const float px = area.getX() + (float) i / (float) points * area.getWidth();
         const float py = area.getCentreY() - v * area.getHeight() * 0.48f;
         if (i == 0) p.startNewSubPath (px, py); else p.lineTo (px, py);
@@ -743,6 +1081,22 @@ void LfoView::paint (juce::Graphics& g)
     g.strokePath (p, juce::PathStrokeType (4.0f));
     g.setColour (colours::mod);
     g.strokePath (p, juce::PathStrokeType (1.6f));
+
+    if (shape == kLfoShapeCustom && table != nullptr)
+        for (int i = 0; i < kLfoPoints; ++i)
+        {
+            const float px = area.getX() + (float) i / (float) kLfoPoints * area.getWidth();
+            const float py = area.getCentreY() - table->pts[(size_t) i].load() * area.getHeight() * 0.48f;
+            g.setColour (juce::Colour (0xfff0e6df).withAlpha (0.85f));
+            g.fillEllipse (px - 2.0f, py - 2.0f, 4.0f, 4.0f);
+        }
+
+    if (drawn != nullptr && isMouseOver (true))
+    {
+        g.setColour (colours::textDim);
+        g.setFont (PyraLookAndFeel::font (10.5f));
+        g.drawText (tr ("draw with the mouse - right-click: tools"), r.reduced (6.0f, 3.0f), juce::Justification::bottomLeft);
+    }
 
     const bool uni = st.getRawParameterValue (pid::lfo (lfo, "uni"))->load() > 0.5f;
     const float lv = uni ? live * 2.0f - 1.0f : live;

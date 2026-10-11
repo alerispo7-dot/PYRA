@@ -8,7 +8,7 @@ UndoHistory::UndoHistory (PyraAudioProcessor& p) : proc (p) {}
 int UndoHistory::patternSignature() const
 {
     return proc.arpPattern.changeCounter.load() * 92821 + proc.chordPattern.changeCounter.load() * 7919
-           + proc.glitchPattern.changeCounter.load() * 31;
+           + proc.glitchPattern.changeCounter.load() * 31 + proc.lfoDrawn.changeCounter.load() * 3;
 }
 
 UndoHistory::Snapshot UndoHistory::capture() const
@@ -20,6 +20,7 @@ UndoHistory::Snapshot UndoHistory::capture() const
     obj->setProperty ("arp", juce::var (proc.arpPattern.toTree().createXml()->toString()));
     obj->setProperty ("chords", proc.chordPattern.toVar());
     obj->setProperty ("glitch", proc.glitchPattern.toVar());
+    obj->setProperty ("lfoDraw", proc.lfoDrawn.toVar());
     s.patterns = juce::var (obj);
     s.presetId = proc.presetId;
     s.presetName = proc.presetName;
@@ -54,6 +55,7 @@ void UndoHistory::apply (const Snapshot& s)
         for (int k = 0; k < kMaxGlitchSteps; ++k) gl[k] = proc.glitchPattern.steps[(size_t) k].lock.load();
         proc.chordPattern.fromVar (s.patterns["chords"]);
         proc.glitchPattern.fromVar (s.patterns["glitch"]);
+        proc.lfoDrawn.fromVar (s.patterns["lfoDraw"]);
         for (int k = 0; k < kMaxChordSlots; ++k) proc.chordPattern.slots[(size_t) k].lock = cl[k];
         for (int k = 0; k < kMaxGlitchSteps; ++k) proc.glitchPattern.steps[(size_t) k].lock = gl[k];
     }

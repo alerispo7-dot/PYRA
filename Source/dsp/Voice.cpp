@@ -95,6 +95,8 @@ void Voice::start (int midiNote, int midiChannel, float vel, float glideFrom, co
         for (auto& f : filters) f.reset();
         for (auto& p : pink) p = 0.0f;
         brown = noiseLp = noiseOut = noiseHold = 0.0f;
+        nzPrev = nzPrev2 = nzEnv = nzLow = nzBand = nzS1 = nzGate = 0.0f;
+        nzPh = rng.uni();
         subGainL = subGainR = noiseGainL = noiseGainR = 0.0f;
     }
 
@@ -455,7 +457,30 @@ void Voice::render (float* outL, float* outR, int n, const VoiceContext& ctx)
                 case 0:  x = std::sin (kTwoPi * t); break;
                 case 1:  x = 4.0f * std::abs (t - 0.5f) - 1.0f; break;
                 case 2:  x = 2.0f * t - 1.0f - polyBlep (t, subInc); break;
-                default: x = (t < 0.5f ? 1.0f : -1.0f) + polyBlep (t, subInc) - polyBlep (frac (t + 0.5f), subInc); break;
+                case 3:  x = (t < 0.5f ? 1.0f : -1.0f) + polyBlep (t, subInc) - polyBlep (frac (t + 0.5f), subInc); break;
+                case 4:  // pulse 25%
+                case 5:  // pulse 10%
+                {
+                    const float pw = s.sub.shape == 4 ? 0.25f : 0.1f;
+                    x = (t < pw ? 1.0f : -1.0f) + polyBlep (t, subInc) - polyBlep (frac (t + 1.0f - pw), subInc) - (2.0f * pw - 1.0f);
+                    break;
+                }
+                case 6:  x = std::tanh (4.0f * std::sin (kTwoPi * t)) * 1.0007f; break;                 // rounded square
+                case 7:  x = 2.0f * std::max (0.0f, std::sin (kTwoPi * t)) - 0.64f; break;              // half sine
+                case 8:  x = 2.0f * std::abs (std::sin (kTwoPi * t)) - 1.27f; break;                   // full-wave (octave up)
+                case 9:  x = (std::sin (kTwoPi * t) + 0.5f * std::sin (kTwoPi * 2.0f * t)) / 1.3f; break;   // + octave
+                case 10: x = (std::sin (kTwoPi * t) + 0.4f * std::sin (kTwoPi * 3.0f * t)) / 1.2f; break;   // + twelfth
+                case 11: x = (std::sin (kTwoPi * t) + 0.6f * std::sin (kTwoPi * 2.0f * t) + 0.3f * std::sin (kTwoPi * 4.0f * t)) / 1.5f; break;
+                case 12: x = std::tanh (3.0f * std::sin (kTwoPi * t)) / 0.995f; break;                 // driven sine
+                case 13: x = std::tanh (1.6f * std::sin (kTwoPi * t) + 0.2f * std::sin (kTwoPi * 2.0f * t)) / 0.93f; break;   // 808
+                case 14:  // warm saw: the first 6 harmonics only
+                {
+                    x = 0.0f;
+                    for (int k = 1; k <= 6; ++k) x += std::sin (kTwoPi * (float) k * t) / (float) k;
+                    x *= 0.55f;
+                    break;
+                }
+                default: x = (std::sin (kTwoPi * t) - std::sin (kTwoPi * 3.0f * t) / 9.0f + std::sin (kTwoPi * 5.0f * t) / 25.0f) * 0.86f; break;   // soft triangle
             }
             subPhase += subInc;
             if (subPhase >= 1.0f) subPhase -= 1.0f;
@@ -512,6 +537,67 @@ void Voice::render (float* outL, float* outR, int n, const VoiceContext& ctx)
                 case 4:
                     if (--noiseCounter <= 0) { noiseHold = rng.bi(); noiseCounter = 3 + (int) (rng.next() % 14u); }
                     x = noiseHold;
+                    break;
+                case 5:  x = (w - nzPrev) * 0.7f; nzPrev = w; break;                                    // blue
+                case 6:  { const float d = w - nzPrev; x = (d - nzPrev2) * 0.45f; nzPrev2 = d; nzPrev = w; break; }   // violet
+                case 7:  // vinyl: soft hiss and pops
+                    if (rng.uni() < 10.0f / sr) nzEnv = rng.bi() * 0.9f;
+                    nzEnv *= 0.88f;
+                    nzS1 += (w - nzS1) * 0.3f;
+                    x = nzS1 * 0.12f + nzEnv;
+                    break;
+                case 8:  x = ((w - nzPrev) * 0.5f + w * 0.3f) * 0.8f; nzPrev = w; break;                 // tape hiss
+                case 9:  // breath: soft noise that breathes in and out
+                {
+                    nzPh += 0.35f / sr; if (nzPh >= 1.0f) nzPh -= 1.0f;
+                    const float amp = 0.25f + 0.75f * std::pow (std::sin (kPi * nzPh), 2.0f);
+                    nzS1 += (w - nzS1) * 0.22f;
+                    x = nzS1 * 3.0f * amp;
+                    break;
+                }
+                case 10: // wind: a band of noise drifting up and down
+                {
+                    nzPh += 0.11f / sr; if (nzPh >= 1.0f) nzPh -= 1.0f;
+                    const float fc = 250.0f + 1100.0f * (0.5f + 0.5f * std::sin (kTwoPi * nzPh)) * (0.8f + 0.2f * std::sin (kTwoPi * nzPh * 3.7f));
+                    const float ff = std::min (0.9f, 2.0f * std::sin (kPi * fc / sr));
+                    nzLow += ff * nzBand;
+                    const float high = w - nzLow - 0.18f * nzBand;
+                    nzBand += ff * high;
+                    x = nzBand * 1.6f;
+                    break;
+                }
+                case 11: // ocean: deep rumble in slow waves
+                {
+                    nzPh += 0.09f / sr; if (nzPh >= 1.0f) nzPh -= 1.0f;
+                    const float sw = std::max (0.0f, std::sin (kTwoPi * nzPh));
+                    brown = (brown + 0.02f * w) / 1.02f;
+                    nzS1 += (w - nzS1) * 0.05f;
+                    x = (brown * 10.0f + nzS1 * 2.5f) * (0.25f + 0.75f * sw * sw);
+                    break;
+                }
+                case 12: // rain: many small drops
+                    if (rng.uni() < 380.0f / sr) nzEnv = 0.25f + 0.75f * rng.uni();
+                    nzEnv *= 0.993f;
+                    x = (w - nzPrev) * nzEnv * 0.8f + w * 0.04f; nzPrev = w;
+                    break;
+                case 13: // fire: crackles over a low roar
+                    if (rng.uni() < 22.0f / sr) nzEnv = rng.bi();
+                    nzEnv *= 0.82f;
+                    brown = (brown + 0.02f * w) / 1.02f;
+                    x = nzEnv * 0.9f + brown * 5.0f;
+                    break;
+                case 14: // bit-crushed: 3 bits, low sample rate
+                    if (--noiseCounter <= 0) { noiseHold = std::round (w * 3.5f) / 3.5f; noiseCounter = 6; }
+                    x = noiseHold * 0.8f;
+                    break;
+                case 15: // static: bursts of harsh noise
+                    if (rng.uni() < 5.0f / sr) nzGate = nzGate > 0.5f ? 0.0f : 1.0f;
+                    x = nzGate > 0.5f ? (w > 0.0f ? 0.6f : -0.6f) * (0.5f + 0.5f * rng.uni()) : w * 0.04f;
+                    break;
+                case 16: // geiger: sparse clicks
+                    if (rng.uni() < 28.0f / sr) nzEnv = rng.uni() < 0.5f ? 1.0f : -1.0f;
+                    nzEnv *= 0.55f;
+                    x = nzEnv;
                     break;
                 default: x = w; break;
             }

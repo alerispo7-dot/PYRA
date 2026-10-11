@@ -115,7 +115,6 @@ namespace
 
 const juce::Image& logo()       { static auto i = asset (BinaryData::logo_png, BinaryData::logo_pngSize); return i; }
 const juce::Image& wordmark()   { static auto i = asset (BinaryData::wordmark_png, BinaryData::wordmark_pngSize); return i; }
-const juce::Image& ballroom()   { static auto i = asset (BinaryData::ballroom_jpg, BinaryData::ballroom_jpgSize); return i; }
 const juce::Image& stone()      { static auto i = asset (BinaryData::stone_jpg, BinaryData::stone_jpgSize); return i; }
 const juce::Image& lava (int)   { static auto i = asset (BinaryData::magma_jpg, BinaryData::magma_jpgSize); return i; }
 const juce::Image& basalt()     { static auto i = asset (BinaryData::bg_jpg, BinaryData::bg_jpgSize); return i; }

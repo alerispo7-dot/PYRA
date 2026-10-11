@@ -1,0 +1,170 @@
+170|Rumore più scuro (sinistra) o più brillante (destra).|Ruido más oscuro (izquierda) o más brillante (derecha).|Bruit plus sombre (gauche) ou plus brillant (droite).|Dunkleres (links) oder helleres (rechts) Rauschen.|Ruído mais escuro (esquerda) ou mais brilhante (direita).
+171|Distorsione più scura o più brillante.|Distorsión más oscura o más brillante.|Distorsion plus sombre ou plus brillante.|Dunklere oder hellere Verzerrung.|Distorção mais escura ou mais brilhante.
+172|Nastro più scuro o più brillante.|Cinta más oscura o más brillante.|Bande plus sombre ou plus brillante.|Dunkleres oder helleres Band.|Fita mais escura ou mais brilhante.
+173|=|Curva Dec.|Courbe Déc.|Dec.-Kurve|Curva Dec.
+174|=|Decaimiento|Décroissance|Decay|Decaimento
+175|Decadimento: tempo per scendere al livello di sostegno.|Decaimiento: tiempo para bajar al nivel de sostenido.|Décroissance : temps pour descendre au niveau de maintien.|Decay: Zeit bis zum Sustain-Pegel.|Decaimento: tempo para descer ao nível de sustentação.
+176|=|Destinos iniciales: brillo, wavetable, drive y reverb. Cámbialos como quieras.|Cibles de départ : brillance, wavetable, drive et réverbération. Changez-les librement.|Startziele: Helligkeit, Wavetable, Drive und Hall. Ändere sie nach Belieben.|Alvos iniciais: brilho, wavetable, drive e reverb. Mude-os à vontade.
+177|=|Retardo|Retard|Verzögerung|Atraso
+178|Tempo di ritardo in millisecondi (quando Sync è spento).|Tiempo de retardo en milisegundos (con Sync apagado).|Temps de retard en millisecondes (Sync éteint).|Verzögerungszeit in Millisekunden (wenn Sync aus ist).|Tempo de atraso em milissegundos (com Sync desligado).
+179|Tempo di ritardo in valori di nota (quando Sync è acceso).|Tiempo de retardo en valores de nota (con Sync activo).|Temps de retard en valeurs de note (Sync allumé).|Verzögerungszeit in Notenwerten (wenn Sync an ist).|Tempo de atraso em valores de nota (com Sync ligado).
+180|Ritarda ogni secondo step per un andamento shuffle.|Retrasa cada segundo paso para un aire shuffle.|Retarde un pas sur deux pour un groove shuffle.|Verzögert jeden zweiten Step für ein Shuffle-Gefühl.|Atrasa cada segundo passo para um balanço shuffle.
+181|=|Eliminar preset|Supprimer le preset|Preset löschen|Excluir preset
+182|=|Densidad|Densité|Dichte|Densidade
+183|=|Profundidad|Profondeur|Tiefe|Profundidade
+184|Profondità del movimento del chorus.|Profundidad del movimiento del chorus.|Profondeur du mouvement du chorus.|Tiefe der Chorus-Bewegung.|Profundidade do movimento do chorus.
+185|Profondità dello sweep del flanger.|Profundidad del barrido del flanger.|Profondeur du balayage du flanger.|Tiefe des Flanger-Sweeps.|Profundidade da varredura do flanger.
+186|Profondità dello sweep del phaser.|Profundidad del barrido del phaser.|Profondeur du balayage du phaser.|Tiefe des Phaser-Sweeps.|Profundidade da varredura do phaser.
+187|=|Desafinación|Désaccord|Verstimmung|Desafinação
+188|=|Digital|Numérique|Digital|Digital
+189|Digitale, eco a nastro o ping-pong (rimbalza tra sinistra e destra).|Digital, eco de cinta o ping-pong (rebota entre izquierda y derecha).|Numérique, écho à bande ou ping-pong (rebondit entre gauche et droite).|Digital, Bandecho oder Ping-Pong (springt zwischen links und rechts).|Digital, eco de fita ou ping-pong (quica entre esquerda e direita).
+190|=|Dism|Dim|Verm|Dim
+191|=|Disminuida|Diminuée|Vermindert|Diminuta
+192|=|Diodo|Diode|Diode|Diodo
+193|LP a diodo|LP diodo|LP diode|Dioden-LP|LP diodo
+194|=|Directo|Direct|Direkt|Direto
+195|=|Distorsión (varios modelos), compresor, EQ|Distorsion (plusieurs modèles), compresseur, EQ|Verzerrung (mehrere Modelle), Kompressor, EQ|Distorção (vários modelos), compressor, EQ
+196|=|Dórica|Dorien|Dorisch|Dórica
+197|Gate puntato|Gate con puntillo|Gate pointé|Punktiertes Gate|Gate pontuado
+198|=|Abajo|Bas|Ab|Para baixo
+199|=|Abajo-Arriba|Bas-Haut|Ab-Auf|Baixo-Cima
+200|=|Downsample|Sous-échantillonnage|Downsample|Downsample
+201|=|Arrastra ENV sobre una perilla|Glissez ENV sur un bouton|ENV auf einen Regler ziehen|Arraste ENV para um botão
+202|=|Arrastra aquí una fuente de modulación. Clic derecho para opciones.|Glissez ici une source de modulation. Clic droit pour les options.|Zieh eine Modulationsquelle hierher. Rechtsklick für Optionen.|Arraste aqui uma fonte de modulação. Clique direito para opções.
+203|=|Arrástralo a una pista de tu DAW para tener los acordes en MIDI. Clic para guardar un archivo .mid.|Glissez-le sur une piste de votre DAW pour obtenir les accords en MIDI. Cliquez pour enregistrer un fichier .mid.|Zieh es auf eine Spur deiner DAW, um die Akkorde als MIDI zu bekommen. Klicke, um eine .mid-Datei zu speichern.|Arraste para uma faixa da sua DAW para ter os acordes em MIDI. Clique para salvar um arquivo .mid.
+204|=|Arrástralo a una pista de tu DAW para tener el patrón en MIDI. Clic para guardar un archivo .mid.|Glissez-le sur une piste de votre DAW pour obtenir le motif en MIDI. Cliquez pour enregistrer un fichier .mid.|Zieh es auf eine Spur deiner DAW, um das Pattern als MIDI zu bekommen. Klicke, um eine .mid-Datei zu speichern.|Arraste para uma faixa da sua DAW para ter o padrão em MIDI. Clique para salvar um arquivo .mid.
+205|=|Arrástrala sobre cualquier perilla: una macro puede mover muchas perillas a la vez|Glissez-la sur n'importe quel bouton : une macro peut bouger plusieurs boutons à la fois|Zieh sie auf einen beliebigen Regler: Ein Makro kann viele Regler gleichzeitig bewegen|Arraste para qualquer botão: uma macro pode mover muitos botões de uma vez
+206|Trascina il punto: sinistra / destra = taglio, su / giù = risonanza. Doppio clic: azzera.|Arrastra el punto: izquierda / derecha = corte, arriba / abajo = resonancia. Doble clic: restablecer.|Déplacez le point : gauche / droite = coupure, haut / bas = résonance. Double-clic : réinitialiser.|Zieh den Punkt: links / rechts = Cutoff, auf / ab = Resonanz. Doppelklick: zurücksetzen.|Arraste o ponto: esquerda / direita = corte, cima / baixo = ressonância. Duplo clique: redefinir.
+207|Trascina i punti: attacco (in alto), decadimento e sostegno (al centro), rilascio (alla fine). Trascina in su o in giù il centro di una curva per piegarla. Doppio clic su un punto per azzerarlo.|Arrastra los puntos: ataque (arriba), decaimiento y sostenido (centro), liberación (final). Arrastra arriba o abajo el centro de una curva para curvarla. Doble clic en un punto para restablecerlo.|Déplacez les points : attaque (en haut), décroissance et maintien (au milieu), relâchement (à la fin). Glissez le milieu d'une courbe vers le haut ou le bas pour la courber. Double-clic sur un point pour le réinitialiser.|Zieh die Punkte: Attack (oben), Decay und Sustain (Mitte), Release (Ende). Zieh die Mitte einer Kurve nach oben oder unten, um sie zu biegen. Doppelklick auf einen Punkt setzt ihn zurück.|Arraste os pontos: ataque (em cima), decaimento e sustentação (no meio), liberação (no fim). Arraste o meio de uma curva para cima ou para baixo para curvá-la. Duplo clique num ponto para redefini-lo.
+208|Trascina su / giù per muoverti nella wavetable, a sinistra / destra per cambiare il WARP. Doppio clic: torna al primo frame.|Arrastra arriba / abajo para moverte por la wavetable, izquierda / derecha para cambiar el WARP. Doble clic: vuelve al primer cuadro.|Glissez haut / bas pour parcourir la wavetable, gauche / droite pour changer le WARP. Double-clic : retour à la première image.|Zieh auf / ab, um durch die Wavetable zu fahren, links / rechts für die WARP-Menge. Doppelklick: zurück zum ersten Frame.|Arraste para cima / baixo para percorrer a wavetable, esquerda / direita para mudar o WARP. Duplo clique: volta ao primeiro quadro.
+209|Disegna la tua forma dell'LFO con il mouse (diventa la forma Personalizzata). Clic destro: strumenti (ammorbidisci, capovolgi, inverti, casuale...).|Dibuja tu propia forma de LFO con el ratón (se convierte en la forma Personalizada). Clic derecho: herramientas (suavizar, voltear, invertir, aleatorio...).|Dessinez votre propre forme de LFO à la souris (elle devient la forme Personnalisée). Clic droit : outils (lisser, retourner, inverser, aléatoire...).|Zeichne deine eigene LFO-Form mit der Maus (sie wird zur eigenen Form). Rechtsklick: Werkzeuge (glätten, spiegeln, umkehren, zufällig...).|Desenhe sua própria forma de LFO com o mouse (ela vira a forma Personalizada). Clique direito: ferramentas (suavizar, virar, inverter, aleatório...).
+210|Disegna: parti dalla forma attuale|Dibujar: partir de la forma actual|Dessiner : partir de la forme actuelle|Zeichnen: von der aktuellen Form ausgehen|Desenhar: começar da forma atual
+211|=|Soñador|Rêveur|Verträumt|Sonhador
+212|=|Deriva|Dérive|Drift|Drift
+213|=|Drift: los osciladores se desafinan un poco, como el hardware real. Variación de voces: cada nota es un poco distinta (afinación, filtro, envolvente). Ambos a 0 = sonido digital limpio. Más herramientas analógicas llegan con la sección ANALOG en la fase 3.|Dérive : les oscillateurs se désaccordent un peu, comme du vrai matériel. Variation des voix : chaque note est un peu différente (hauteur, filtre, enveloppe). Les deux à 0 = son numérique propre. D'autres outils analogiques arrivent avec la section ANALOG en phase 3.|Drift: Oszillatoren verstimmen sich leicht wie echte Hardware. Stimmenstreuung: Jede Note ist etwas anders (Tonhöhe, Filter, Hüllkurve). Beide auf 0 = sauberer digitaler Klang. Weitere analoge Werkzeuge kommen mit der ANALOG-Sektion in Phase 3.|Drift: os osciladores desafinam um pouco, como hardware real. Variação de vozes: cada nota é um pouco diferente (afinação, filtro, envelope). Ambos em 0 = som digital limpo. Mais ferramentas analógicas chegam com a seção ANALOG na fase 3.
+214|=|Drift: afinación que vaga lentamente. Variación de voces: cada nota un poco distinta. Tolerancia: osciladores y filtros nunca idénticos.|Dérive : hauteur qui erre lentement. Variation des voix : chaque note un peu différente. Tolérance : oscillateurs et filtres jamais parfaitement identiques.|Drift: langsam wandernde Tonhöhe. Stimmenstreuung: jede Note etwas anders. Toleranz: Oszillatoren und Filter nie ganz gleich.|Drift: afinação que vagueia devagar. Variação de vozes: cada nota um pouco diferente. Tolerância: osciladores e filtros nunca idênticos.
+215|=|Drive|Drive|Drive|Drive
+216|Saturati|Saturado|Saturé|Gesättigt|Saturado
+217|Sinusoide saturata|Seno saturado|Sinus saturé|Gesättigter Sinus|Senoide saturada
+218|=|Drop 2|Drop 2|Drop 2|Drop 2
+219|=|Batería|Batterie|Drums|Bateria
+220|BP doppio|BP doble|BP double|Doppel-BP|BP duplo
+221|*
+222|=|EFECTO A PINTAR|EFFET À PEINDRE|EFFEKT ZUM MALEN|EFEITO A PINTAR
+223|=|Editar esta capa: todas las páginas (SYNTH, FX, ARP...) muestran ahora este sonido|Modifier cette couche : toutes les pages (SYNTH, FX, ARP...) montrent maintenant ce son|Diese Ebene bearbeiten: Alle Seiten (SYNTH, FX, ARP...) zeigen jetzt diesen Klang|Editar esta camada: todas as páginas (SYNTH, FX, ARP...) mostram agora este som
+224|Elastico|Elástico|Élastique|Elastisch|Elástico
+225|=|Emoción (para RANDOM)|Émotion (pour RANDOM)|Emotion (für RANDOM)|Emoção (para RANDOM)
+226|Emozione per RANDOM: progressione, scala, ritmo e disposizione seguono lo stato d'animo.|Emoción para RANDOM: progresión, escala, ritmo y disposición siguen el estado de ánimo.|Émotion pour RANDOM : progression, gamme, rythme et voicing suivent l'humeur.|Emotion für RANDOM: Progression, Skala, Rhythmus und Voicing folgen der Stimmung.|Emoção para RANDOM: progressão, escala, ritmo e disposição seguem o clima.
+227|=|Emoción para RANDOM: la progresión, la escala, el ritmo y la disposición siguen el estado de ánimo que elijas. Cualquiera = sin preferencia.|Émotion pour RANDOM : la progression, la gamme, le rythme et le voicing suivent l'humeur choisie. N'importe = sans préférence.|Emotion für RANDOM: Progression, Skala, Rhythmus und Voicing folgen der gewählten Stimmung. Beliebig = keine Vorgabe.|Emoção para RANDOM: a progressão, a escala, o ritmo e a disposição seguem o clima escolhido. Qualquer = sem preferência.
+228|=|Vacío - haz clic para cargar un preset|Vide - cliquez pour charger un preset|Leer - klicke, um ein Preset zu laden|Vazio - clique para carregar um preset
+229|*
+230|=|Env 1 = volumen|Env 1 = volume|Env 1 = Lautstärke|Env 1 = volume
+231|=|Env 1 siempre da forma al volumen. Arrástrala sobre una perilla para modularla también.|Env 1 façonne toujours le volume. Glissez-la sur un bouton pour le moduler aussi.|Env 1 formt immer die Lautstärke. Zieh sie auf einen Regler, um ihn ebenfalls zu modulieren.|Env 1 sempre molda o volume. Arraste para um botão para modulá-lo também.
+232|=|Env 2|Env 2|Env 2|Env 2
+233|*
+234|*
+235|=|Envolvente|Enveloppe|Hüllkurve|Envelope
+236|=|Épico|Épique|Episch|Épico
+237|=|Etéreo|Éthéré|Ätherisch|Etéreo
+238|=|Eufórico|Euphorique|Euphorisch|Eufórico
+239|Ogni nota è leggermente diversa per intonazione, filtro e tempi.|Cada nota es ligeramente distinta en afinación, filtro y tiempo.|Chaque note est légèrement différente en hauteur, filtre et timing.|Jede Note ist in Tonhöhe, Filter und Timing leicht anders.|Cada nota é ligeiramente diferente em afinação, filtro e tempo.
+240|=|Malvado|Maléfique|Böse|Maligno
+241|=|Exp. abajo|Exp. bas|Exp. ab|Exp. baixo
+242|=|Exp. arriba|Exp. haut|Exp. auf|Exp. cima
+243|*
+244|*
+245|=|FILTRO|FILTRE|FILTER|FILTRO
+246|=|FLANGER|FLANGER|FLANGER|FLANGER
+247|*
+248|=|FX|FX|FX|FX
+249|=|Preset de fábrica|Preset d'usine|Werks-Preset|Preset de fábrica
+250|=|Entrada|Fondu d'entrée|Einblenden|Entrada
+251|Veloce|Rápido|Rapide|Schnell|Rápido
+252|Tremolio rapido dell'intonazione del nastro.|Trémolo rápido de la afinación de la cinta.|Scintillement rapide de la hauteur de la bande.|Schnelles Flattern der Bandtonhöhe.|Tremulação rápida da afinação da fita.
+253|=|Favoritos|Favoris|Favoriten|Favoritos
+254|=|Realimentación|Réinjection|Rückkopplung|Realimentação
+255|Feedback: un flanger più tagliente, effetto jet.|Realimentación: un flanger más afilado, tipo jet.|Réinjection : un flanger plus tranchant, effet jet.|Rückkopplung: ein schärferer, düsenartiger Flanger.|Realimentação: um flanger mais agudo, tipo jato.
+256|Feedback: un chorus più forte e metallico.|Realimentación: un chorus más fuerte y metálico.|Réinjection : un chorus plus fort et plus métallique.|Rückkopplung: ein stärkerer, metallischerer Chorus.|Realimentação: um chorus mais forte e metálico.
+257|Feedback: un phaser più forte e risonante.|Realimentación: un phaser más fuerte y resonante.|Réinjection : un phaser plus fort et plus résonant.|Rückkopplung: ein stärkerer, resonanterer Phaser.|Realimentação: um phaser mais forte e ressonante.
+258|Feedback: spirali infinite che salgono o scendono.|Realimentación: espirales infinitas que suben o bajan.|Réinjection : spirales sans fin qui montent ou descendent.|Rückkopplung: endlose steigende oder fallende Spiralen.|Realimentação: espirais infinitas que sobem ou descem.
+259|Feedback: quante ripetizioni.|Realimentación: cuántas repeticiones.|Réinjection : combien de répétitions.|Rückkopplung: wie viele Wiederholungen.|Realimentação: quantas repetições.
+260|=|Quinta|Quinte|Quinte|Quinta
+261|=|Filtro 1|Filtre 1|Filter 1|Filtro 1
+262|=|Filtro 1+2|Filtre 1+2|Filter 1+2|Filtro 1+2
+263|=|Filtro 2|Filtre 2|Filter 2|Filtro 2
+264|=|Barrido de filtro|Balayage du filtre|Filter-Sweep|Varredura do filtro
+265|Tipo di filtro: passa basso, passa alto, passa banda, notch, shelving, comb, formanti...|Tipo de filtro: pasa bajos, pasa altos, pasa banda, notch, shelving, comb, formantes...|Type de filtre : passe-bas, passe-haut, passe-bande, coupe-bande, plateaux, comb, formants...|Filtertyp: Tiefpass, Hochpass, Bandpass, Notch, Shelf, Comb, Formant...|Tipo de filtro: passa-baixa, passa-alta, passa-banda, notch, shelving, comb, formantes...
+266|=|Fino|Fin|Fein|Fino
+267|Accordatura fine in centesimi: piccole quantità lo rendono più spesso contro gli altri oscillatori.|Afinación fina en cents: pequeñas cantidades lo engordan frente a los otros osciladores.|Accord fin en cents : de petites valeurs l'épaississent face aux autres oscillateurs.|Feinstimmung in Cent: kleine Werte machen ihn gegenüber den anderen Oszillatoren dicker.|Afinação fina em cents: pequenas quantidades o deixam mais encorpado contra os outros osciladores.
+268|Accordatura fine del campione, in centesimi.|Afinación fina de la muestra, en cents.|Accord fin de l'échantillon, en cents.|Feinstimmung des Samples in Cent.|Afinação fina da amostra, em cents.
+269|Accordatura fine di tutto il synth, in centesimi.|Afinación fina de todo el sintetizador, en cents.|Accord fin de tout le synthé, en cents.|Feinstimmung des ganzen Synths in Cent.|Afinação fina de todo o sintetizador, em cents.
+270|Fuoco|Fuego|Feu|Feuer|Fogo
+271|Capovolgi (sotto sopra)|Voltear (al revés)|Retourner (à l'envers)|Spiegeln (auf den Kopf)|Virar (de cabeça para baixo)
+272|=|Flauta|Flûte|Flöte|Flauta
+273|=|Flutter|Flutter|Flutter|Flutter
+274|=|Focus|Focus|Fokus|Foco
+275|=|Pliegue|Repli|Falten|Dobra
+276|=|Para RANDOM: bajo = progresiones pop clásicas, alto = séptimas, novenas y acordes prestados|Pour RANDOM : bas = progressions pop classiques, haut = septièmes, neuvièmes et accords d'emprunt|Für RANDOM: niedrig = klassische Pop-Progressionen, hoch = Septimen, Nonen und geliehene Akkorde|Para RANDOM: baixo = progressões pop clássicas, alto = sétimas, nonas e acordes emprestados
+277|Per RANDOM: progressioni semplici o accordi più ricchi.|Para RANDOM: progresiones simples o acordes más ricos.|Pour RANDOM : progressions simples ou accords plus riches.|Für RANDOM: einfache Progressionen oder reichere Akkorde.|Para RANDOM: progressões simples ou acordes mais ricos.
+278|Formanti|Formantes|Formants|Formant|Formantes
+279|=|Libre|Libre|Frei|Livre
+280|=|Congelar|Geler|Einfrieren|Congelar
+281|=|Congelar: deja de grabar y sigue tocando granos de lo que hay en el búfer|Geler : arrête d'enregistrer et continue de jouer des grains de ce qui est dans la mémoire|Einfrieren: hört auf aufzunehmen und spielt weiter Grains aus dem Puffer|Congelar: para de gravar e continua tocando grãos do que está no buffer
+282|Congela il suono in una nuvola infinita.|Congela el sonido en una nube infinita.|Fige le son en un nuage sans fin.|Friert den Klang zu einer endlosen Wolke ein.|Congela o som numa nuvem infinita.
+283|=|Trompa|Cor|Horn|Trompa
+284|=|Desplazador de frecuencia|Décalage de fréquence|Frequenzverschiebung|Deslocador de frequência
+285|=|Frecuencia|Fréquence|Frequenz|Frequência
+286|Frequenza della banda alta.|Frecuencia de la banda alta.|Fréquence de la bande aiguë.|Frequenz des hohen Bands.|Frequência da banda alta.
+287|Frequenza della banda bassa.|Frecuencia de la banda baja.|Fréquence de la bande grave.|Frequenz des tiefen Bands.|Frequência da banda baixa.
+288|Frequenza della banda media.|Frecuencia de la banda media.|Fréquence de la bande médium.|Frequenz des mittleren Bands.|Frequência da banda média.
+289|Spostamento di frequenza o modulazione ad anello.|Desplazamiento de frecuencia o modulación en anillo.|Décalage de fréquence ou modulation en anneau.|Frequenzverschiebung oder Ringmodulation.|Deslocamento de frequência ou modulação em anel.
+290|=|Del banco de muestras:|De la banque d'échantillons :|Aus der Sample-Bank:|Do banco de amostras:
+291|Sinusoide raddrizzata|Seno rectificado|Sinus redressé|Gleichgerichteter Sinus|Senoide retificada
+292|*
+293|*
+294|=|GATE|GATE|GATE|GATE
+295|=|GLITCH|GLITCH|GLITCH|GLITCH
+296|=|GLITCH / GRANULAR / SHIFTER|GLITCH / GRANULAIRE / SHIFTER|GLITCH / GRANULAR / SHIFTER|GLITCH / GRANULAR / SHIFTER
+297|=|GRANULAR|GRANULAIRE|GRANULAR|GRANULAR
+298|Pausa prima che inizi il riverbero.|Pausa antes de que empiece la reverb.|Pause avant le début de la réverbération.|Lücke, bevor der Hall einsetzt.|Pausa antes de o reverb começar.
+299|=|Gate|Gate|Gate|Gate
+300|*
+301|*
+302|*
+303|*
+304|=|Glide|Glide|Glide|Glide
+305|=|Glide solo en legato|Glide seulement en legato|Glide nur bei Legato|Glide só em legato
+306|=|Glockenspiel|Glockenspiel|Glockenspiel|Glockenspiel
+307|=|Tamaño de grano|Taille du grain|Grain-Größe|Tamanho do grão
+308|=|Piano de cola|Piano à queue|Flügel|Piano de cauda
+309|=|Guitarras|Guitares|Gitarren|Guitarras
+310|*
+311|*
+312|*
+313|*
+314|Mezza sinusoide|Medio seno|Demi-sinus|Halber Sinus|Meia senoide
+315|=|Sala|Salle|Saal|Salão
+316|=|Feliz|Joyeux|Fröhlich|Feliz
+317|=|Recorte duro|Écrêtage dur|Hartes Clipping|Corte duro
+318|La velocity più forte che questo layer suona.|La velocidad más fuerte que toca esta capa.|La vélocité la plus forte que joue cette couche.|Die stärkste Anschlagstärke, die diese Ebene spielt.|A velocidade mais forte que esta camada toca.
+319|Armonici|Armónicos|Harmoniques|Harmonisch|Harmônicos
+320|=|Menor armónica|Mineure harmonique|Harmonisch Moll|Menor harmônica
+321|=|Arpa|Harpe|Harfe|Harpa
+322|Senti solo i layer in solo.|Escucha solo las capas en solo.|N'entendre que les couches en solo.|Nur die Solo-Ebenen hören.|Ouça só as camadas em solo.
+323|Battito|Latido|Battement|Herzschlag|Batimento
+324|Riquadri di aiuto|Burbujas de ayuda|Bulles d'aide|Hilfe-Blasen|Balões de ajuda
+325|Ritardo dell'aiuto|Retardo de la ayuda|Délai de l'aide|Hilfe-Verzögerung|Atraso da ajuda
+326|=|Heroico|Héroïque|Heroisch|Heroico
+327|=|Corte de agudos|Coupe-aigus|Höhen-Cut|Corte de agudos
+328|=|Frec. agudos|Fréq. aigus|Höhen-Freq.|Freq. agudos
+329|=|Gan. agudos|Gain aigus|Höhen-Gain|Ganho agudos
+330|=|Pasa altos|Passe-haut|Hochpass|Passa-alta
+331|Shelving alti|Shelf agudos|Plateau aigu|High-Shelf|Shelf agudos
+332|Il tasto più alto che questo layer suona.|La tecla más aguda que toca esta capa.|La touche la plus haute que joue cette couche.|Die höchste Taste, die diese Ebene spielt.|A tecla mais aguda que esta camada toca.
+333|=|Mantener|Maintien|Halten|Sustentação
+334|=|Mantener tecla|Maintenir la touche|Taste halten|Segurar tecla
+335|=|Mantener tecla: suena mientras mantienes una tecla. Latch: sigue sonando al soltarla (la misma tecla otra vez lo para). Play DAW: suena cuando tu DAW reproduce.|Maintenir la touche : joue tant que vous tenez une touche. Latch : continue après relâchement (la même touche à nouveau arrête). Lecture DAW : joue quand votre DAW joue.|Taste halten: spielt, solange du eine Taste hältst. Latch: spielt nach dem Loslassen weiter (dieselbe Taste stoppt). DAW-Wiedergabe: spielt, wenn deine DAW läuft.|Segurar tecla: toca enquanto você segura uma tecla. Latch: continua depois de soltar (a mesma tecla de novo para). Play da DAW: toca quando sua DAW toca.
+336|=|Mantén una tecla para tocar la progresión a tempo (C4-B4 = como se muestra, otras octavas la suben o bajan). Activa el ARP para arpegiar los acordes.|Maintenez une touche pour jouer la progression en rythme (C4-B4 = comme affiché, les autres octaves la décalent). Activez l'ARP pour arpéger les accords.|Halte eine Taste, um die Progression im Takt zu spielen (C4-B4 = wie angezeigt, andere Oktaven verschieben sie). Schalte ARP ein, um die Akkorde zu arpeggieren.|Segure uma tecla para tocar a progressão no tempo (C4-B4 = como mostrado, outras oitavas a deslocam). Ligue o ARP para arpejar os acordes.
+337|Tieni tasto, latch, o suona quando la DAW è in play.|Mantener tecla, latch o sonar cuando tu DAW reproduce.|Maintenir la touche, latch, ou jouer quand votre DAW joue.|Taste halten, Latch oder spielen, wenn deine DAW läuft.|Segurar tecla, latch ou tocar quando sua DAW toca.
+338|=|Esperanzado|Plein d'espoir|Hoffnungsvoll|Esperançoso
+339|=|Cuánto mueve FOCUS este destino (izquierda = dirección opuesta)|De combien FOCUS déplace cette cible (gauche = sens opposé)|Wie weit FOCUS dieses Ziel bewegt (links = Gegenrichtung)|Quanto o FOCUS move este alvo (esquerda = direção oposta)

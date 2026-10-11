@@ -1,0 +1,170 @@
+0|=|(editado)|(modifié)|(bearbeitet)|(editado)
+1|=|(separadas por comas). Nunca cambian el sonido ni tus proyectos.|(séparés par des virgules). Ils ne changent jamais le son ni vos projets.|(durch Kommas getrennt). Sie ändern nie den Klang oder deine Projekte.|(separadas por vírgulas). Nunca mudam o som nem seus projetos.
+2|=|(tuyo)|(perso)|(eigenes)|(seu)
+3|=|Pulso 1/4|Pulsation 1/4|Puls 1/4|Pulso 1/4
+4|=|Pulso 1/8|Pulsation 1/8|Puls 1/8|Pulso 1/8
+5|=|1.ª inv.|1er renv.|1. Umk.|1ª inv.
+6|=|2.ª inv.|2e renv.|2. Umk.|2ª inv.
+7|*
+8|Ronzio a 50 Hz (Europa) o 60 Hz (America).|Zumbido de 50 Hz (Europa) o 60 Hz (América).|Ronflement 50 Hz (Europe) ou 60 Hz (Amérique).|Brummen mit 50 Hz (Europa) oder 60 Hz (Amerika).|Zumbido de 50 Hz (Europa) ou 60 Hz (América).
+9|*
+10|*
+11|*
+12|Un andamento casuale diverso per il chaos.|Un patrón aleatorio distinto para el caos.|Un autre motif aléatoire pour le chaos.|Ein anderes Zufallsmuster für das Chaos.|Um padrão aleatório diferente para o caos.
+13|Un piccolo riquadro spiega un controllo quando il mouse si ferma sopra. Spegnilo quando conosci bene PYRA.|Una pequeña burbuja explica un control cuando el ratón se detiene sobre él. Desactívala cuando conozcas bien PYRA.|Une petite bulle explique une commande quand la souris s'arrête dessus. Désactivez-la quand vous connaissez bien PYRA.|Eine kleine Blase erklärt ein Bedienelement, wenn die Maus darauf ruht. Schalte sie aus, wenn du PYRA gut kennst.|Um pequeno balão explica um controle quando o mouse para sobre ele. Desligue quando conhecer bem o PYRA.
+14|*
+15|=|ACERCA DE|À PROPOS|INFO|SOBRE
+16|=|ACERCA DE LAS MUESTRAS|À PROPOS DES ÉCHANTILLONS|ÜBER DIE SAMPLES|SOBRE AS AMOSTRAS
+17|=|Perilla AGE: de nuevo de fábrica a sintetizador de 1978|Bouton AGE : du neuf au synthé de 1978|AGE-Regler: von fabrikneu bis Synth von 1978|Botão AGE: de novo de fábrica a sintetizador de 1978
+18|=|AGE sube a la vez la deriva, la variación de voces, la tolerancia, la saturación del circuito y un poco de ruido y zumbido. Cada perilla de la derecha también funciona sola.|AGE augmente ensemble la dérive, la variation des voix, la tolérance, la saturation du circuit et un peu de souffle et de ronflement. Chaque bouton à droite fonctionne aussi seul.|AGE erhöht gemeinsam Drift, Stimmenstreuung, Toleranz, Schaltungssättigung und etwas Rauschen und Brummen. Jeder Regler rechts wirkt auch allein.|AGE aumenta juntos o drift, a variação de vozes, a tolerância, a saturação do circuito e um pouco de ruído e zumbido. Cada botão à direita também funciona sozinho.
+19|=|CANTIDAD|QUANTITÉ|MENGE|QUANTIDADE
+20|=|CARÁCTER ANALÓGICO|CARACTÈRE ANALOGIQUE|ANALOGER CHARAKTER|CARÁTER ANALÓGICO
+21|=|ARP ACTIVO|ARP ACTIF|ARP AN|ARP LIGADO
+22|=|Unos 500 presets en categorías y subcategorías|Environ 500 presets en catégories et sous-catégories|Rund 500 Presets in Kategorien und Unterkategorien|Cerca de 500 presets em categorias e subcategorias
+23|Additiva|Aditiva|Additive|Additiv|Aditiva
+24|Aggiunge la nota fondamentale un'ottava sotto.|Añade la nota raíz una octava por debajo.|Ajoute la fondamentale une octave plus bas.|Fügt den Grundton eine Oktave tiefer hinzu.|Adiciona a nota fundamental uma oitava abaixo.
+25|Passa tutto|Pasa todo|Passe-tout|Allpass|Passa-tudo
+26|=|Todos los presets|Tous les presets|Alle Presets|Todos os presets
+27|=|También elige tonalidad, escala, ritmo, disposición y duración nuevas|Choisit aussi une nouvelle tonalité, gamme, rythme, voicing et durée|Wählt auch neue Tonart, Skala, Rhythmus, Voicing und Länge|Também escolhe nova tonalidade, escala, ritmo, disposição e duração
+28|Quantità di modulazione di frequenza: dal calore ai suoni metallici, come di campana.|Cantidad de modulación de frecuencia: del calor a tonos metálicos, como de campana.|Quantité de modulation de fréquence : de la chaleur aux sons métalliques, façon cloche.|Stärke der Frequenzmodulation: von warm bis metallisch, glockenartig.|Quantidade de modulação de frequência: do calor a tons metálicos, como de sino.
+29|Quantità di shimmer (scintillio un'ottava sopra).|Cantidad de shimmer (brillo una octava arriba).|Quantité de shimmer (scintillement à l'octave supérieure).|Menge an Shimmer (Glitzern eine Oktave höher).|Quantidade de shimmer (brilho uma oitava acima).
+30|Quantità del warp. Puoi anche trascinare a sinistra e a destra nello schermo.|Cantidad del warp. También puedes arrastrar a izquierda y derecha en la pantalla.|Quantité du warp. Vous pouvez aussi glisser à gauche et à droite dans l'écran.|Stärke des Warp. Du kannst auch im Display nach links und rechts ziehen.|Quantidade do warp. Você também pode arrastar para a esquerda e a direita na tela.
+31|Analogico|Analógico|Analogique|Analog|Analógico
+32|=|Enfadado / Agresivo|En colère / Agressif|Wütend / Aggressiv|Raivoso / Agressivo
+33|Animazioni|Animaciones|Animations|Animationen|Animações
+34|=|Cualquiera|N'importe|Beliebig|Qualquer
+35|=|Árabe|Arabe|Arabisch|Árabe
+36|Intorno alla manopola|Alrededor de la perilla|Autour du bouton|Um den Regler herum|Ao redor do botão
+37|=|Arpegios|Arpèges|Arpeggios|Arpejos
+38|=|Como se toca|Comme joué|Wie gespielt|Como tocado
+39|*
+40|=|Curva Ataq.|Courbe Att.|Att.-Kurve|Curva Atq.
+41|=|Ataque|Attaque|Attack|Ataque
+42|Attacco: tempo per arrivare al livello pieno. Puoi anche trascinare i punti nello schermo.|Ataque: tiempo para llegar al nivel máximo. También puedes arrastrar los puntos en la pantalla.|Attaque : temps pour atteindre le niveau maximal. Vous pouvez aussi déplacer les points dans l'écran.|Attack: Zeit bis zum vollen Pegel. Du kannst die Punkte auch im Display ziehen.|Ataque: tempo para chegar ao nível máximo. Você também pode arrastar os pontos na tela.
+43|=|Aum|Aug|Übm|Aum
+44|=|Auto (escala)|Auto (gamme)|Auto (Skala)|Auto (escala)
+45|=|Auto-pan|Auto-pan|Auto-Pan|Auto-pan
+46|*
+47|*
+48|*
+49|=|METALES Y VIENTOS|CUIVRES ET VENTS|BLECH & HOLZ|METAIS E SOPROS
+50|Torna alle impostazioni originali|Volver a los ajustes originales|Revenir aux réglages d'origine|Zurück zu den ursprünglichen Einstellungen|Voltar às configurações originais
+51|=|Soplido de fondo y zumbido eléctrico, solo mientras suenan notas.|Souffle de fond et ronflement secteur, seulement quand des notes jouent.|Grundrauschen und Netzbrummen, nur während Noten klingen.|Chiado de fundo e zumbido da rede, só enquanto as notas soam.
+52|Fruscio di fondo mentre le note suonano.|Soplido de fondo mientras suenan las notas.|Souffle de fond pendant que les notes jouent.|Grundrauschen, während Noten spielen.|Chiado de fundo enquanto as notas tocam.
+53|Bilanciamento tra suono pulito e compresso (compressione parallela).|Balance entre el sonido seco y el comprimido (compresión en paralelo).|Équilibre entre son sec et compressé (compression parallèle).|Balance zwischen trockenem und komprimiertem Klang (Parallelkompression).|Equilíbrio entre o som seco e o comprimido (compressão paralela).
+54|Bilanciamento tra suono pulito e filtrato.|Balance entre el sonido seco y el filtrado.|Équilibre entre son sec et filtré.|Balance zwischen trockenem und gefiltertem Klang.|Equilíbrio entre o som seco e o filtrado.
+55|Bilanciamento tra suono pulito e spostato.|Balance entre el sonido seco y el desplazado.|Équilibre entre son sec et décalé.|Balance zwischen trockenem und verschobenem Klang.|Equilíbrio entre o som seco e o deslocado.
+56|Bilanciamento tra suono pulito e chorus.|Balance entre el sonido seco y el chorus.|Équilibre entre son sec et chorus.|Balance zwischen trockenem Klang und Chorus.|Equilíbrio entre o som seco e o chorus.
+57|Bilanciamento tra suono pulito ed echi.|Balance entre el sonido seco y los ecos.|Équilibre entre son sec et échos.|Balance zwischen trockenem Klang und Echos.|Equilíbrio entre o som seco e os ecos.
+58|Bilanciamento tra suono pulito e flanger.|Balance entre el sonido seco y el flanger.|Équilibre entre son sec et flanger.|Balance zwischen trockenem Klang und Flanger.|Equilíbrio entre o som seco e o flanger.
+59|Bilanciamento tra suono pulito e grani.|Balance entre el sonido seco y los granos.|Équilibre entre son sec et grains.|Balance zwischen trockenem Klang und Grains.|Equilíbrio entre o som seco e os grãos.
+60|Bilanciamento tra suono pulito e phaser.|Balance entre el sonido seco y el phaser.|Équilibre entre son sec et phaser.|Balance zwischen trockenem Klang und Phaser.|Equilíbrio entre o som seco e o phaser.
+61|Bilanciamento tra suono pulito e riverbero.|Balance entre el sonido seco y la reverb.|Équilibre entre son sec et réverbération.|Balance zwischen trockenem Klang und Hall.|Equilíbrio entre o som seco e o reverb.
+62|Bilanciamento tra suono pulito e nastro.|Balance entre el sonido seco y la cinta.|Équilibre entre son sec et bande.|Balance zwischen trockenem Klang und Band.|Equilíbrio entre o som seco e a fita.
+63|Bilanciamento tra la voce centrale e le voci unisono scordate.|Balance entre la voz central y las voces unísono desafinadas.|Équilibre entre la voix centrale et les voix unisson désaccordées.|Balance zwischen der mittleren Stimme und den verstimmten Unisono-Stimmen.|Equilíbrio entre a voz central e as vozes uníssono desafinadas.
+64|Bilanciamento tra suono pulito e distorto.|Balance entre el sonido limpio y el distorsionado.|Équilibre entre son propre et distordu.|Balance zwischen sauberem und verzerrtem Klang.|Equilíbrio entre o som limpo e o distorcido.
+65|Bilanciamento tra suono pulito e glitch.|Balance entre el sonido limpio y los glitches.|Équilibre entre son propre et glitches.|Balance zwischen sauberem Klang und Glitches.|Equilíbrio entre o som limpo e os glitches.
+66|Bilanciamento tra suono pulito e suono filtrato.|Balance entre el sonido seco y el sonido filtrado.|Équilibre entre le son sec et le son filtré.|Balance zwischen trockenem und gefiltertem Klang.|Equilíbrio entre o som seco e o som filtrado.
+67|Bilanciamento tra suono pulito e risonatore.|Balance entre el sonido seco y el resonador.|Équilibre entre le son sec et le résonateur.|Balance zwischen trockenem Klang und Resonator.|Equilíbrio entre o som seco e o ressonador.
+68|=|Pasa banda|Passe-bande|Bandpass|Passa-banda
+69|Ritardo di base delle voci del chorus.|Retardo base de las voces del chorus.|Retard de base des voix du chorus.|Grundverzögerung der Chorus-Stimmen.|Atraso base das vozes do chorus.
+70|Base|Básico|Basique|Basis|Básico
+71|=|Bajos|Basses|Bässe|Baixos
+72|=|Nota de bajo|Note de basse|Basston|Nota de baixo
+73|=|Fagot|Basson|Fagott|Fagote
+74|*
+75|*
+76|=|Bend abajo|Bend bas|Bend ab|Bend p/ baixo
+77|=|Rango bend|Plage bend|Bend-Bereich|Faixa do bend
+78|=|Bend arriba|Bend haut|Bend auf|Bend p/ cima
+79|Curvatura della curva di attacco.|Curvatura del ataque.|Courbure de l'attaque.|Krümmung der Attack-Kurve.|Curvatura do ataque.
+80|Curvatura della curva di decadimento.|Curvatura del decaimiento.|Courbure de la décroissance.|Krümmung der Decay-Kurve.|Curvatura do decaimento.
+81|Curvatura della curva di rilascio.|Curvatura de la liberación.|Courbure du relâchement.|Krümmung der Release-Kurve.|Curvatura da liberação.
+82|Bit-crush|Bit-crush|Bit-crush|Bit-Crush|Bit-crush
+83|=|Bitcrush|Bitcrush|Bitcrush|Bitcrush
+84|=|Mordida|Mordant|Biss|Mordida
+85|=|Bits|Bits|Bits|Bits
+86|=|Mezcla|Mélange|Mischung|Mistura
+87|Blu|Azul|Bleu|Blau|Azul
+88|=|Blues / Funk|Blues / Funk|Blues / Funk|Blues / Funk
+89|Aumenta o riduce la banda alta.|Realza o recorta la banda alta.|Accentue ou atténue la bande aiguë.|Hebt oder senkt das hohe Band.|Reforça ou corta a banda alta.
+90|Aumenta o riduce la banda bassa.|Realza o recorta la banda baja.|Accentue ou atténue la bande grave.|Hebt oder senkt das tiefe Band.|Reforça ou corta a banda baixa.
+91|Aumenta o riduce la banda media.|Realza o recorta la banda media.|Accentue ou atténue la bande médium.|Hebt oder senkt das mittlere Band.|Reforça ou corta a banda média.
+92|Rimbalzo|Rebote|Rebond|Hüpfen|Quique
+93|=|Metales y vientos|Cuivres et vents|Blech & Holz|Metais e sopros
+94|Respiro|Aliento|Souffle|Atem|Respiração
+95|=|Brillo|Brillance|Helligkeit|Brilho
+96|Brillantezza della risonanza.|Brillo de la resonancia.|Brillance de la résonance.|Helligkeit des Klingens.|Brilho da ressonância.
+97|=|Marrón|Brun|Braun|Marrom
+98|*
+99|*
+100|=|CANCELAR|ANNULER|ABBRECHEN|CANCELAR
+101|=|CATEGORÍAS|CATÉGORIES|KATEGORIEN|CATEGORIAS
+102|=|CATEGORÍA|CATÉGORIE|KATEGORIE|CATEGORIA
+103|=|ACORDES|ACCORDS|AKKORDE|ACORDES
+104|=|ACORDES ACTIVOS|ACCORDS ACTIFS|AKKORDE AN|ACORDES LIGADOS
+105|=|ACORDES está apagado: enciéndelo (arriba a la izquierda) para tocar los acordes con tus teclas. PLAY en una tarjeta siempre funciona.|ACCORDS est éteint : allumez-le (en haut à gauche) pour jouer les accords avec vos touches. PLAY sur une carte marche toujours.|AKKORDE ist aus: schalte es ein (oben links), um die Akkorde mit deinen Tasten zu spielen. PLAY auf einer Karte geht immer.|ACORDES está desligado: ligue-o (em cima à esquerda) para tocar os acordes com suas teclas. PLAY num cartão sempre funciona.
+106|=|CHORUS|CHORUS|CHORUS|CHORUS
+107|=|CIRCUITO|CIRCUIT|SCHALTUNG|CIRCUITO
+108|=|BORRAR|EFFACER|LEEREN|LIMPAR
+109|=|COMPRESOR|COMPRESSEUR|KOMPRESSOR|COMPRESSOR
+110|=|CURVA|COURBE|KURVE|CURVA
+111|=|Violonchelos|Violoncelles|Celli|Violoncelos
+112|Frequenza centrale del phaser.|Frecuencia central del phaser.|Fréquence centrale du phaser.|Mittenfrequenz des Phasers.|Frequência central do phaser.
+113|Probabilità che i grani suonino al contrario.|Probabilidad de que los granos suenen al revés.|Probabilité que les grains jouent à l'envers.|Wahrscheinlichkeit, dass Grains rückwärts spielen.|Chance de os grãos tocarem ao contrário.
+114|Probabilità di glitch extra casuali.|Probabilidad de glitches extra aleatorios.|Probabilité de glitches aléatoires en plus.|Wahrscheinlichkeit zusätzlicher zufälliger Glitches.|Chance de glitches extras aleatórios.
+115|=|Caos|Chaos|Chaos|Caos
+116|=|Charleston|Charleston|Charleston|Charleston
+117|=|Chill / Lo-fi|Chill / Lo-fi|Chill / Lo-fi|Chill / Lo-fi
+118|=|Acorde|Accord|Akkord|Acorde
+119|=|Duración del acorde|Durée de l'accord|Akkordlänge|Duração do acorde
+120|=|Acorde por tecla|Accord par touche|Akkord pro Taste|Acorde por tecla
+121|=|Acorde por tecla: cada tecla que tocas se convierte en el acorde de la escala que empieza en ella (teclas blancas en Do mayor / La menor).|Accord par touche : chaque touche jouée devient l'accord de la gamme qui commence sur elle (touches blanches en Do majeur / La mineur).|Akkord pro Taste: Jede gespielte Taste wird zum Akkord der Skala, die auf ihr beginnt (weiße Tasten in C-Dur / a-Moll).|Acorde por tecla: cada tecla que você toca vira o acorde da escala que começa nela (teclas brancas em Dó maior / Lá menor).
+122|Accordo su cui risuona il risonatore.|Acorde en el que suena el resonador.|Accord sur lequel sonne le résonateur.|Akkord, auf dem der Resonator klingt.|Acorde em que o ressonador soa.
+123|=|Tipo de acorde|Type d'accord|Akkordtyp|Tipo de acorde
+124|=|Acordes|Accords|Akkorde|Acordes
+125|=|Chorus, flanger, phaser, wow y flutter de cinta|Chorus, flanger, phaser, wow & flutter de bande|Chorus, Flanger, Phaser, Band-Wow & -Flutter|Chorus, flanger, phaser, wow e flutter de fita
+126|=|Cromática|Chromatique|Chromatisch|Cromática
+127|=|Saturación de circuito y de cinta, tolerancia de componentes|Saturation du circuit et de la bande, tolérance des composants|Schaltungs- und Bandsättigung, Bauteiltoleranz|Saturação de circuito e de fita, tolerância de componentes
+128|=|Clarinete|Clarinette|Klarinette|Clarinete
+129|=|Vaciar esta ranura|Vider cet emplacement|Diesen Slot leeren|Esvaziar este slot
+130|=|Haz clic en un preset para cargarlo. Haz clic en la estrella para añadirlo a favoritos.|Cliquez sur un preset pour le charger. Cliquez sur l'étoile pour l'ajouter aux favoris.|Klicke auf ein Preset, um es zu laden. Klicke auf den Stern, um es zu den Favoriten hinzuzufügen.|Clique num preset para carregá-lo. Clique na estrela para adicioná-lo aos favoritos.
+131|=|Haz clic en un instrumento para activar la capa de muestras.|Cliquez sur un instrument pour activer la couche d'échantillons.|Klicke auf ein Instrument, um die Sample-Ebene einzuschalten.|Clique num instrumento para ligar a camada de amostras.
+132|=|Haz clic o arrastra sobre los pasos para pintar el efecto elegido. Clic derecho = apagado. La fila de candados protege los pasos al pulsar RANDOM.|Cliquez ou glissez sur les pas pour peindre l'effet choisi. Clic droit = éteint. La rangée de cadenas garde les pas quand vous appuyez sur RANDOM.|Klicke oder ziehe über die Steps, um den gewählten Effekt zu malen. Rechtsklick = aus. Die Schloss-Reihe schützt Steps vor RANDOM.|Clique ou arraste nos passos para pintar o efeito escolhido. Clique direito = desligado. A fileira de cadeados protege os passos do RANDOM.
+133|=|Haz clic para elegir el preset de esta capa|Cliquez pour choisir le preset de cette couche|Klicke, um das Preset dieser Ebene zu wählen|Clique para escolher o preset desta camada
+134|=|Clic para mostrar, arrastra sobre una perilla para modularla|Cliquez pour afficher, glissez sur un bouton pour le moduler|Klicken zum Anzeigen, auf einen Regler ziehen zum Modulieren|Clique para mostrar, arraste para um botão para modulá-lo
+135|=|Cerrada|Serré|Eng|Fechada
+136|=|Color|Couleur|Farbe|Cor
+137|Colori|Colores|Couleurs|Farben|Cores
+138|*
+139|*
+140|=|Llega en la próxima versión|Dans la prochaine version|Kommt in der nächsten Version|Chega na próxima versão
+141|=|Complejidad|Complexité|Komplexität|Complexidade
+142|=|Velocidad constante|Vitesse constante|Konstante Rate|Velocidade constante
+143|=|Tiempo constante|Temps constant|Konstante Zeit|Tempo constante
+144|=|Tiempo constante: cada deslizamiento dura lo mismo. Velocidad constante: los saltos grandes tardan más.|Temps constant : chaque glissé dure pareil. Vitesse constante : les grands sauts durent plus.|Konstante Zeit: Jedes Gleiten dauert gleich lang. Konstante Rate: größere Sprünge dauern länger.|Tempo constante: cada deslizamento dura o mesmo. Velocidade constante: saltos maiores demoram mais.
+145|Tempo costante: ogni scivolata dura uguale. Velocità costante: i salti più grandi durano di più.|Tiempo constante: cada deslizamiento dura lo mismo. Velocidad constante: los saltos grandes tardan más.|Temps constant : chaque glissé dure pareil. Vitesse constante : les grands sauts durent plus.|Konstante Zeit: Jedes Gleiten dauert gleich lang. Konstante Rate: größere Sprünge dauern länger.|Tempo constante: cada deslizamento dura o mesmo. Velocidade constante: saltos maiores demoram mais.
+146|=|Contrabajo|Contrebasse|Kontrabass|Contrabaixo
+147|=|Copiar el sonido de|Copier le son de|Klang kopieren von|Copiar o som de
+148|=|Crepitar|Crépitement|Knistern|Crepitar
+149|=|Fundido entre pasos: bajo = cortes secos, alto = más suave|Fondu entre les pas : bas = coupes nettes, haut = plus doux|Überblendung zwischen Steps: niedrig = harte Schnitte, hoch = weicher|Transição entre passos: baixo = cortes secos, alto = mais suave
+150|=|Crush|Crush|Crush|Crush
+151|=|Curva: izquierda = actúa pronto, centro = recta, derecha = actúa tarde|Courbe : gauche = agit tôt, centre = droite, droite = agit tard|Kurve: links = wirkt früh, Mitte = linear, rechts = wirkt spät|Curva: esquerda = age cedo, centro = reta, direita = age tarde
+152|Curve|Curvas|Courbes|Kurven|Curvas
+153|Personalizzata|Personalizada|Personnalisée|Eigene|Personalizada
+154|Personalizzata (disegnata)|Personalizada (dibujada)|Personnalisée (dessinée)|Eigene (gezeichnet)|Personalizada (desenhada)
+155|=|Corte|Coupure|Cutoff|Corte
+156|Frequenza di taglio del filtro FX.|Frecuencia de corte del filtro FX.|Fréquence de coupure du filtre FX.|Cutoff-Frequenz des FX-Filters.|Frequência de corte do filtro FX.
+157|Frequenza di taglio: dove il filtro inizia a lavorare. Puoi anche trascinare il punto nello schermo.|Frecuencia de corte: donde el filtro empieza a actuar. También puedes arrastrar el punto en la pantalla.|Fréquence de coupure : là où le filtre commence à agir. Vous pouvez aussi déplacer le point dans l'écran.|Cutoff-Frequenz: wo der Filter zu wirken beginnt. Du kannst auch den Punkt im Display ziehen.|Frequência de corte: onde o filtro começa a agir. Você também pode arrastar o ponto na tela.
+158|*
+159|*
+160|=|Play DAW|Lecture DAW|DAW-Wiedergabe|Play da DAW
+161|=|DELAY|DELAY|DELAY|DELAY
+162|=|ELIMINAR|SUPPRIMER|LÖSCHEN|EXCLUIR
+163|=|PROFUNDIDAD|PROFONDEUR|TIEFE|PROFUNDIDADE
+164|=|DESTINO|DESTINATION|ZIEL|DESTINO
+165|=|DISTORSIÓN|DISTORSION|VERZERRUNG|DISTORÇÃO
+166|=|ARRASTRAR MIDI|GLISSER MIDI|MIDI ZIEHEN|ARRASTAR MIDI
+167|=|Amortiguación|Amortissement|Dämpfung|Amortecimento
+168|=|Oscuro|Sombre|Düster|Sombrio
+169|Scurisce la coda del riverbero.|Oscurece la cola de la reverb.|Assombrit la queue de réverbération.|Macht die Hallfahne dunkler.|Escurece a cauda do reverb.

@@ -1,4 +1,5 @@
 #include "Pages.h"
+#include "Prefs.h"
 #include "PyraLookAndFeel.h"
 #include "../Lang.h"
 #include "../PluginProcessor.h"
@@ -28,9 +29,9 @@ namespace
             return k;
         }
 
-        ParamCombo* combo (const juce::String& id, bool translate = true)
+        ParamCombo* combo (const juce::String& id, bool translate = true, const char* groups = nullptr)
         {
-            auto* c = new ParamCombo (ui.st, id, translate);
+            auto* c = new ParamCombo (ui.st, id, translate, groups != nullptr ? ParamCombo::groupsFor (groups) : nullptr);
             owned.add (c);
             parent.addAndMakeVisible (c);
             return c;
@@ -72,7 +73,7 @@ namespace
             titleX = 34;
             on = b.toggle (pid::osc (index, "on"));
             setPowerButton (on);
-            wt = b.combo (pid::osc (index, "wt"), false);
+            wt = b.combo (pid::osc (index, "wt"), false, "wt");
             addAndMakeVisible (view);
 
             for (auto* btn : { &prev, &next })
@@ -158,14 +159,14 @@ namespace
         {
             Builder b { ui, *this, owned };
             subOn = b.toggle ("sub_on", "SUB");
-            subShape = b.combo ("sub_shape");
+            subShape = b.combo ("sub_shape", true, "sub");
             subRoute = b.combo ("sub_route");
             subOct = b.knob ("sub_oct", "Octave", false);
             subLevel = b.knob ("sub_level", "Level");
             subPan = b.knob ("sub_pan", "Pan", false);
 
             noiseOn = b.toggle ("noise_on", "NOISE");
-            noiseType = b.combo ("noise_type");
+            noiseType = b.combo ("noise_type", true, "noise");
             noiseRoute = b.combo ("noise_route");
             noiseLevel = b.knob ("noise_level", "Level");
             noiseColor = b.knob ("noise_color", "Color");
@@ -203,7 +204,7 @@ namespace
 
     //==========================================================================
     /** Approximate magnitude response of the selected filter. */
-    class FilterView : public juce::Component
+    class FilterView : public juce::Component, public juce::SettableTooltipClient
     {
     public:
         FilterView (juce::AudioProcessorValueTreeState& st, int f)
@@ -212,8 +213,41 @@ namespace
             cutoff = st.getRawParameterValue (pid::filt (f, "cutoff"));
             res = st.getRawParameterValue (pid::filt (f, "res"));
             on = st.getRawParameterValue (pid::filt (f, "on"));
-            setInterceptsMouseClicks (false, false);
+            cutG.p = st.getParameter (pid::filt (f, "cutoff"));
+            resG.p = st.getParameter (pid::filt (f, "res"));
+            setMouseCursor (juce::MouseCursor::CrosshairCursor);
+            setTooltip (tr ("Drag the point: left / right = cutoff, up / down = resonance. Double-click: reset."));
         }
+
+        juce::Rectangle<float> plot() const { return getLocalBounds().toFloat().reduced (6.0f, 8.0f); }
+
+        void mouseDown (const juce::MouseEvent& e) override
+        {
+            if (auto& hook = userActivityHook()) hook();
+            cutG.begin(); resG.begin();
+            mouseDrag (e);
+        }
+
+        void mouseDrag (const juce::MouseEvent& e) override
+        {
+            auto a = plot();
+            const float nx = juce::jlimit (0.0f, 1.0f, (e.position.x - a.getX()) / a.getWidth());
+            const float hz = 20.0f * std::pow (1000.0f, nx);
+            if (cutG.p != nullptr) cutG.set (cutG.p->convertTo0to1 (hz));
+            const float ny = juce::jlimit (0.0f, 1.0f, (a.getBottom() - e.position.y) / a.getHeight());
+            if (resG.p != nullptr) resG.set (resG.p->convertTo0to1 (ny));
+            if (auto& hook = userActivityHook()) hook();
+        }
+
+        void mouseUp (const juce::MouseEvent&) override { cutG.end(); resG.end(); }
+
+        void mouseDoubleClick (const juce::MouseEvent&) override
+        {
+            for (auto* g : { &cutG, &resG }) { g->begin(); if (g->p != nullptr) g->set (g->p->getDefaultValue()); g->end(); }
+        }
+
+        void mouseEnter (const juce::MouseEvent&) override { repaint(); }
+        void mouseExit (const juce::MouseEvent&) override { repaint(); }
 
         void refresh()
         {
@@ -269,6 +303,27 @@ namespace
                         m *= 0.55f + 0.45f * std::abs (1.0f - 1.0f / (1.0f + std::pow (std::log2 (w / s), 2.0f) * 3.0f));
                     return m;
                 }
+                case FLp6:    return 1.0f / std::sqrt (1.0f + w * w);
+                case FHp6:    return w / std::sqrt (1.0f + w * w);
+                case FLp36:   return lp2 (w, 1.932f) * lp2 (w, 1.414f) * lp2 (w, 1.414f * (1.0f - r * 0.99f)) * (1.0f + r * 0.4f);
+                case FHp36:   return hp2 (w, 1.932f) * hp2 (w, 1.414f) * hp2 (w, 1.414f * (1.0f - r * 0.99f));
+                case FNotch24:
+                {
+                    const float n1 = std::abs (1 - w * w) / std::sqrt ((1 - w * w) * (1 - w * w) + k * k * w * w);
+                    const float k2 = k * 0.8f;
+                    return n1 * std::abs (1 - w * w) / std::sqrt ((1 - w * w) * (1 - w * w) + k2 * k2 * w * w);
+                }
+                case FLowShelf:
+                case FHighShelf:
+                {
+                    const float A = std::pow (10.0f, (r * 24.0f - 12.0f) / 20.0f);
+                    const float part = t == FLowShelf ? lp2 (w, 1.414f) : hp2 (w, 1.414f);
+                    return std::max (0.001f, 1.0f + (A - 1.0f) * part);
+                }
+                case FDiode:  return lp2 (w, 1.6f * (1.0f - r * 0.9f) + 0.1f) / std::sqrt (1.0f + w * w) * (1.0f + r * 0.4f);
+                case FMs20:   return std::min (6.0f, lp2 (w, 2.0f - 1.995f * r) * (1.0f + r * 1.5f) * 0.9f);
+                case FDualBp: return (bp2 (w, 2.0f - 1.9f * r) + 0.8f * bp2 (w / 2.6f, 2.0f - 1.9f * r)) * 1.1f;
+                case FResonator: { const float kk = 0.012f + (1.0f - r) * 0.25f; return bp2 (w, kk) * 1.6f; }
                 default: return 1.0f;
             }
         }
@@ -310,9 +365,21 @@ namespace
             g.strokePath (p, juce::PathStrokeType (4.0f));
             g.setColour (isOn ? colours::lavaCore : colours::textDim);
             g.strokePath (p, juce::PathStrokeType (1.8f));
+
+            // the point you can drag: x = cutoff, y = resonance
+            const float px = area.getX() + juce::jlimit (0.0f, 1.0f, std::log (fc / 20.0f) / std::log (1000.0f)) * area.getWidth();
+            const float py = area.getBottom() - rs * area.getHeight();
+            const bool hot = isMouseOver (true) || cutG.active;
+            g.setColour (colours::accent.withAlpha (hot ? 0.4f : 0.2f));
+            g.fillEllipse (px - 8.0f, py - 8.0f, 16.0f, 16.0f);
+            g.setColour (juce::Colour (0xfff0e6df));
+            g.fillEllipse (px - 4.0f, py - 4.0f, 8.0f, 8.0f);
+            g.setColour (colours::accent);
+            g.drawEllipse (px - 4.0f, py - 4.0f, 8.0f, 8.0f, 1.2f);
         }
 
     private:
+        ParamGesture cutG, resG;
         std::atomic<float>* type, *cutoff, *res, *on;
         float last = -1.0f;
     };
@@ -328,7 +395,7 @@ namespace
             titleX = 34;
             on = b.toggle (pid::filt (index, "on"));
             setPowerButton (on);
-            type = b.combo (pid::filt (index, "type"), false);
+            type = b.combo (pid::filt (index, "type"), false, "filter");
             if (index == 0)
             {
                 routing = b.combo ("filterRouting");
@@ -454,7 +521,7 @@ namespace
     class LfoPanel : public Panel
     {
     public:
-        explicit LfoPanel (UiContext& ui) : proc (ui.proc), st (ui.st), view (ui.st)
+        explicit LfoPanel (UiContext& ui) : proc (ui.proc), st (ui.st), view (ui.st, &ui.proc.lfoDrawn)
         {
             tint = colours::mod;
             Builder b { ui, *this, owned };
@@ -466,7 +533,7 @@ namespace
                 addAndMakeVisible (badge);
 
                 Set s;
-                s.shape = b.combo (pid::lfo (l, "shape"));
+                s.shape = b.combo (pid::lfo (l, "shape"), true, "lfo");
                 s.mode = b.combo (pid::lfo (l, "mode"));
                 s.uni = b.toggle (pid::lfo (l, "uni"), tr ("Unipolar"));
                 s.sync = b.toggle (pid::lfo (l, "sync"), tr ("Sync"));
@@ -899,12 +966,12 @@ namespace
     class GlobalPage : public Page
     {
     public:
-        GlobalPage (UiContext& ui, std::function<void()> onLang)
-            : voice (tr ("VOICE")), mpePanel ("MPE"), language (tr ("LANGUAGE")),
-              about (tr ("ABOUT")), onLanguageChanged (std::move (onLang))
+        GlobalPage (UiContext& ui, std::function<void()> onLang, std::function<void (float)> onScale)
+            : voice (tr ("VOICE")), mpePanel ("MPE"), language (tr ("LANGUAGE")), personal (tr ("PERSONALIZE")),
+              about (tr ("ABOUT")), onLanguageChanged (std::move (onLang)), onWindowScale (std::move (onScale))
         {
-            for (auto* p : { &voice, &mpePanel, &language, &about }) addAndMakeVisible (p);
-            mpePanel.tint = colours::accent2; language.tint = colours::accent2; about.tint = colours::hot;
+            for (auto* p : { &voice, &mpePanel, &language, &personal, &about }) addAndMakeVisible (p);
+            mpePanel.tint = colours::accent2; language.tint = colours::accent2; about.tint = colours::hot; personal.tint = colours::accent;
 
             Builder bv { ui, voice, owned };
             poly = bv.knob ("polyphony", "Voices", false);
@@ -925,17 +992,55 @@ namespace
             mpe = bm.toggle ("mpe", tr ("MPE on"));
             mpeRange = bm.knob ("mpeRange", "Bend Range", false);
 
-
-            for (auto* btn : { &en, &it })
+            // LANGUAGE: one button per language, each written in its own language
+            for (int l = 0; l < lang::NumLanguages; ++l)
             {
-                language.addAndMakeVisible (*btn);
+                auto* btn = langButtons.add (new juce::TextButton (lang::nativeName ((lang::Language) l)));
+                language.addAndMakeVisible (btn);
                 btn->setClickingTogglesState (false);
+                btn->setToggleState (lang::current() == (lang::Language) l, juce::dontSendNotification);
+                btn->onClick = [this, l] { setLanguage ((lang::Language) l); };
             }
-            en.setButtonText ("English"); it.setButtonText ("Italiano");
-            en.setToggleState (lang::current() == lang::English, juce::dontSendNotification);
-            it.setToggleState (lang::current() == lang::Italian, juce::dontSendNotification);
-            en.onClick = [this] { setLanguage (lang::English); };
-            it.onClick = [this] { setLanguage (lang::Italian); };
+
+            // PERSONALIZE: how the window behaves (saved for you, in every project)
+            auto toggle = [this] (prefs::Key k, const juce::String& text, const juce::String& tip)
+            {
+                auto* t = new juce::ToggleButton (text);
+                t->setToggleState (prefs::get (k) != 0, juce::dontSendNotification);
+                t->onClick = [t, k] { prefs::set (k, t->getToggleState() ? 1 : 0); };
+                t->setTooltip (tip);
+                personal.addAndMakeVisible (t); prefControls.add (t);
+                return t;
+            };
+            auto combo = [this] (prefs::Key k, const juce::StringArray& items, const juce::String& tip)
+            {
+                auto* c = new juce::ComboBox();
+                for (int i = 0; i < items.size(); ++i) c->addItem (items[i], i + 1);
+                c->setSelectedId (prefs::get (k) + 1, juce::dontSendNotification);
+                c->onChange = [c, k] { prefs::set (k, c->getSelectedId() - 1); };
+                c->setTooltip (tip);
+                personal.addAndMakeVisible (c); prefControls.add (c);
+                return c;
+            };
+            helpToggle = toggle (prefs::HelpBubbles, tr ("On"), tr ("A small bubble explains a control when the mouse rests on it. Switch it off when you know PYRA well."));
+            helpDelay = combo (prefs::HelpDelay, { tr ("Fast"), tr ("Normal"), tr ("Slow") }, tr ("How long the mouse has to rest before the help bubble appears"));
+            animToggle = toggle (prefs::Animations, tr ("On"), tr ("Moving lava, scope and glowing pictures. Off saves a little CPU."));
+            valuesCombo = combo (prefs::ShowValues, { tr ("Names (values on hover)"), tr ("Values (names on hover)") }, tr ("What is written under the knobs"));
+            dragCombo = combo (prefs::KnobDrag, { tr ("Up / down"), tr ("Around the knob") }, tr ("How you turn a knob with the mouse"));
+            speedCombo = combo (prefs::KnobSpeed, { tr ("Fine"), tr ("Normal"), tr ("Fast") }, tr ("How far a knob turns for each movement of the mouse (Shift = extra fine)"));
+            wheelToggle = toggle (prefs::WheelKnobs, tr ("On"), tr ("The mouse wheel turns the knob under the mouse"));
+            startCombo = combo (prefs::StartPage, { tr ("Last page used"), "SYNTH" }, tr ("Which page opens when you open PYRA"));
+            for (float s : { 0.75f, 0.9f, 1.0f, 1.25f, 1.5f })
+            {
+                auto* b = sizeButtons.add (new juce::TextButton (juce::String (juce::roundToInt (s * 100.0f)) + "%"));
+                b->setTooltip (tr ("Size of the PYRA window (you can also drag its corner)"));
+                b->onClick = [this, s] { if (onWindowScale) onWindowScale (s); };
+                personal.addAndMakeVisible (b);
+            }
+            resetPrefs.setButtonText (tr ("RESET"));
+            resetPrefs.setTooltip (tr ("Back to the original settings"));
+            resetPrefs.onClick = [this] { prefs::resetAll(); juce::MessageManager::callAsync ([cb = onLanguageChanged] { if (cb) cb(); }); };
+            personal.addAndMakeVisible (resetPrefs);
 
             about.addAndMakeVisible (aboutText);
             aboutText.setMultiLine (true);
@@ -956,48 +1061,30 @@ namespace
             juce::MessageManager::callAsync ([cb = onLanguageChanged] { if (cb) cb(); });
         }
 
-        juce::Rectangle<float> sceneArea() const { return { 8.0f, 414.0f, 820.0f, (float) getHeight() - 422.0f }; }
-
-        void paint (juce::Graphics& g) override
-        {
-            // the empty corner becomes a window on the infernal ballroom (it drifts slowly up and down the picture)
-            const auto a = sceneArea();
-            const auto& img = art::ballroom();
-            if (img.isValid() && a.getHeight() > 20.0f)
-            {
-                juce::Graphics::ScopedSaveState ss (g);
-                juce::Path win; win.addRoundedRectangle (a, 7.0f);
-                g.reduceClipRegion (win);
-                const float sc = a.getWidth() / (float) img.getWidth();
-                const float visible = a.getHeight() / sc;
-                const float range = std::max (0.0f, (float) img.getHeight() - visible);
-                const float y = range * (0.62f + 0.38f * std::sin (scenePhase));
-                g.setImageResamplingQuality (juce::Graphics::mediumResamplingQuality);   // light on the CPU while it drifts
-                g.drawImageTransformed (img, juce::AffineTransform::translation (0.0f, -y).scaled (sc).translated (a.getX(), a.getY()));
-                // depth: dark edges, like looking in through a window cut in the rock
-                juce::ColourGradient vig (juce::Colours::transparentBlack, a.getCentreX(), a.getCentreY(), juce::Colours::black.withAlpha (0.55f),
-                                          a.getX(), a.getY(), true);
-                vig.addColour (0.6, juce::Colours::transparentBlack);
-                g.setGradientFill (vig);
-                g.fillRect (a);
-            }
-            art::drawCarvedFrame (g, a, 7.0f);
-        }
-
-        void tick() override
-        {
-            scenePhase += 0.0016f;   // about one minute up and down
-            if (++sceneCounter >= 2) { sceneCounter = 0; repaint (sceneArea().toNearestInt()); }
-        }
-
-        float scenePhase = 0.0f;
-        int sceneCounter = 0;
-
         void paintOverChildren (juce::Graphics& g) override
         {
             g.setColour (colours::textDim);
             g.setFont (PyraLookAndFeel::font (12.0f));
             g.drawFittedText (voiceHelp, voice.getBounds().removeFromBottom (40).reduced (14, 4), juce::Justification::centredLeft, 2);
+
+            // labels of the PERSONALIZE rows
+            auto pb = personal.getBounds();
+            auto label = [&] (juce::Component* c, const juce::String& text)
+            {
+                auto r = c->getBounds().translated (pb.getX(), pb.getY());
+                g.setColour (colours::text);
+                g.setFont (PyraLookAndFeel::font (12.5f, true));
+                g.drawText (text, r.getX() - 196, r.getY(), 188, r.getHeight(), juce::Justification::centredRight, true);
+            };
+            label (helpToggle, tr ("Help bubbles"));
+            label (helpDelay, tr ("Help delay"));
+            label (animToggle, tr ("Animations"));
+            label (valuesCombo, tr ("Under the knobs"));
+            label (dragCombo, tr ("Knob drag"));
+            label (speedCombo, tr ("Knob speed"));
+            label (wheelToggle, tr ("Mouse wheel on knobs"));
+            label (startCombo, tr ("Open on"));
+            label (sizeButtons[0], tr ("Window size"));
         }
 
         void resized() override
@@ -1006,6 +1093,7 @@ namespace
             voice.setBounds (m, m, 820, 250);
             mpePanel.setBounds (m + 820 + m, m, getWidth() - 836 - 2 * m, 250);
             language.setBounds (m, 266, 820, 140);
+            personal.setBounds (m, 414, 820, getHeight() - 422);
             about.setBounds (m + 828 + m, 266, getWidth() - 836 - 2 * m, getHeight() - 266 - m);
 
             rowOfKnobs ({ poly, glide, bendUp, bendDown, velAmp, transpose, tune, master }, { 10, 34, 800, 90 });
@@ -1016,19 +1104,36 @@ namespace
             mpe->setBounds (14, 34, 120, 24);
             mpeRange->setBounds (14, 70, 90, 90);
 
+            for (int i = 0; i < langButtons.size(); ++i)
+                langButtons[i]->setBounds (14 + i * 133, 48, 125, 36);
 
-            en.setBounds (14, 40, 130, 34);
-            it.setBounds (154, 40, 130, 34);
+            // two columns: label | control
+            const int rowH = 36, y0 = 40;
+            auto place = [&] (juce::Component* c, int col, int row, int w)
+            {
+                c->setBounds (col == 0 ? 206 : 612, y0 + row * rowH, w, 26);
+            };
+            place (helpToggle, 0, 0, 80);   place (helpDelay, 0, 1, 180);
+            place (animToggle, 0, 2, 80);   place (valuesCombo, 0, 3, 190);
+            place (dragCombo, 1, 0, 190);   place (speedCombo, 1, 1, 190);
+            place (wheelToggle, 1, 2, 80);  place (startCombo, 1, 3, 190);
+            for (int i = 0; i < sizeButtons.size(); ++i)
+                sizeButtons[i]->setBounds (206 + i * 82, y0 + 4 * rowH + 8, 74, 28);
+            resetPrefs.setBounds (personal.getWidth() - 14 - 120, y0 + 4 * rowH + 8, 120, 28);
 
             aboutText.setBounds (about.getLocalBounds().withTrimmedTop (28).reduced (10, 4));
         }
 
-        Panel voice, mpePanel, language, about;
+        Panel voice, mpePanel, language, personal, about;
         std::function<void()> onLanguageChanged;
-        juce::OwnedArray<juce::Component> owned;
+        std::function<void (float)> onWindowScale;
+        juce::OwnedArray<juce::Component> owned, prefControls;
         Knob* poly, *glide, *bendUp, *bendDown, *velAmp, *transpose, *tune, *master, *mpeRange;
         ParamCombo* mode, *glideType; ParamToggle* glideLegato, *mpe;
-        juce::TextButton en, it;
+        juce::OwnedArray<juce::TextButton> langButtons, sizeButtons;
+        juce::ToggleButton* helpToggle, *animToggle, *wheelToggle;
+        juce::ComboBox* helpDelay, *valuesCombo, *dragCombo, *speedCombo, *startCombo;
+        juce::TextButton resetPrefs;
         juce::TextEditor aboutText;
         juce::String voiceHelp;
     };
@@ -1069,7 +1174,10 @@ namespace
 
 std::unique_ptr<Page> createSynthPage (UiContext& ui)  { return std::make_unique<SynthPage> (ui); }
 std::unique_ptr<Page> createMatrixPage (UiContext& ui) { return std::make_unique<MatrixPage> (ui); }
-std::unique_ptr<Page> createGlobalPage (UiContext& ui, std::function<void()> cb) { return std::make_unique<GlobalPage> (ui, std::move (cb)); }
+std::unique_ptr<Page> createGlobalPage (UiContext& ui, std::function<void()> cb, std::function<void (float)> scale)
+{
+    return std::make_unique<GlobalPage> (ui, std::move (cb), std::move (scale));
+}
 std::unique_ptr<Page> createComingSoonPage (const juce::String& t, const juce::StringArray& l) { return std::make_unique<ComingSoonPage> (t, l); }
 
 } // namespace pyra

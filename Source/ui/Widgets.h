@@ -93,10 +93,18 @@ float parseTypedValue (const juce::RangedAudioParameter&, const juce::String& te
 class ParamCombo : public juce::ComboBox
 {
 public:
-    ParamCombo (juce::AudioProcessorValueTreeState& state, const juce::String& paramId, bool translateItems = true);
+    /** Groups of choices shown as submenus (like a browser): { "Low Pass", { 14, 0, 1 } }, ... */
+    using Groups = std::vector<std::pair<juce::String, std::vector<int>>>;
+
+    ParamCombo (juce::AudioProcessorValueTreeState& state, const juce::String& paramId, bool translateItems = true,
+                const Groups* groups = nullptr);
+
+    /** Submenus for wavetables ("wt"), LFO shapes ("lfo"), filter types ("filter"), sub shapes ("sub"), noise types ("noise"). */
+    static const Groups* groupsFor (const juce::String& kind);
 
 private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> attachment;
+    std::unique_ptr<juce::ParameterAttachment> groupedAttachment;
 };
 
 class ParamToggle : public juce::ToggleButton
@@ -185,21 +193,42 @@ private:
 };
 
 //==============================================================================
-class WavetableView : public juce::Component
+/** One parameter changed by dragging inside a display (with a proper gesture, for automation and undo). */
+struct ParamGesture
+{
+    juce::RangedAudioParameter* p = nullptr;
+    float start = 0.0f;
+    bool active = false;
+    void begin()          { if (p != nullptr && ! active) { start = p->getValue(); p->beginChangeGesture(); active = true; } }
+    void set (float norm) { if (p != nullptr) { norm = juce::jlimit (0.0f, 1.0f, norm); if (std::abs (norm - p->getValue()) > 1.0e-7f) p->setValueNotifyingHost (norm); } }
+    void end()            { if (p != nullptr && active) p->endChangeGesture(); active = false; }
+};
+
+/** Wavetable screen: drag up / down = wavetable position, left / right = warp amount. */
+class WavetableView : public juce::Component, public juce::SettableTooltipClient
 {
 public:
     WavetableView (juce::AudioProcessorValueTreeState& state, int oscIndex);
     void visibilityChanged() override { refresh(); }
     void paint (juce::Graphics&) override;
     void refresh();
+    void mouseDown (const juce::MouseEvent&) override;
+    void mouseDrag (const juce::MouseEvent&) override;
+    void mouseUp (const juce::MouseEvent&) override;
+    void mouseDoubleClick (const juce::MouseEvent&) override;
+    void mouseWheelMove (const juce::MouseEvent&, const juce::MouseWheelDetails&) override;
+    void mouseEnter (const juce::MouseEvent&) override { repaint(); }
+    void mouseExit (const juce::MouseEvent&) override { repaint(); }
 
 private:
     std::atomic<float>* wt; std::atomic<float>* pos; std::atomic<float>* on;
     std::atomic<float>* warp; std::atomic<float>* warpAmt;
-    int lastWt = -1; float lastPos = -1; bool lastOn = false;
+    ParamGesture posG, warpG;
+    int lastWt = -1; float lastPos = -1, lastWarp = -1; bool lastOn = false;
 };
 
-class EnvelopeView : public juce::Component
+/** Envelope screen: drag the points (attack, decay / sustain, release) and the middle of the curves (their bend). */
+class EnvelopeView : public juce::Component, public juce::SettableTooltipClient
 {
 public:
     EnvelopeView (juce::AudioProcessorValueTreeState& state);
@@ -207,27 +236,49 @@ public:
     void setLive (float value) { if (std::abs (value - live) > 0.004f) { live = value; repaint(); } }
     void paint (juce::Graphics&) override;
     void refresh (bool force = false);
+    void mouseMove (const juce::MouseEvent&) override;
+    void mouseExit (const juce::MouseEvent&) override { hover = -1; repaint(); }
+    void mouseDown (const juce::MouseEvent&) override;
+    void mouseDrag (const juce::MouseEvent&) override;
+    void mouseUp (const juce::MouseEvent&) override;
+    void mouseDoubleClick (const juce::MouseEvent&) override;
 
 private:
+    enum Handle { HAttack, HDecay, HRelease, CAttack, CDecay, CRelease, HCount };
+    void layout (juce::Path& curve, juce::Point<float>* handles);
+    int handleAt (juce::Point<float>);
     juce::AudioProcessorValueTreeState& st;
-    int env = 0;
+    int env = 0, hover = -1, dragging = -1;
     float live = 0;
     juce::String signature;
+    ParamGesture gx, gy;
+    juce::Point<float> downPos;
 };
 
-class LfoView : public juce::Component
+/** LFO screen: draw your own shape with the mouse (it becomes the "Custom (drawn)" shape). Right-click for tools. */
+class LfoView : public juce::Component, public juce::SettableTooltipClient
 {
 public:
-    LfoView (juce::AudioProcessorValueTreeState& state);
+    LfoView (juce::AudioProcessorValueTreeState& state, LfoDrawnSet* drawn = nullptr);
     void setLfo (int index) { lfo = index; refresh (true); }
     void setLive (float value) { if (std::abs (value - live) > 0.004f) { live = value; repaint(); } }
     void paint (juce::Graphics&) override;
     void refresh (bool force = false);
+    void mouseDown (const juce::MouseEvent&) override;
+    void mouseDrag (const juce::MouseEvent&) override;
+    void mouseUp (const juce::MouseEvent&) override;
+    void mouseEnter (const juce::MouseEvent&) override { repaint(); }
+    void mouseExit (const juce::MouseEvent&) override { repaint(); }
 
 private:
+    juce::Rectangle<float> plotArea() const { return getLocalBounds().toFloat().reduced (8.0f, 10.0f); }
+    void makeCustom();
+    void drawAt (juce::Point<float>, bool connect);
+    void showTools();
     juce::AudioProcessorValueTreeState& st;
-    int lfo = 0, lastShape = -1;
-    float live = 0;
+    LfoDrawnSet* drawn;
+    int lfo = 0, lastShape = -1, lastCounter = -1, lastIndex = -1;
+    float live = 0, lastValue = 0;
 };
 
 } // namespace pyra

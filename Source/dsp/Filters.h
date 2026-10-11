@@ -27,6 +27,7 @@ public:
             for (auto& s : formant[ch]) s = {};
             for (auto& v : ladder[ch]) v = 0.0f;
             for (auto& v : ap[ch]) v = 0.0f;
+            onePole[ch] = 0.0f;
             ladderOut[ch] = 0.0f; phaserFb[ch] = 0.0f;
             std::fill (comb[ch].begin(), comb[ch].end(), 0.0f);
             combLp[ch] = 0.0f;
@@ -210,6 +211,82 @@ private:
                 return 0.5f * (x + y);
             }
 
+            case FLp6:
+            case FHp6:
+            {
+                const float G = g / (1.0f + g);
+                const float v = (x - onePole[ch]) * G;
+                const float y = v + onePole[ch];
+                onePole[ch] = y + v;
+                return type == FLp6 ? y : x - y;
+            }
+            case FLp36:
+            case FHp36:
+            {
+                const float k3 = 1.414f * (1.0f - resonance * 0.99f);
+                if (type == FLp36)
+                {
+                    const float y = svfTick (st[1], svfTick (st[0], x, g, 1.932f).low, g, 1.414f).low;
+                    return svfTick (st[2], y, g, k3).low * (1.0f + resonance * 0.4f);
+                }
+                const float y = svfTick (st[1], svfTick (st[0], x, g, 1.932f).high, g, 1.414f).high;
+                return svfTick (st[2], y, g, k3).high;
+            }
+            case FNotch24:
+            {
+                auto a = svfTick (st[0], x, g, k12);
+                const float y = a.low + a.high;
+                auto b = svfTick (st[1], y, g, k12 * 0.8f);
+                return b.low + b.high;
+            }
+            case FLowShelf:
+            case FHighShelf:
+            {
+                // RES sets the amount: middle = flat, up = boost (+12 dB), down = cut (-12 dB)
+                const float A = std::pow (10.0f, (resonance * 24.0f - 12.0f) / 20.0f);
+                auto o = svfTick (st[0], x, g, 1.414f);
+                return type == FLowShelf ? x + (A - 1.0f) * o.low : x + (A - 1.0f) * o.high;
+            }
+            case FDiode:
+            {
+                // 3 poles, asymmetric saturation in the feedback: a rubbery, acid-like low pass
+                const float G = g / (1.0f + g);
+                const float k = resonance * 3.3f;
+                float* s = ladder[ch];
+                const float fbk = ladderOut[ch];
+                float u = fastTanh ((x - k * (fbk + 0.15f * fbk * fbk)) * 1.2f);
+                for (int i = 0; i < 3; ++i)
+                {
+                    const float v = (u - s[i]) * G;
+                    const float y = v + s[i];
+                    s[i] = y + v;
+                    u = y;
+                }
+                ladderOut[ch] = u;
+                return u * (1.0f + k * 0.4f);
+            }
+            case FMs20:
+            {
+                // screaming 12 dB: the resonance is pushed through a saturator
+                const float k = 2.0f - 1.995f * resonance;
+                auto o = svfTick (st[0], fastTanh (x * 1.4f), g, k);
+                return fastTanh (o.low * (1.0f + resonance * 1.5f)) * 0.9f;
+            }
+            case FDualBp:
+            {
+                const float k = 2.0f - 1.9f * resonance;
+                const float g2 = std::min (g * 2.6f, 20.0f);
+                const float a = svfTick (st[0], x, g, k).band * k;
+                const float b = svfTick (st[1], x, g2, k).band * k;
+                return (a + 0.8f * b) * 1.1f;
+            }
+            case FResonator:
+            {
+                // very narrow band: rings at the cutoff like a struck string or a glass
+                const float k = 0.012f + (1.0f - resonance) * 0.25f;
+                return svfTick (st[0], x, g, k).band * k * 1.6f;
+            }
+
             default: return x;
         }
     }
@@ -221,12 +298,13 @@ private:
     float resonance = 0.0f, drive = 0.0f, mix = 1.0f;
     bool first = true;
 
-    SvfState svf[2][2];
+    SvfState svf[2][3];
     SvfState formant[2][3];
     float ladder[2][4] {};
     float ladderOut[2] {};
     float ap[2][4] {};
     float phaserFb[2] {};
+    float onePole[2] {};
     std::vector<float> comb[2];
     float combLp[2] {};
     int combPos = 0;

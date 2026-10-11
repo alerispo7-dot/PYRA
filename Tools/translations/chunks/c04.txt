@@ -1,0 +1,170 @@
+510|=|Mis presets|Mes presets|Meine Presets|Meus presets
+511|=|Mis etiquetas|Mes tags|Meine Tags|Minhas tags
+512|=|Misterioso|Mystérieux|Geheimnisvoll|Misterioso
+513|=|NOMBRE|NOM|NAME|NOME
+514|=|RUIDO Y ZUMBIDO|BRUIT ET RONFLEMENT|RAUSCHEN & BRUMMEN|RUÍDO E ZUMBIDO
+515|=|NOTA|NOTE|NOTE|NOTA
+516|=|NOTA = grados de la escala sumados a la nota tocada (el modo Secuenciador los toca como melodía). Arrastra para editar, doble clic para restablecer. Los pasos bloqueados sobreviven a RANDOM.|NOTE = degrés de la gamme ajoutés à la note jouée (le mode Séquenceur les joue comme une mélodie). Glissez pour modifier, double-clic pour réinitialiser. Les pas verrouillés résistent à RANDOM.|NOTE = Skalenstufen, die zur gespielten Note addiert werden (der Sequencer-Modus spielt sie als Melodie). Ziehen zum Bearbeiten, Doppelklick zum Zurücksetzen. Gesperrte Steps überstehen RANDOM.|NOTA = graus da escala somados à nota tocada (o modo Sequenciador os toca como melodia). Arraste para editar, duplo clique para redefinir. Passos bloqueados resistem ao RANDOM.
+517|Nomi (valori al passaggio del mouse)|Nombres (valores al pasar el ratón)|Noms (valeurs au survol)|Namen (Werte beim Darüberfahren)|Nomes (valores ao passar o mouse)
+518|=|Nueva progresión en la tonalidad y escala elegidas (y en la emoción). Los acordes bloqueados se quedan.|Nouvelle progression dans la tonalité et la gamme choisies (et l'émotion). Les accords verrouillés restent.|Neue Progression in gewählter Tonart und Skala (und Emotion). Gesperrte Akkorde bleiben.|Nova progressão na tonalidade e escala escolhidas (e na emoção). Acordes bloqueados ficam.
+519|=|Nueva progresión en la tonalidad y escala elegidas. Los acordes bloqueados se quedan.|Nouvelle progression dans la tonalité et la gamme choisies. Les accords verrouillés restent.|Neue Progression in gewählter Tonart und Skala. Gesperrte Akkorde bleiben.|Nova progressão na tonalidade e escala escolhidas. Acordes bloqueados ficam.
+520|=|Nuevo carácter aleatorio para el caos (misma cantidad, otro movimiento)|Nouveau caractère aléatoire pour le chaos (même quantité, autre mouvement)|Neuer Zufallscharakter fürs Chaos (gleiche Menge, andere Bewegung)|Novo caráter aleatório para o caos (mesma quantidade, outro movimento)
+521|=|Nuevo patrón glitch aleatorio. Los pasos bloqueados se quedan como están.|Nouveau motif glitch aléatoire. Les pas verrouillés restent tels quels.|Neues zufälliges Glitch-Pattern. Gesperrte Steps bleiben, wie sie sind.|Novo padrão glitch aleatório. Passos bloqueados ficam como estão.
+522|Nuovo pattern casuale di step. Gli step bloccati restano come sono.|Nuevo patrón aleatorio de pasos. Los pasos bloqueados se quedan como están.|Nouveau motif de pas aléatoire. Les pas verrouillés restent tels quels.|Neues zufälliges Step-Pattern. Gesperrte Steps bleiben, wie sie sind.|Novo padrão aleatório de passos. Passos bloqueados ficam como estão.
+523|=|Nuevo patrón aleatorio. Los pasos bloqueados se quedan como están.|Nouveau motif aléatoire. Les pas verrouillés restent tels quels.|Neues Zufallspattern. Gesperrte Steps bleiben, wie sie sind.|Novo padrão aleatório. Passos bloqueados ficam como estão.
+524|=|Valores aleatorios nuevos|Nouvelles valeurs aléatoires|Neue Zufallswerte|Novos valores aleatórios
+525|=|Valores aleatorios nuevos para esta página. Clic derecho (o Mayús+clic) para una pequeña variación. Deshacer vuelve atrás.|Nouvelles valeurs aléatoires pour cette page. Clic droit (ou Maj+clic) pour une petite variation. Annuler revient en arrière.|Neue Zufallswerte für diese Seite. Rechtsklick (oder Umschalt+Klick) für eine kleine Variation. Rückgängig geht zurück.|Novos valores aleatórios para esta página. Clique direito (ou Shift+clique) para uma pequena variação. Desfazer volta atrás.
+526|Valori nuovi per ogni controllo dell'ARP (modalità, velocità, scala, tonica, ottave, gate, swing, step) e un nuovo pattern|Valores nuevos para cada control del ARP (modo, velocidad, escala, tónica, octavas, gate, swing, pasos) y un patrón nuevo|Nouvelles valeurs pour chaque réglage de l'ARP (mode, vitesse, gamme, tonique, octaves, gate, swing, pas) et un nouveau motif|Neue Werte für jedes ARP-Element (Modus, Rate, Skala, Grundton, Oktaven, Gate, Swing, Steps) und ein neues Pattern|Novos valores para cada controle do ARP (modo, velocidade, escala, tônica, oitavas, gate, swing, passos) e um novo padrão
+527|=|Preset siguiente|Preset suivant|Nächstes Preset|Próximo preset
+528|=|Preset siguiente (misma categoría)|Preset suivant (même catégorie)|Nächstes Preset (gleiche Kategorie)|Próximo preset (mesma categoria)
+529|=|Novenas|Neuvièmes|Nonen|Nonas
+530|Rumore|Ruido|Bruit|Rauschen|Ruído
+531|Rumore e FX|Ruido y FX|Bruit et FX|Rauschen & FX|Ruído e FX
+532|=|Ruido de fondo|Bruit de fond|Grundrauschen|Ruído de fundo
+533|=|Ruido de fondo y zumbido, convertidor vintage (grano de sampler de los 80)|Bruit de fond et ronflement, convertisseur vintage (grain de sampler années 80)|Grundrauschen und Brummen, Vintage-Wandler (80er-Sampler-Körnung)|Ruído de fundo e zumbido, conversor vintage (granulação de sampler anos 80)
+534|=|Ninguno|Aucun|Keine|Nenhum
+535|Normale|Normal|Normal|Normal|Normal
+536|=|Nostálgico|Nostalgique|Nostalgisch|Nostálgico
+537|Notch|Notch|Coupe-bande|Notch|Notch
+538|Notch ed EQ|Notch y EQ|Coupe-bande et EQ|Notch & EQ|Notch e EQ
+539|Notch 24|Notch 24|Coupe-bande 24|Notch 24|Notch 24
+540|=|Nota|Note|Note|Nota
+541|=|Todavía no hay nada modulado. Elige arriba una fuente, una cantidad y un destino.|Rien n'est encore modulé. Choisissez en haut une source, une quantité et une destination.|Noch ist nichts moduliert. Wähle oben Quelle, Menge und Ziel.|Ainda nada está modulado. Escolha acima uma fonte, uma quantidade e um destino.
+542|Numero di stadi del phaser (di più = più notch).|Número de etapas del phaser (más = más muescas).|Nombre d'étages du phaser (plus = plus d'encoches).|Anzahl der Phaser-Stufen (mehr = mehr Kerben).|Número de estágios do phaser (mais = mais entalhes).
+543|Numero di step nel pattern glitch.|Número de pasos del patrón glitch.|Nombre de pas du motif glitch.|Anzahl der Steps im Glitch-Pattern.|Número de passos do padrão glitch.
+544|*
+545|=|ACTIVO|ACTIF|AN|LIGADO
+546|=|ABRIR CARPETA|OUVRIR LE DOSSIER|ORDNER ÖFFNEN|ABRIR PASTA
+547|=|SOBRESCRIBIR|ÉCRASER|ÜBERSCHREIBEN|SOBRESCREVER
+548|=|Oboe|Hautbois|Oboe|Oboé
+549|Oceano|Océano|Océan|Ozean|Oceano
+550|=|Octava|Octave|Oktave|Oitava
+551|Ottava del campione.|Octava de la muestra.|Octave de l'échantillon.|Oktave des Samples.|Oitava da amostra.
+552|Ottava del sub oscillatore (di solito 1 o 2 sotto).|Octava del suboscilador (normalmente 1 o 2 por debajo).|Octave du sous-oscillateur (en général 1 ou 2 en dessous).|Oktave des Sub-Oszillators (meist 1 oder 2 tiefer).|Oitava do suboscilador (normalmente 1 ou 2 abaixo).
+553|=|Octavas|Octaves|Oktaven|Oitavas
+554|=|Apagado|Éteint|Aus|Desligado
+555|=|A contratiempo|À contretemps|Offbeats|Contratempo
+556|Acceso|Activado|Activé|An|Ligado
+557|Acceso: muovere una manopola muove la stessa manopola su ogni layer acceso, così tutto il suono stratificato cambia insieme. Spento: ogni layer si modifica per conto suo (EDIT).|Activado: mover una perilla mueve la misma perilla en cada capa encendida, así todo el sonido en capas cambia a la vez. Apagado: cada capa se edita por separado (EDIT).|Activé : tourner un bouton tourne le même bouton sur chaque couche allumée, tout le son en couches change ensemble. Désactivé : chaque couche se modifie seule (EDIT).|An: Ein Regler bewegt denselben Regler auf jeder eingeschalteten Ebene, der ganze geschichtete Klang ändert sich zusammen. Aus: Jede Ebene wird einzeln bearbeitet (EDIT).|Ligado: mover um botão move o mesmo botão em cada camada ligada, então todo o som em camadas muda junto. Desligado: cada camada é editada sozinha (EDIT).
+558|Una manopola che muove fino a 8 bersagli scelti insieme.|Una perilla que mueve hasta 8 destinos elegidos a la vez.|Un bouton qui bouge jusqu'à 8 cibles choisies à la fois.|Ein Regler, der bis zu 8 gewählte Ziele gleichzeitig bewegt.|Um botão que move até 8 alvos escolhidos de uma vez.
+559|=|Una perilla, muchos destinos: tú eliges qué mueve, cuánto y con qué curva.|Un bouton, plusieurs cibles : vous choisissez ce qu'il bouge, de combien et avec quelle courbe.|Ein Regler, viele Ziele: Du wählst, was er bewegt, wie weit und mit welcher Kurve.|Um botão, muitos alvos: você escolhe o que ele move, quanto e com qual curva.
+560|=|Guarda tus propios sonidos con un clic, como en Serum|Enregistrez vos sons en un clic, comme dans Serum|Eigene Klänge mit einem Klick speichern, wie bei Serum|Salve seus próprios sons com um clique, como no Serum
+561|=|Solo legato|Legato seulement|Nur Legato|Só legato
+562|=|Abierta|Ouvert|Offen|Aberta
+563|Apri su|Abrir en|Ouvrir sur|Öffnen auf|Abrir em
+564|Spostamento opposto a sinistra e a destra.|Desplazamiento opuesto a la izquierda y a la derecha.|Décalage opposé à gauche et à droite.|Gegenläufige Verschiebung links und rechts.|Deslocamento oposto à esquerda e à direita.
+565|=|Opcional: a 0 todo queda limpio y digital|Optionnel : à 0 tout reste propre et numérique|Optional: bei 0 bleibt alles sauber und digital|Opcional: em 0 tudo fica limpo e digital
+566|=|Naranja = en la segunda página FX. Los efectos apagados no usan CPU.|Orange = sur la deuxième page FX. Les effets éteints n'utilisent pas de CPU.|Orange = auf der zweiten FX-Seite. Ausgeschaltete Effekte brauchen keine CPU.|Laranja = na segunda página FX. Efeitos desligados não usam CPU.
+567|Ordine delle note: su, giù, casuale, come suonate, o il sequencer a step.|Orden de las notas: arriba, abajo, aleatorio, como se tocan, o el secuenciador por pasos.|Ordre des notes : montant, descendant, aléatoire, comme joué, ou le séquenceur pas à pas.|Reihenfolge der Noten: auf, ab, zufällig, wie gespielt oder der Step-Sequencer.|Ordem das notas: subindo, descendo, aleatória, como tocadas, ou o sequenciador de passos.
+568|Sub d'organo|Sub de órgano|Sub d'orgue|Orgel-Sub|Sub de órgão
+569|*
+570|*
+571|*
+572|Oscillatori e filtri mai perfettamente uguali, come i componenti veri.|Osciladores y filtros nunca idénticos, como los componentes reales.|Oscillateurs et filtres jamais parfaitement identiques, comme de vrais composants.|Oszillatoren und Filter nie ganz gleich, wie echte Bauteile.|Osciladores e filtros nunca idênticos, como componentes reais.
+573|Altro|Otros|Autres|Weitere|Outros
+574|=|Salida|Sortie|Ausgang|Saída
+575|Livello di uscita dopo la distorsione.|Nivel de salida tras la distorsión.|Niveau de sortie après la distorsion.|Ausgangspegel nach der Verzerrung.|Nível de saída após a distorção.
+576|Volume di uscita di tutto PYRA (tutti i layer).|Volumen de salida de todo PYRA (todas las capas).|Volume de sortie de tout PYRA (toutes les couches).|Ausgangslautstärke des ganzen PYRA (alle Ebenen).|Volume de saída de todo o PYRA (todas as camadas).
+577|=|Overdrive|Overdrive|Overdrive|Overdrive
+578|PERSONALIZZA|PERSONALIZAR|PERSONNALISER|ANPASSEN|PERSONALIZAR
+579|=|PHASER|PHASER|PHASER|PHASER
+580|=|ESCUCHAR|ÉCOUTER|ANHÖREN|OUVIR
+581|=|PRESET|PRESET|PRESET|PRESET
+582|=|PRESETS|PRESETS|PRESETS|PRESETS
+583|=|PROGRESIÓN|PROGRESSION|PROGRESSION|PROGRESSÃO
+584|*
+585|=|Pad|Pad|Pad|Pad
+586|Pad e atmosfere|Pads y atmósferas|Pads et ambiances|Pads & Atmosphären|Pads e atmosferas
+587|=|Pan|Pan|Pan|Pan
+588|=|Paralelo|Parallèle|Parallel|Paralelo
+589|=|Sereno|Paisible|Friedlich|Sereno
+590|Picco|Pico|Pic|Peak|Pico
+591|=|Fase|Phase|Phase|Fase
+592|Phaser|Phaser|Phaser|Phaser|Phaser
+593|=|Frigia|Phrygien|Phrygisch|Frígia
+594|=|Frigia dominante|Phrygien dominant|Phrygisch-dominant|Frígia dominante
+595|=|Elige un instrumento para superponerlo al sintetizador. Los presets con SAMPLE lo usan.|Choisissez un instrument à superposer au synthé. Les presets marqués SAMPLE l'utilisent.|Wähle ein Instrument, um es mit dem Synth zu schichten. Presets mit SAMPLE nutzen es.|Escolha um instrumento para sobrepor ao sintetizador. Presets marcados SAMPLE o usam.
+596|=|Ping-pong|Ping-pong|Ping-Pong|Ping-pong
+597|=|Rosa|Rose|Rosa|Rosa
+598|=|Afinación|Hauteur|Tonhöhe|Afinação
+599|=|Pitch bend|Pitch bend|Pitch-Bend|Pitch bend
+600|=|Octava arriba|Octave haut|Oktave hoch|Oitava acima
+601|Intonazione dei grani, in semitoni.|Afinación de los granos, en semitonos.|Hauteur des grains, en demi-tons.|Tonhöhe der Grains in Halbtönen.|Afinação dos grãos, em semitons.
+602|Range del pitch bend di ogni nota in modalità MPE, in semitoni.|Rango de pitch bend de cada nota en modo MPE, en semitonos.|Plage de pitch bend de chaque note en mode MPE, en demi-tons.|Pitch-Bend-Bereich jeder Note im MPE-Modus, in Halbtönen.|Faixa de pitch bend de cada nota no modo MPE, em semitons.
+603|=|Cuerdas pizzicato|Cordes pizzicato|Pizzicato-Streicher|Cordas pizzicato
+604|=|Tocar|Jouer|Spielen|Tocar
+605|=|Toca un instrumento grabado junto con los osciladores|Joue un instrument enregistré avec les oscillateurs|Spielt ein aufgenommenes Instrument zusammen mit den Oszillatoren|Toca um instrumento gravado junto com os osciladores
+606|=|Toca las notas de cada acorde una tras otra, como un rasgueo de guitarra|Joue les notes de chaque accord l'une après l'autre, comme un grattement de guitare|Spielt die Noten jedes Akkords nacheinander, wie ein Gitarrenanschlag|Toca as notas de cada acorde uma após a outra, como uma batida de violão
+607|Suona le note una dopo l'altra, come una pennata di chitarra.|Toca las notas una tras otra, como un rasgueo de guitarra.|Joue les notes l'une après l'autre, comme un grattement de guitare.|Spielt die Noten nacheinander, wie ein Gitarrenanschlag.|Toca as notas uma após a outra, como uma batida de violão.
+608|=|Pluck|Pluck|Pluck|Pluck
+609|=|Poly|Poly|Poly|Poly
+610|=|Poly = acordes. Mono = una nota, reinicia. Legato = una nota, se desliza sin reiniciar.|Poly = accords. Mono = une note, redéclenche. Legato = une note, glisse sans redéclencher.|Poly = Akkorde. Mono = eine Note, neu ausgelöst. Legato = eine Note, gleitet ohne Neuauslösung.|Poly = acordes. Mono = uma nota, reinicia. Legato = uma nota, desliza sem reiniciar.
+611|Poly suona accordi. Mono suona una nota alla volta. Legato scivola tra le note tenute senza farle ripartire.|Poly toca acordes. Mono toca una nota a la vez. Legato se desliza entre notas sostenidas sin reiniciarlas.|Poly joue des accords. Mono joue une note à la fois. Legato glisse entre les notes tenues sans les redéclencher.|Poly spielt Akkorde. Mono spielt eine Note nach der anderen. Legato gleitet zwischen gehaltenen Noten, ohne sie neu zu starten.|Poly toca acordes. Mono toca uma nota por vez. Legato desliza entre notas seguradas sem reiniciá-las.
+612|=|Portamento|Portamento|Portamento|Portamento
+613|Portamento: quanto ci mette una nota a scivolare nella successiva. 0 = spento.|Portamento: cuánto tarda una nota en deslizarse a la siguiente. 0 = apagado.|Portamento : temps qu'une note met à glisser vers la suivante. 0 = éteint.|Portamento: wie lange eine Note zur nächsten gleitet. 0 = aus.|Portamento: quanto uma nota demora para deslizar até a próxima. 0 = desligado.
+614|=|Portamento: las notas se deslizan una en otra. 0 = apagado. Funciona en Poly, Mono y Legato.|Portamento : les notes glissent l'une dans l'autre. 0 = éteint. Fonctionne en Poly, Mono et Legato.|Portamento: Noten gleiten ineinander. 0 = aus. Funktioniert in Poly, Mono und Legato.|Portamento: as notas deslizam uma na outra. 0 = desligado. Funciona em Poly, Mono e Legato.
+615|Posizione nella wavetable: passa da un frame all'altro. Puoi anche trascinare su e giù nello schermo.|Posición dentro de la wavetable: pasa de un cuadro a otro. También puedes arrastrar arriba y abajo en la pantalla.|Position dans la wavetable : passe d'une image à l'autre. Vous pouvez aussi glisser vers le haut et le bas dans l'écran.|Position in der Wavetable: blendet zwischen ihren Frames. Du kannst auch im Display auf und ab ziehen.|Posição dentro da wavetable: passa de um quadro a outro. Você também pode arrastar para cima e para baixo na tela.
+616|=|Power|Power|Power|Power
+617|=|Pre-delay|Pré-délai|Pre-Delay|Pré-atraso
+618|=|Presión|Pression|Druck|Pressão
+619|=|Wavetable anterior / siguiente|Wavetable précédente / suivante|Vorherige / nächste Wavetable|Wavetable anterior / próxima
+620|=|Preset anterior|Preset précédent|Vorheriges Preset|Preset anterior
+621|=|Preset anterior (misma categoría)|Preset précédent (même catégorie)|Vorheriges Preset (gleiche Kategorie)|Preset anterior (mesma categoria)
+622|=|Progresión|Progression|Progression|Progressão
+623|=|Progresión: mantén una tecla y los acordes suenan a tempo. Acorde por tecla: cada tecla que pulsas toca el acorde de la escala construido sobre ella.|Progression : maintenez une touche et les accords jouent en rythme. Accord par touche : chaque touche joue l'accord de la gamme construit sur elle.|Progression: Halte eine Taste, und die Akkorde spielen im Takt. Akkord pro Taste: Jede Taste spielt den Akkord der Skala auf dieser Note.|Progressão: segure uma tecla e os acordes tocam no tempo. Acorde por tecla: cada tecla que você toca dispara o acorde da escala construído sobre ela.
+624|Progressione: tenendo premuto un tasto gli accordi suonano a tempo. Accordo per tasto: ogni tasto suona il suo accordo.|Progresión: al mantener una tecla los acordes suenan a tempo. Acorde por tecla: cada tecla toca su propio acorde.|Progression : en maintenant une touche, les accords jouent en rythme. Accord par touche : chaque touche joue son propre accord.|Progression: Hältst du eine Taste, spielen die Akkorde im Takt. Akkord pro Taste: Jede Taste spielt ihren eigenen Akkord.|Progressão: segurando uma tecla os acordes tocam no tempo. Acorde por tecla: cada tecla toca seu próprio acorde.
+625|=|Los proyectos que usan este preset siguen sonando exactamente igual.|Les projets qui utilisent ce preset sonnent toujours exactement pareil.|Projekte, die dieses Preset nutzen, klingen weiterhin genau gleich.|Projetos que usam este preset continuam soando exatamente iguais.
+626|=|Pulso|Impulsion|Puls|Pulso
+627|Impulso 10%|Pulso 10%|Impulsion 10%|Puls 10%|Pulso 10%
+628|Impulso 12%|Pulso 12%|Impulsion 12%|Puls 12%|Pulso 12%
+629|Impulso 25%|Pulso 25%|Impulsion 25%|Puls 25%|Pulso 25%
+630|=|Bombeo|Pompage|Pumpen|Bombeamento
+631|Quantizza|Cuantizar|Quantifier|Quantisieren|Quantizar
+632|=|RANDOM|RANDOM|RANDOM|RANDOM
+633|=|RANDOM TODO|RANDOM TOUT|RANDOM ALLES|RANDOM TUDO
+634|=|VELOCIDAD|VITESSE|RATE|VELOCIDADE
+635|=|ACTUALIZAR|ACTUALISER|AKTUALISIEREN|ATUALIZAR
+636|=|RENOMBRAR|RENOMMER|UMBENENNEN|RENOMEAR
+637|AZZERA|RESTABLECER|RÉINITIALISER|ZURÜCKSETZEN|REDEFINIR
+638|=|RESONADOR|RÉSONATEUR|RESONATOR|RESSONADOR
+639|=|REVERB|RÉVERBÉRATION|HALL|REVERB
+640|=|RELANZAR|RELANCER|NEU WÜRFELN|RELANÇAR
+641|=|RUTAS|ROUTAGE|ROUTING|ROTAS
+642|Pioggia|Lluvia|Pluie|Regen|Chuva
+643|=|Aleatorio|Aléatoire|Zufall|Aleatório
+644|=|Pasos aleatorios|Pas aléatoires|Zufallsschritte|Passos aleatórios
+645|=|Botón Random: un arpegio nuevo en cada clic|Bouton Random : un nouvel arpège à chaque clic|Random-Knopf: bei jedem Klick ein neues Arpeggio|Botão Random: um arpejo novo a cada clique
+646|=|Efectos aleatorios sobre el patrón: 0 = solo tus pasos, 100% = cada paso puede hacer glitch|Effets aléatoires par-dessus le motif : 0 = vos pas seulement, 100 % = chaque pas peut glitcher|Zufallseffekte über dem Pattern: 0 = nur deine Steps, 100 % = jeder Step kann glitchen|Efeitos aleatórios sobre o padrão: 0 = só seus passos, 100% = cada passo pode dar glitch
+647|=|Aleatorio solo para esta sección. Clic derecho: pequeña variación.|Aléatoire pour cette section seulement. Clic droit : petite variation.|Zufall nur für diesen Bereich. Rechtsklick: kleine Variation.|Aleatório só para esta seção. Clique direito: pequena variação.
+648|=|Movimiento aleatorio dentro de rangos seguros. Cada vuelta hace el sonido vivo y nunca igual.|Mouvement aléatoire dans des limites sûres. Chaque tour rend le son vivant et jamais pareil.|Zufällige Bewegung in sicheren Grenzen. Jede Drehung macht den Klang lebendig und nie gleich.|Movimento aleatório dentro de limites seguros. Cada volta deixa o som vivo e nunca igual.
+649|=|Movimiento aleatorio. Hasta la mitad mantiene el sonido vivo; hacia arriba lo destroza (ver MANGLE).|Mouvement aléatoire. Jusqu'à la moitié il garde le son vivant ; vers le haut il le met en pièces (voir MANGLE).|Zufällige Bewegung. Bis zur Hälfte hält sie den Klang lebendig; oben zerreißt sie ihn (siehe MANGLE).|Movimento aleatório. Até a metade mantém o som vivo; no alto o despedaça (veja MANGLE).
+650|Movimento casuale: fino a metà rende il suono vivo, verso il massimo lo fa a pezzi.|Movimiento aleatorio: hasta la mitad mantiene vivo el sonido, hacia arriba lo destroza.|Mouvement aléatoire : jusqu'à la moitié il garde le son vivant, vers le haut il le met en pièces.|Zufällige Bewegung: bis zur Hälfte lebendig, nach oben zerreißt sie den Klang.|Movimento aleatório: até a metade mantém o som vivo, no alto o despedaça.
+651|Intonazione casuale per ogni grano.|Afinación aleatoria para cada grano.|Hauteur aléatoire pour chaque grain.|Zufällige Tonhöhe für jedes Grain.|Afinação aleatória para cada grão.
+652|=|Preset aleatorio|Preset aléatoire|Zufälliges Preset|Preset aleatório
+653|=|Preset aleatorio para esta capa (clic derecho: pequeño cambio de volumen y pan)|Preset aléatoire pour cette couche (clic droit : petit changement de volume et de pan)|Zufälliges Preset für diese Ebene (Rechtsklick: kleine Änderung an Pegel und Pan)|Preset aleatório para esta camada (clique direito: pequena mudança de volume e pan)
+654|Inizio casuale per ogni nota (0 = ogni attacco suona uguale).|Inicio aleatorio para cada nota (0 = cada ataque suena igual).|Départ aléatoire pour chaque note (0 = chaque attaque sonne pareil).|Zufälliger Start für jede Note (0 = jeder Anschlag klingt gleich).|Início aleatório para cada nota (0 = cada ataque soa igual).
+655|Valore casuale solo per questo controllo (clic destro: piccola modifica)|Valor aleatorio solo para este control (clic derecho: pequeño cambio)|Valeur aléatoire pour ce réglage seulement (clic droit : petit changement)|Zufallswert nur für dieses Element (Rechtsklick: kleine Änderung)|Valor aleatório só para este controle (clique direito: pequena mudança)
+656|=|Velocidad|Vitesse|Rate|Velocidade
+657|=|Ratio|Ratio|Ratio|Razão
+658|=|Instrumento grabado (banco de muestras)|Instrument enregistré (banque d'échantillons)|Aufgenommenes Instrument (Sample-Bank)|Instrumento gravado (banco de amostras)
+659|=|Rehacer (avanzar de nuevo)|Rétablir (avancer à nouveau)|Wiederholen (wieder vor)|Refazer (avançar de novo)
+660|=|Curva Lib.|Courbe Rel.|Rel.-Kurve|Curva Lib.
+661|=|Liberación|Relâchement|Release|Liberação
+662|Rilascio: tempo per sfumare dopo aver lasciato il tasto.|Liberación: tiempo para desvanecerse al soltar la tecla.|Relâchement : temps pour s'éteindre après avoir relâché la touche.|Release: Zeit zum Ausklingen nach dem Loslassen der Taste.|Liberação: tempo para sumir depois de soltar a tecla.
+663|=|Quitar modulación|Supprimer la modulation|Modulation entfernen|Remover modulação
+664|Toglie le frequenze alte dalle ripetizioni.|Quita las frecuencias altas de las repeticiones.|Retire les aigus des répétitions.|Entfernt hohe Frequenzen aus den Wiederholungen.|Remove as frequências altas das repetições.
+665|Toglie le frequenze basse dalle ripetizioni.|Quita las frecuencias bajas de las repeticiones.|Retire les graves des répétitions.|Entfernt tiefe Frequenzen aus den Wiederholungen.|Remove as frequências baixas das repetições.
+666|=|Renombrar preset|Renommer le preset|Preset umbenennen|Renomear preset
+667|=|Repetir|Répéter|Wiederholen|Repetir
+668|=|Restablecer mezcla y zonas|Réinitialiser le mix et les zones|Mix und Zonen zurücksetzen|Redefinir mixagem e zonas
+669|=|Restablecer valor inicial|Valeur par défaut|Auf Standard zurücksetzen|Voltar ao valor inicial
+670|Ripristina sinusoide|Restablecer seno|Revenir au sinus|Auf Sinus zurücksetzen|Voltar à senoide
+671|=|Resonancia|Résonance|Resonanz|Ressonância
+672|Risonanza del filtro FX.|Resonancia del filtro FX.|Résonance du filtre FX.|Resonanz des FX-Filters.|Ressonância do filtro FX.
+673|Risonanza: esalta le frequenze vicino al taglio (negli shelving: alza o abbassa).|Resonancia: realza las frecuencias alrededor del corte (en los shelving: realza o recorta).|Résonance : accentue les fréquences autour de la coupure (sur les plateaux : accentue ou atténue).|Resonanz: hebt die Frequenzen um den Cutoff an (bei Shelf-Filtern: anheben oder absenken).|Ressonância: reforça as frequências em torno do corte (nos shelving: reforça ou corta).
+674|Risonatore|Resonador|Résonateur|Resonator|Ressonador
+675|=|Resonadores y filtro FX, todo en una cadena fija y ordenada|Résonateurs et filtre FX, dans une chaîne fixe et ordonnée|Resonatoren und FX-Filter, alles in einer festen, ordentlichen Kette|Ressonadores e filtro FX, tudo numa cadeia fixa e organizada
+676|=|Reinicio|Redéclenché|Retrigger|Reinício
+677|=|Reinicio: reinicia en cada nota. Libre: sigue girando. Envolvente: suena una sola vez.|Redéclenché : repart à chaque note. Libre : continue de tourner. Enveloppe : joue une fois.|Retrigger: startet bei jeder Note neu. Frei: läuft weiter. Hüllkurve: spielt einmal.|Reinício: reinicia a cada nota. Livre: continua girando. Envelope: toca uma vez.
+678|Riavvio: riparte a ogni nota. Libero: continua a girare. Inviluppo: suona una volta sola.|Reinicio: reinicia con cada nota. Libre: sigue girando. Envolvente: suena una sola vez.|Redéclenché : repart à chaque note. Libre : continue de tourner. Enveloppe : joue une fois.|Retrigger: startet mit jeder Note neu. Frei: läuft weiter. Hüllkurve: spielt einmal.|Reinício: reinicia a cada nota. Livre: continua girando. Envelope: toca uma vez.
+679|=|Reverse|Inversé|Rückwärts|Reverso

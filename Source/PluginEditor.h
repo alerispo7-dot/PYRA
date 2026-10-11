@@ -8,7 +8,8 @@
 
 class PyraAudioProcessorEditor : public juce::AudioProcessorEditor,
                                  public juce::DragAndDropContainer,
-                                 private juce::Timer
+                                 private juce::Timer,
+                                 private juce::ChangeListener
 {
 public:
     explicit PyraAudioProcessorEditor (PyraAudioProcessor&);
@@ -44,6 +45,8 @@ private:
     void randomizeCurrentPage (bool variation);
     void editLayerSound (int layer);
     void layoutTabs();
+    void noteActivity();
+    void linkLayers();
     /** The sound the pages are editing: this PYRA (layer A) or one of its layers. */
     PyraAudioProcessor& target();
 
@@ -51,6 +54,10 @@ private:
     pyra::PyraLookAndFeel lnf;
     std::unique_ptr<pyra::ModMatrixAccess> matrix;
     std::unique_ptr<pyra::UiContext> ui;
+    std::unique_ptr<pyra::ModMatrixAccess> masterMatrix;
+    std::unique_ptr<pyra::UiContext> masterUi;   // CHORDS and ARP (shared by all the layers)
+    std::vector<float> linkSnapshot;
+    double lastActivityMs = -1.0e9;
 
     Root root { *this };
     juce::OwnedArray<juce::TextButton> tabs;
@@ -63,7 +70,10 @@ private:
     std::unique_ptr<pyra::SaveDialog> saveDialog;
     juce::TextButton langButton;
     juce::MidiKeyboardComponent keyboard;
-    juce::TooltipWindow tooltips { this, 600 };
+    std::unique_ptr<juce::TooltipWindow> tooltips;   // the help bubbles (SETTINGS > PERSONALIZE can switch them off)
+    void applyPrefs();
+    void changeListenerCallback (juce::ChangeBroadcaster*) override;
+    int prefsSignature = -1;
     int lastVoices = -1, historyCounter = 0, animCounter = 0;
     float animTime = 0.0f, scopeLevel = 0.0f;
     int editLayer = 0;   // 0 = the main sound (layer A), 1..7 = layers B..H

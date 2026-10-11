@@ -81,6 +81,7 @@ private:
     Rng rng;
     float pink[7] {}, brown = 0, noiseLp = 0, noiseOut = 0, noiseHold = 0;
     int noiseCounter = 0;
+    float nzPrev = 0, nzPrev2 = 0, nzPh = 0, nzEnv = 0, nzLow = 0, nzBand = 0, nzS1 = 0, nzGate = 0;   // textured noises
     float noiseGainL = 0, noiseGainR = 0;
 
     // sampler layer

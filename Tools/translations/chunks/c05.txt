@@ -1,0 +1,150 @@
+680|Inverti (da dietro a davanti)|Invertir (de atrás hacia delante)|Inverser (de l'arrière vers l'avant)|Umkehren (von hinten nach vorn)|Inverter (de trás para frente)
+681|=|Ritmo|Rythme|Rhythmus|Ritmo
+682|=|Movimiento rítmico sincronizado con el tempo de tu DAW.|Mouvement rythmique calé sur le tempo de votre DAW.|Rhythmische Bewegung im Tempo deiner DAW.|Movimento rítmico sincronizado com o andamento da sua DAW.
+683|=|Mod. en anillo|Modulation en anneau|Ringmodulator|Mod. em anel
+684|=|Afin. aleat.|Hauteur aléat.|Zufallstonhöhe|Afin. aleat.
+685|=|Romántico|Romantique|Romantisch|Romântico
+686|=|Habitación|Pièce|Raum|Sala
+687|Stanza, sala o shimmer (con ottave sopra).|Habitación, sala o shimmer (con octavas arriba).|Pièce, salle ou shimmer (avec octaves supérieures).|Raum, Saal oder Shimmer (mit Oktaven darüber).|Sala pequena, salão ou shimmer (com oitavas acima).
+688|=|Fundamental|Fondamentale|Grundton|Fundamental
+689|=|Fundamental un semitono más alta (#)|Fondamentale un demi-ton plus haut (#)|Grundton einen Halbton höher (#)|Fundamental um semitom acima (#)
+690|=|Fundamental un semitono más baja (b)|Fondamentale un demi-ton plus bas (b)|Grundton einen Halbton tiefer (b)|Fundamental um semitom abaixo (b)
+691|Nota fondamentale del risonatore.|Nota raíz del resonador.|Note fondamentale du résonateur.|Grundton des Resonators.|Nota fundamental do ressonador.
+692|Quadra arrotondata|Cuadrada redondeada|Carré arrondi|Abgerundetes Rechteck|Quadrada arredondada
+693|*
+694|Curva S giù|Curva S abajo|Courbe S bas|S-Kurve ab|Curva S baixo
+695|Curva S su|Curva S arriba|Courbe S haut|S-Kurve auf|Curva S cima
+696|=|MUESTRA|ÉCHANTILLON|SAMPLE|AMOSTRA
+697|=|CAPA DE MUESTRAS|COUCHE D'ÉCHANTILLONS|SAMPLE-EBENE|CAMADA DE AMOSTRAS
+698|=|MUESTRAS ACTIVAS|ÉCHANTILLONS ACTIFS|SAMPLES AN|AMOSTRAS LIGADAS
+699|=|GUARDAR|ENREGISTRER|SPEICHERN|SALVAR
+700|=|GUARDAR COMO NUEVO|ENREGISTRER COMME NOUVEAU|ALS NEU SPEICHERN|SALVAR COMO NOVO
+701|=|GUARDAR EL SONIDO ACTUAL|ENREGISTRER LE SON ACTUEL|AKTUELLEN KLANG SPEICHERN|SALVAR O SOM ATUAL
+702|=|GUARDAR PRESET|ENREGISTRER LE PRESET|PRESET SPEICHERN|SALVAR PRESET
+703|=|AJUSTES|RÉGLAGES|EINSTELLUNGEN|CONFIGURAÇÕES
+704|=|FORMA|FORME|FORM|FORMA
+705|=|SHIFTER|SHIFTER|SHIFTER|SHIFTER
+706|=|CADENA DE SEÑAL|CHAÎNE DU SIGNAL|SIGNALKETTE|CADEIA DE SINAL
+707|=|FUENTE|SOURCE|QUELLE|FONTE
+708|=|PASO|PAS|STEP|PASSO
+709|=|PASOS|PAS|STEPS|PASSOS
+710|=|CUERDAS|CORDES|STREICHER|CORDAS
+711|=|Triste|Triste|Traurig|Triste
+712|=|Banco de muestras|Banque d'échantillons|Sample-Bank|Banco de amostras
+713|=|Frec. de muestreo|Fréq. d'échantillonnage|Abtastrate|Taxa de amostragem
+714|Strumento campionato (pianoforte, archi, fiati...).|Instrumento sampleado (piano, cuerdas, vientos...).|Instrument échantillonné (piano, cordes, vents...).|Gesampeltes Instrument (Klavier, Streicher, Bläser...).|Instrumento sampleado (piano, cordas, sopros...).
+715|=|No se encuentran las muestras. Reinstala PYRA con el instalador incluido, o copia la carpeta "Samples" en:|Échantillons introuvables. Réinstallez PYRA avec l'installateur fourni, ou copiez le dossier "Samples" dans :|Samples nicht gefunden. Installiere PYRA mit dem beiliegenden Installer neu oder kopiere den Ordner "Samples" nach:|Amostras não encontradas. Reinstale o PYRA com o instalador incluído, ou copie a pasta "Samples" para:
+716|=|No se encuentran las muestras. Reinstala PYRA con el instalador incluido.|Échantillons introuvables. Réinstallez PYRA avec l'installateur fourni.|Samples nicht gefunden. Installiere PYRA mit dem beiliegenden Installer neu.|Amostras não encontradas. Reinstale o PYRA com o instalador incluído.
+717|=|Saturación|Saturation|Sättigung|Saturação
+718|Saturazione prima del filtro: più calda e sporca.|Saturación antes del filtro: más cálida y sucia.|Saturation avant le filtre : plus chaude et sale.|Sättigung vor dem Filter: wärmer und schmutziger.|Saturação antes do filtro: mais quente e suja.
+719|Saturazione del filtro FX.|Saturación del filtro FX.|Saturation du filtre FX.|Sättigung des FX-Filters.|Saturação do filtro FX.
+720|=|Guardar el patrón del arp como MIDI|Enregistrer le motif de l'arp en MIDI|Arp-Pattern als MIDI speichern|Salvar o padrão do arp como MIDI
+721|=|Guardar los acordes como MIDI|Enregistrer les accords en MIDI|Akkorde als MIDI speichern|Salvar os acordes como MIDI
+722|=|Guarda el sonido actual como preset propio|Enregistrer le son actuel comme votre preset|Aktuellen Klang als eigenes Preset speichern|Salve o som atual como seu preset
+723|=|Guardado en Documentos/PYRA/Presets: aparece en el navegador enseguida.|Enregistré dans Documents/PYRA/Presets : il apparaît aussitôt dans le navigateur.|Gespeichert in Dokumente/PYRA/Presets - es erscheint sofort im Browser.|Salvo em Documentos/PYRA/Presets: aparece no navegador na hora.
+724|=|Sierra|Dent de scie|Sägezahn|Dente de serra
+725|=|Rampa abajo|Rampe descendante|Rampe ab|Rampa descendo
+726|=|Rampa arriba|Rampe montante|Rampe auf|Rampa subindo
+727|=|Escala|Gamme|Skala|Escala
+728|Scala da cui sono costruiti gli accordi.|Escala con la que se construyen los acordes.|Gamme sur laquelle les accords sont construits.|Skala, aus der die Akkorde gebaut werden.|Escala com que os acordes são construídos.
+729|Scala usata dagli step NOTA.|Escala usada por los pasos NOTA.|Gamme utilisée par les pas NOTE.|Skala, die die NOTE-Steps nutzen.|Escala usada pelos passos NOTA.
+730|=|Escalas y tónica, modos, swing, arrastra el MIDI a tu DAW|Gammes et tonique, modes, swing, glissez le MIDI dans votre DAW|Skalen und Grundton, Modi, Swing, MIDI in deine DAW ziehen|Escalas e tônica, modos, swing, arraste o MIDI para sua DAW
+731|=|Scratch|Scratch|Scratch|Scratch
+732|=|Buscar presets, categorías, etiquetas...|Rechercher presets, catégories, tags...|Presets, Kategorien, Tags suchen...|Buscar presets, categorias, tags...
+733|=|Semitonos|Demi-tons|Halbtöne|Semitons
+734|Semitoni del campione.|Semitonos de la muestra.|Demi-tons de l'échantillon.|Halbtöne des Samples.|Semitons da amostra.
+735|=|Sensual|Sensuel|Sinnlich|Sensual
+736|=|Secuencias|Séquences|Sequenzen|Sequências
+737|=|Secuenciador|Séquenceur|Sequencer|Sequenciador
+738|=|Serie|Série|Seriell|Série
+739|=|Serie: el filtro 1 alimenta al filtro 2. Paralelo: los dos filtros lado a lado.|Série : le filtre 1 alimente le filtre 2. Parallèle : les deux filtres côte à côte.|Seriell: Filter 1 speist Filter 2. Parallel: beide Filter nebeneinander.|Série: o filtro 1 alimenta o filtro 2. Paralelo: os dois filtros lado a lado.
+740|Serie: il filtro 1 entra nel filtro 2. Parallelo: i due filtri lavorano affiancati.|Serie: el filtro 1 alimenta al filtro 2. Paralelo: los dos filtros trabajan lado a lado.|Série : le filtre 1 alimente le filtre 2. Parallèle : les deux filtres travaillent côte à côte.|Seriell: Filter 1 speist Filter 2. Parallel: die beiden Filter arbeiten nebeneinander.|Série: o filtro 1 alimenta o filtro 2. Paralelo: os dois filtros trabalham lado a lado.
+741|=|Séptimas|Septièmes|Septimen|Sétimas
+742|Pinna di squalo|Aleta de tiburón|Aileron de requin|Haifischflosse|Barbatana de tubarão
+743|=|Shimmer|Shimmer|Shimmer|Shimmer
+744|Andamento shuffle per il ritmo.|Aire shuffle para el ritmo.|Groove shuffle pour le rythme.|Shuffle-Gefühl für den Rhythmus.|Balanço shuffle para o ritmo.
+745|Pompa sidechain|Bombeo sidechain|Pompage sidechain|Sidechain-Pumpen|Bombeamento sidechain
+746|Silenzia questo layer.|Silencia esta capa.|Rend cette couche muette.|Schaltet diese Ebene stumm.|Silencia esta camada.
+747|=|Seno|Sinus|Sinus|Senoide
+748|Sinusoide + armonica|Seno + armónico|Sinus + harmonique|Sinus + Oberton|Senoide + harmônico
+749|Sinusoide + ottava|Seno + octava|Sinus + octave|Sinus + Oktave|Senoide + oitava
+750|Sinusoide + dodicesima|Seno + duodécima|Sinus + douzième|Sinus + Duodezime|Senoide + décima segunda
+751|=|Simple|Simple|Einzeln|Simples
+752|=|Tamaño|Taille|Größe|Tamanho
+753|Dimensione della finestra di PYRA (puoi anche trascinarne l'angolo)|Tamaño de la ventana de PYRA (también puedes arrastrar su esquina)|Taille de la fenêtre de PYRA (vous pouvez aussi tirer son coin)|Größe des PYRA-Fensters (du kannst auch an der Ecke ziehen)|Tamanho da janela do PYRA (você também pode arrastar o canto)
+754|Dimensione dello spazio.|Tamaño del espacio.|Taille de l'espace.|Größe des Raums.|Tamanho do espaço.
+755|=|Salta el principio de la grabación (ataque más suave)|Saute le début de l'enregistrement (attaque plus douce)|Überspringt den Anfang der Aufnahme (weicherer Anschlag)|Pula o início da gravação (ataque mais suave)
+756|=|Slide|Slide|Slide|Slide
+757|Scivola solo quando la nuova nota è suonata mentre un'altra è ancora premuta.|Desliza solo cuando la nota nueva se toca mientras otra sigue pulsada.|Glisse seulement si la nouvelle note est jouée pendant qu'une autre est encore tenue.|Gleitet nur, wenn die neue Note gespielt wird, während eine andere noch gehalten wird.|Desliza só quando a nova nota é tocada enquanto outra ainda está segurada.
+758|=|Desliza solo cuando tocas una nota mientras otra sigue pulsada|Glisse seulement si vous jouez une note pendant qu'une autre est encore tenue|Gleitet nur, wenn du eine Note spielst, während eine andere noch gehalten wird|Desliza só quando você toca uma nota enquanto outra ainda está segurada
+759|Lento|Lento|Lent|Langsam|Lento
+760|Ondeggiamento lento dell'intonazione, come un nastro consumato.|Ondulación lenta de la afinación, como una cinta gastada.|Ondulation lente de la hauteur, comme une bande usée.|Langsames Tonhöhenschwanken, wie bei einem abgenutzten Band.|Ondulação lenta da afinação, como uma fita gasta.
+761|Lenta variazione casuale dell'intonazione, come un vecchio synth analogico.|Variación lenta y aleatoria de la afinación, como un viejo sintetizador analógico.|Errance lente et aléatoire de la hauteur, comme un vieux synthé analogique.|Langsam zufällig wandernde Tonhöhe, wie bei einem alten Analogsynth.|Variação lenta e aleatória da afinação, como um velho sintetizador analógico.
+762|Piccole variazioni casuali di tempo e velocity, come un musicista vero.|Pequeños cambios aleatorios de tiempo y velocidad, como un músico real.|Petites variations aléatoires de timing et de vélocité, comme un vrai musicien.|Kleine zufällige Änderungen in Timing und Anschlag, wie ein echter Spieler.|Pequenas mudanças aleatórias de tempo e velocidade, como um músico de verdade.
+763|=|Pequeña variación (mantiene el carácter)|Petite variation (garde le caractère)|Kleine Variation (behält den Charakter)|Pequena variação (mantém o caráter)
+764|=|Suavizado|Lissage|Glättung|Suavização
+765|=|Aleatorio suave|Aléatoire doux|Weicher Zufall|Aleatório suave
+766|=|Suave: cada acorde elige la inversión más cercana a la anterior (conducción de voces fluida)|Doux : chaque accord choisit le renversement le plus proche du précédent (conduite des voix fluide)|Weich: Jeder Akkord wählt die Umkehrung, die der vorigen am nächsten ist (flüssige Stimmführung)|Suave: cada acorde escolhe a inversão mais próxima da anterior (condução de vozes fluida)
+767|Ammorbidisce gli spigoli della forma dell'LFO.|Suaviza las esquinas de la forma del LFO.|Adoucit les angles de la forme du LFO.|Glättet die Ecken der LFO-Form.|Suaviza os cantos da forma do LFO.
+768|Ammorbidisce i bordi tra gli step del glitch.|Suaviza los bordes entre los pasos del glitch.|Adoucit les transitions entre les pas du glitch.|Glättet die Übergänge zwischen den Glitch-Steps.|Suaviza as bordas entre os passos do glitch.
+769|=|Recorte suave|Écrêtage doux|Weiches Clipping|Corte suave
+770|Triangolo morbido|Triángulo suave|Triangle doux|Weiches Dreieck|Triângulo suave
+771|Ammorbidisce i bordi del movimento.|Suaviza los bordes del movimiento.|Adoucit les bords du mouvement.|Glättet die Kanten der Bewegung.|Suaviza as bordas do movimento.
+772|La velocity più leggera che questo layer suona.|La velocidad más suave que toca esta capa.|La vélocité la plus douce que joue cette couche.|Die leiseste Anschlagstärke, die diese Ebene spielt.|A velocidade mais suave que esta camada toca.
+773|=|Violín solista|Violon solo|Solovioline|Violino solo
+774|=|Solo: escucha solo las capas en solo|Solo : n'entendre que les couches en solo|Solo: nur die Solo-Ebenen hören|Solo: ouça só as camadas em solo
+775|=|Espacio|Espace|Raum|Espaço
+776|Speciali|Especiales|Spéciaux|Spezial|Especiais
+777|=|Velocidad|Vitesse|Tempo|Velocidade
+778|Velocità degli step dell'arpeggio.|Velocidad de los pasos del arpegio.|Vitesse des pas de l'arpège.|Tempo der Arpeggio-Steps.|Velocidade dos passos do arpejo.
+779|Velocità del movimento del chorus.|Velocidad del movimiento del chorus.|Vitesse du mouvement du chorus.|Tempo der Chorus-Bewegung.|Velocidade do movimento do chorus.
+780|Velocità dello sweep del flanger.|Velocidad del barrido del flanger.|Vitesse du balayage du flanger.|Tempo des Flanger-Sweeps.|Velocidade da varredura do flanger.
+781|Velocità del movimento in valori di nota.|Velocidad del movimiento en valores de nota.|Vitesse du mouvement en valeurs de note.|Tempo der Bewegung in Notenwerten.|Velocidade do movimento em valores de nota.
+782|Velocità dello sweep del phaser.|Velocidad del barrido del phaser.|Vitesse du balayage du phaser.|Tempo des Phaser-Sweeps.|Velocidade da varredura do phaser.
+783|=|Espectral|Spectral|Gespenstisch|Assombrado
+784|=|Dispersión|Dispersion|Streuung|Dispersão
+785|=|Amplia|Large|Weit|Ampla
+786|=|Cuadrada|Carré|Rechteck|Quadrada
+787|=|Golpes|Stabs|Stabs|Stabs
+788|=|Etapas|Étages|Stufen|Estágios
+789|=|Escalones|Escaliers|Treppe|Degraus
+790|Scalini 8|Escalones 8|Escaliers 8|Treppe 8|Degraus 8
+791|Scalini su-giù|Escalones arriba-abajo|Escaliers haut-bas|Treppe auf-ab|Degraus sobe-desce
+792|=|Estrella en tus favoritos, etiquetas propias|Étoile sur vos favoris, tags personnalisés|Stern für Favoriten, eigene Tags|Estrela nos favoritos, tags personalizadas
+793|=|Inicio|Début|Start|Início
+794|=|Volver al sonido inicial|Repartir du son de départ|Vom Grundklang neu starten|Recomeçar do som inicial
+795|Statica|Estática|Parasites|Statik|Estática
+796|=|División|Division|Teilung|Divisão
+797|=|Vel. paso|Vél. pas|Step-Vel.|Vel. passo
+798|=|Editor de hasta 32 pasos: nota, velocidad, duración, ligadura|Éditeur jusqu'à 32 pas : note, vélocité, durée, liaison|Editor mit bis zu 32 Steps: Note, Anschlag, Länge, Bindung|Editor de até 32 passos: nota, velocidade, duração, ligadura
+799|=|Pasos|Pas|Steps|Passos
+800|Scalini e gate|Escalones y gates|Escaliers et gates|Treppen & Gates|Degraus e gates
+801|=|Estéreo|Stéréo|Stereo|Estéreo
+802|Apertura stereo dei grani.|Apertura estéreo de los granos.|Étalement stéréo des grains.|Stereobreite der Grains.|Abertura estéreo dos grãos.
+803|Apertura stereo delle voci unisono.|Apertura estéreo de las voces unísono.|Étalement stéréo des voix unisson.|Stereobreite der Unisono-Stimmen.|Abertura estéreo das vozes uníssono.
+804|Ampiezza stereo del chorus.|Anchura estéreo del chorus.|Largeur stéréo du chorus.|Stereobreite des Chorus.|Largura estéreo do chorus.
+805|Ampiezza stereo delle ripetizioni.|Anchura estéreo de las repeticiones.|Largeur stéréo des répétitions.|Stereobreite der Wiederholungen.|Largura estéreo das repetições.
+806|Ampiezza stereo del riverbero.|Anchura estéreo de la reverb.|Largeur stéréo de la réverbération.|Stereobreite des Halls.|Largura estéreo do reverb.
+807|=|Cuerdas|Cordes|Streicher|Cordas
+808|=|Rasgueo|Grattement|Strum|Batida
+809|=|Stutter|Stutter|Stottern|Stutter
+810|*
+811|=|Sus|Sus|Sus|Sus
+812|*
+813|=|Sostenido|Maintien|Sustain|Sustentação
+814|Sostegno: livello mantenuto mentre il tasto è premuto.|Sostenido: nivel mantenido mientras la tecla está pulsada.|Maintien : niveau tenu tant que la touche est enfoncée.|Sustain: Pegel, solange die Taste gedrückt ist.|Sustentação: nível mantido enquanto a tecla está pressionada.
+815|=|Crescendo|Crescendo|Anschwellen|Crescendo
+816|=|Swing|Swing|Swing|Swing
+817|Accende o spegne l'EQ.|Enciende o apaga el EQ.|Active ou désactive l'EQ.|Schaltet den EQ ein oder aus.|Liga ou desliga o EQ.
+818|Accende o spegne il filtro FX.|Enciende o apaga el filtro FX.|Active ou désactive le filtre FX.|Schaltet den FX-Filter ein oder aus.|Liga ou desliga o filtro FX.
+819|Accende o spegne l'arpeggiatore (suona tutti i layer).|Enciende o apaga el arpegiador (toca todas las capas).|Active ou désactive l'arpégiateur (il joue toutes les couches).|Schaltet den Arpeggiator ein oder aus (er spielt alle Ebenen).|Liga ou desliga o arpejador (ele toca todas as camadas).
+820|Accende o spegne il generatore di accordi (suona tutti i layer).|Enciende o apaga el generador de acordes (toca todas las capas).|Active ou désactive le générateur d'accords (il joue toutes les couches).|Schaltet den Akkordgenerator ein oder aus (er spielt alle Ebenen).|Liga ou desliga o gerador de acordes (ele toca todas as camadas).
+821|Accende o spegne il chorus.|Enciende o apaga el chorus.|Active ou désactive le chorus.|Schaltet den Chorus ein oder aus.|Liga ou desliga o chorus.
+822|Accende o spegne il compressore.|Enciende o apaga el compresor.|Active ou désactive le compresseur.|Schaltet den Kompressor ein oder aus.|Liga ou desliga o compressor.
+823|Accende o spegne il delay.|Enciende o apaga el delay.|Active ou désactive le delay.|Schaltet das Delay ein oder aus.|Liga ou desliga o delay.
+824|Accende o spegne la distorsione.|Enciende o apaga la distorsión.|Active ou désactive la distorsion.|Schaltet die Verzerrung ein oder aus.|Liga ou desliga a distorção.
+825|Accende o spegne il flanger.|Enciende o apaga el flanger.|Active ou désactive le flanger.|Schaltet den Flanger ein oder aus.|Liga ou desliga o flanger.
+826|Accende o spegne lo spostatore di frequenza.|Enciende o apaga el desplazador de frecuencia.|Active ou désactive le décaleur de fréquence.|Schaltet den Frequenzverschieber ein oder aus.|Liga ou desliga o deslocador de frequência.
+827|Accende o spegne l'effetto glitch.|Enciende o apaga el efecto glitch.|Active ou désactive l'effet glitch.|Schaltet den Glitch-Effekt ein oder aus.|Liga ou desliga o efeito glitch.
+828|Accende o spegne l'effetto granulare.|Enciende o apaga el efecto granular.|Active ou désactive l'effet granulaire.|Schaltet den Granular-Effekt ein oder aus.|Liga ou desliga o efeito granular.
+829|Accende o spegne il generatore di rumore.|Enciende o apaga el generador de ruido.|Active ou désactive le générateur de bruit.|Schaltet den Rauschgenerator ein oder aus.|Liga ou desliga o gerador de ruído.
