@@ -18,5 +18,5 @@ I campioni sono stati adattati per PYRA (tagliati, accordati, messi in loop, bil
 
 Built with JUCE (https://juce.com).
 
-Fonts: Barlow and Barlow Condensed (The Barlow Project Authors) and Cinzel Decorative (Natanael Gama),
+Fonts: Barlow and Barlow Condensed (The Barlow Project Authors) Unifraktur Cook (j. 'mach' wust) and New Rocker (Impallari Type),
 licensed under the SIL Open Font License 1.1 (see Resources/Fonts in the source code).

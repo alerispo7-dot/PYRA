@@ -40,7 +40,8 @@ public:
 
     static juce::Font font (float height, bool bold = false);      // Barlow: labels and values
     static juce::Font titleFont (float height);                    // Barlow Condensed Bold: titles, tabs, buttons
-    static juce::Font displayFont (float height);                  // Cinzel Decorative: the name, big knob labels
+    static juce::Font displayFont (float height);                  // New Rocker: big knob labels
+    static juce::Font logoFont (float height);                     // Unifraktur Cook: the PYRA name (gothic)
 
     void drawPopupMenuBackground (juce::Graphics&, int width, int height) override;
     void drawTooltip (juce::Graphics&, const juce::String& text, int width, int height) override;

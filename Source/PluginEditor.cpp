@@ -183,7 +183,7 @@ void PyraAudioProcessorEditor::timerCallback()
     {
         animCounter = 0;
         animTime += 0.066f;
-        root.repaint (0, 0, 180, 44);
+        root.repaint (0, 0, 184, 45);
         root.repaint (896, 0, 104, 46);
     }
 
@@ -224,19 +224,16 @@ void PyraAudioProcessorEditor::Root::paint (juce::Graphics& g)
     g.fillRect (0.0f, 46.0f, (float) getWidth(), 3.0f);
 
     // logo: the treble clef on fire + the name in molten letters
-    pyra::art::drawLogo (g, { 10.0f, 4.0f, 34.0f, 38.0f }, owner.animTime);
-    const auto name = juce::String ("PYRA");
+    pyra::art::drawLogo (g, { 8.0f, 4.0f, 36.0f, 38.0f }, owner.animTime);
+    const auto logoFont = pyra::PyraLookAndFeel::logoFont (31.0f);
+    pyra::art::drawChromeText (g, "PYRA", logoFont, 47.0f, 33.0f, owner.animTime);
     juce::GlyphArrangement ga;
-    ga.addLineOfText (pyra::PyraLookAndFeel::displayFont (28.0f), name, 46.0f, 33.0f);
+    ga.addLineOfText (logoFont, "PYRA", 47.0f, 33.0f);
     juce::Path letters;
     ga.createPath (letters);
-    g.setColour (colours::accent.withAlpha (0.35f));
-    g.strokePath (letters, juce::PathStrokeType (3.0f));
-    g.setGradientFill (juce::ColourGradient (juce::Colour (0xfffff0c0), 0, 10, colours::accent, 0, 34, false));
-    g.fillPath (letters);
     g.setColour (colours::textDim);
     g.setFont (pyra::PyraLookAndFeel::font (10.0f));
-    g.drawText ("v" JucePlugin_VersionString, 46 + (int) letters.getBounds().getWidth() + 4, 22, 60, 14, juce::Justification::centredLeft);
+    g.drawText ("v" JucePlugin_VersionString, (int) letters.getBounds().getRight() + 4, 24, 60, 14, juce::Justification::centredLeft);
 
     // voice meter
     const int v = owner.proc.engine.uiVoices.load();

@@ -272,29 +272,46 @@ juce::Path cracks (juce::Rectangle<float> a, uint32_t seed)
     return p;
 }
 
+namespace
+{
+    /** Polished chrome: bright sky, dark horizon line, warm reflection of the fire underneath. */
+    juce::ColourGradient chrome (float top, float bottom)
+    {
+        juce::ColourGradient cg (juce::Colour (0xfffdfbf8), 0.0f, top, juce::Colour (0xffffd9a0), 0.0f, bottom, false);
+        cg.addColour (0.18, juce::Colour (0xffd9d6d8));
+        cg.addColour (0.42, juce::Colour (0xff6b6870));
+        cg.addColour (0.50, juce::Colour (0xff1c1a1e));   // horizon
+        cg.addColour (0.53, juce::Colour (0xfff2efe9));
+        cg.addColour (0.72, juce::Colour (0xffa59a98));
+        cg.addColour (0.88, juce::Colour (0xffe07a38));   // fire reflected in the metal
+        return cg;
+    }
+
+    void fireBehind (juce::Graphics& g, juce::Rectangle<float> a, float time, int tongues, uint32_t seed, float intensity)
+    {
+        Rng r; r.seed (seed);
+        for (int pass = 0; pass < 3; ++pass)
+            for (int i = 0; i < tongues; ++i)
+            {
+                const float u = ((float) i + 0.5f) / (float) tongues + r.bi() * 0.04f;
+                const float x = a.getX() + a.getWidth() * u;
+                const float flick = 1.0f + 0.16f * std::sin (time * (6.0f + (float) i * 1.7f) + (float) i)
+                                         + 0.08f * std::sin (time * 15.0f + (float) i * 3.1f);
+                const float h = a.getHeight() * (0.55f + 0.45f * r.uni()) * flick * (pass == 0 ? 1.0f : (pass == 1 ? 0.72f : 0.42f));
+                const float w = a.getWidth() / (float) tongues * (pass == 0 ? 2.4f : 1.6f);
+                auto f = flameTongue (x, a.getBottom(), w, h, std::sin (time * 3.0f + (float) i) * w * 0.35f);
+                const juce::Colour c0 = pass == 0 ? juce::Colour (0xffb01206) : (pass == 1 ? juce::Colour (0xffff5a10) : juce::Colour (0xffffd070));
+                g.setGradientFill (juce::ColourGradient (c0.withAlpha (intensity), x, a.getBottom(), c0.withAlpha (0.0f), x, a.getBottom() - h, false));
+                g.fillPath (f);
+            }
+    }
+}
+
 void drawLogo (juce::Graphics& g, juce::Rectangle<float> a, float time)
 {
-    // flames behind the clef
-    const float cx = a.getCentreX(), base = a.getBottom() - a.getHeight() * 0.18f;
-    struct F { float dx, w, h, lean; };
-    const F flames[] = { { -0.22f, 0.42f, 0.78f, -0.10f }, { 0.20f, 0.40f, 0.86f, 0.08f }, { 0.0f, 0.55f, 1.02f, 0.02f },
-                         { -0.08f, 0.32f, 0.62f, -0.12f }, { 0.12f, 0.30f, 0.66f, 0.1f } };
-    for (int pass = 0; pass < 2; ++pass)
-        for (auto& f : flames)
-        {
-            const float flick = 1.0f + 0.09f * std::sin (time * (5.0f + f.dx * 7.0f) + f.w * 11.0f) + 0.05f * std::sin (time * 13.0f + f.h * 5.0f);
-            const float w = a.getWidth() * f.w * (pass == 0 ? 1.0f : 0.55f), h = a.getHeight() * f.h * (pass == 0 ? 1.0f : 0.7f) * flick;
-            auto p = flameTongue (cx + a.getWidth() * f.dx, base, w, h, a.getWidth() * f.lean);
-            if (pass == 0)
-                g.setGradientFill (juce::ColourGradient (juce::Colour (0xffffa020), cx, base, juce::Colour (0xffd8200a).withAlpha (0.9f),
-                                                         cx, base - h, false));
-            else
-                g.setGradientFill (juce::ColourGradient (juce::Colour (0xfffff0a0), cx, base, juce::Colour (0xffffa020).withAlpha (0.0f),
-                                                         cx, base - h, false));
-            g.fillPath (p);
-        }
+    // hellfire behind a chrome treble clef (think biker from hell / hell priest)
+    fireBehind (g, a.expanded (4.0f, 0.0f).withTrimmedBottom (2.0f), time, 5, 31u, 0.95f);
 
-    // the treble clef (one stroke: spiral, up to the top loop, down the stem to the curl)
     const std::vector<juce::Point<float>> pts {
         { 0.43f, 0.63f }, { 0.47f, 0.57f }, { 0.41f, 0.51f }, { 0.30f, 0.52f }, { 0.22f, 0.60f }, { 0.25f, 0.72f }, { 0.38f, 0.78f },
         { 0.53f, 0.73f }, { 0.58f, 0.61f }, { 0.52f, 0.47f }, { 0.40f, 0.38f }, { 0.31f, 0.27f }, { 0.32f, 0.14f }, { 0.40f, 0.04f },
@@ -302,72 +319,85 @@ void drawLogo (juce::Graphics& g, juce::Rectangle<float> a, float time)
         { 0.28f, 0.98f }, { 0.25f, 0.92f } };
     std::vector<juce::Point<float>> scaled;
     const float side = a.getHeight();
-    const float ox = cx - side * 0.40f, oy = a.getY();
+    const float ox = a.getCentreX() - side * 0.40f, oy = a.getY();
     for (auto p : pts) scaled.push_back ({ ox + p.x * side, oy + p.y * side });
     auto clef = smoothPath (scaled);
-    const float sw = side * 0.06f;
-    g.setColour (juce::Colour (0xff1a0402).withAlpha (0.85f));
-    g.strokePath (clef, juce::PathStrokeType (sw * 1.9f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
-    g.setGradientFill (juce::ColourGradient (juce::Colour (0xfffff4d0), cx, a.getY(), juce::Colour (0xffffb040), cx, a.getBottom(), false));
-    g.strokePath (clef, juce::PathStrokeType (sw, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
-    g.setColour (juce::Colour (0xfffff4d0));
-    g.fillEllipse (ox + 0.27f * side - sw * 1.1f, oy + 0.93f * side - sw * 1.1f, sw * 2.2f, sw * 2.2f);
+    const float sw = side * 0.085f;
+    juce::Path solid;
+    juce::PathStrokeType (sw, juce::PathStrokeType::curved, juce::PathStrokeType::rounded).createStrokedPath (solid, clef);
+    solid.addEllipse (ox + 0.27f * side - sw * 1.2f, oy + 0.93f * side - sw * 1.2f, sw * 2.4f, sw * 2.4f);
+
+    g.setColour (juce::Colour (0xff0a0303));
+    g.strokePath (solid, juce::PathStrokeType (2.2f));
+    g.setGradientFill (chrome (a.getY(), a.getBottom()));
+    g.fillPath (solid);
+    g.setColour (juce::Colours::white.withAlpha (0.7f));
+    g.strokePath (solid, juce::PathStrokeType (0.6f), juce::AffineTransform::translation (-0.4f, -0.5f));
+}
+
+void drawChromeText (juce::Graphics& g, const juce::String& text, const juce::Font& font, float x, float baseline, float time)
+{
+    juce::GlyphArrangement ga;
+    ga.addLineOfText (font, text, x, baseline);
+    juce::Path letters;
+    ga.createPath (letters);
+    const auto b = letters.getBounds();
+
+    // flames licking up from behind the letters
+    fireBehind (g, { b.getX(), b.getY() - b.getHeight() * 0.35f, b.getWidth(), b.getHeight() * 1.05f }, time, 9, 77u, 0.75f);
+
+    // deep shadow, dark bevel, chrome, highlight edge, red-hot rim at the bottom
+    g.setColour (juce::Colours::black.withAlpha (0.85f));
+    g.fillPath (letters, juce::AffineTransform::translation (1.5f, 2.0f));
+    g.setColour (juce::Colour (0xff120404));
+    g.strokePath (letters, juce::PathStrokeType (2.6f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+    g.setGradientFill (chrome (b.getY(), b.getBottom()));
+    g.fillPath (letters);
+    g.setColour (juce::Colours::white.withAlpha (0.75f));
+    g.strokePath (letters, juce::PathStrokeType (0.6f), juce::AffineTransform::translation (-0.4f, -0.6f));
+    {
+        juce::Graphics::ScopedSaveState ss (g);
+        g.reduceClipRegion (letters);
+        g.setGradientFill (juce::ColourGradient (juce::Colour (0x00ff4010), 0.0f, b.getCentreY(), juce::Colour (0x88ff3a0a), 0.0f, b.getBottom(), false));
+        g.fillRect (b);
+    }
 }
 
 //==============================================================================
 void drawSkeleton (juce::Graphics& g, float x, float baseY, float h, float lean, float alpha, uint32_t seed)
 {
+    // drawn like a child's pencil sketch: wobbly lines, no shading
     Rng r; r.seed (seed * 7919u + 3u);
-    const auto bone = juce::Colour (0xffe8dcc4).withAlpha (alpha);
-    const auto shade = juce::Colour (0xff2a0a04).withAlpha (alpha);
-    const float skullR = h * 0.13f;
-    const float headY = baseY - h * 0.55f;
-    const float hx = x + lean * h * 0.15f;
-    const float lw = std::max (1.0f, h * 0.035f);
-
-    // ribs / spine just above the lava
-    g.setColour (bone);
-    g.drawLine (hx, headY + skullR, x, baseY, lw);
-    for (int i = 0; i < 3; ++i)
+    const auto c = juce::Colour (0xffeee0c8).withAlpha (alpha);
+    const juce::PathStrokeType st (juce::jlimit (1.0f, 1.8f, h * 0.014f), juce::PathStrokeType::curved, juce::PathStrokeType::rounded);   // pencil-thin
+    const float wob = std::max (0.5f, h * 0.02f);
+    const float headR = h * 0.12f, hx = x + lean * h * 0.15f, headY = baseY - h * 0.62f;
+    g.setColour (c);
+    g.strokePath (shaky (ellipsePts ({ hx - headR, headY - headR, headR * 2.0f, headR * 2.1f }, 10), wob, seed, true), st);
+    // eyes: two scribbled holes, a crooked grin
+    for (int e = -1; e <= 1; e += 2)
+        g.strokePath (shaky ({ { hx + (float) e * headR * 0.45f - headR * 0.18f, headY - headR * 0.1f }, { hx + (float) e * headR * 0.45f + headR * 0.18f, headY + headR * 0.15f },
+                               { hx + (float) e * headR * 0.45f - headR * 0.18f, headY + headR * 0.15f }, { hx + (float) e * headR * 0.45f + headR * 0.15f, headY - headR * 0.1f } },
+                             wob * 0.5f, seed + (uint32_t) e + 9u), st);
+    g.strokePath (shaky ({ { hx - headR * 0.5f, headY + headR * 0.55f }, { hx, headY + headR * 0.7f }, { hx + headR * 0.5f, headY + headR * 0.5f } }, wob * 0.5f, seed + 3u), st);
+    // spine and a few ribs
+    g.strokePath (shaky ({ { hx, headY + headR }, { (hx + x) * 0.5f, (headY + baseY) * 0.5f }, { x, baseY } }, wob, seed + 4u), st);
+    for (int k = 0; k < 3; ++k)
     {
-        const float yy = headY + skullR * 1.8f + (float) i * h * 0.075f;
-        if (yy > baseY) break;
-        juce::Path rib;
-        rib.addCentredArc (x + (hx - x) * (1.0f - (yy - headY) / (baseY - headY)), yy, h * 0.12f, h * 0.04f, 0.0f,
-                           -juce::MathConstants<float>::halfPi - 1.3f, -juce::MathConstants<float>::halfPi + 1.3f, true);
-        g.strokePath (rib, juce::PathStrokeType (lw * 0.8f));
+        const float yy = headY + headR * 1.6f + (float) k * h * 0.08f, w = h * (0.13f - (float) k * 0.02f);
+        const float cx = hx + (x - hx) * ((yy - headY) / (baseY - headY));
+        g.strokePath (shaky ({ { cx - w, yy + h * 0.03f }, { cx, yy }, { cx + w, yy + h * 0.03f } }, wob, seed + 10u + (uint32_t) k), st);
     }
-
-    // arms raised, reaching out of the fire
+    // arms up, stick fingers
     for (int side = -1; side <= 1; side += 2)
     {
-        const float sx = hx + (float) side * h * 0.1f, sy = headY + skullR * 1.7f;
-        const float ex = sx + (float) side * h * (0.14f + r.uni() * 0.08f), ey = sy - h * (0.12f + r.uni() * 0.1f);
-        const float wx = ex + (float) side * h * (0.02f + r.uni() * 0.06f), wy = ey - h * (0.2f + r.uni() * 0.12f);
-        g.drawLine (sx, sy, ex, ey, lw);
-        g.drawLine (ex, ey, wx, wy, lw);
-        for (int f = -2; f <= 2; ++f)
-        {
-            const float fa = -juce::MathConstants<float>::halfPi + (float) f * 0.3f + (float) side * 0.15f;
-            g.drawLine (wx, wy, wx + std::cos (fa) * h * 0.07f, wy + std::sin (fa) * h * 0.07f, lw * 0.6f);
-        }
+        const float sx = hx, sy = headY + headR * 1.5f;
+        const float ex = sx + (float) side * h * (0.18f + r.uni() * 0.08f), ey = sy - h * (0.05f + r.uni() * 0.12f);
+        const float wx = ex + (float) side * h * 0.05f, wy = ey - h * (0.2f + r.uni() * 0.1f);
+        g.strokePath (shaky ({ { sx, sy }, { ex, ey }, { wx, wy } }, wob, seed + 20u + (uint32_t) side), st);
+        for (int f = -1; f <= 1; ++f)
+            g.strokePath (shaky ({ { wx, wy }, { wx + (float) f * h * 0.04f + (float) side * h * 0.01f, wy - h * 0.07f } }, wob * 0.4f, seed + 30u + (uint32_t) (f + 2 * side)), st);
     }
-
-    // skull
-    g.setColour (bone);
-    g.fillEllipse (hx - skullR, headY - skullR, skullR * 2.0f, skullR * 2.0f);
-    g.fillRoundedRectangle (hx - skullR * 0.6f, headY + skullR * 0.5f, skullR * 1.2f, skullR * 0.8f, skullR * 0.2f);
-    g.setColour (shade);
-    g.fillEllipse (hx - skullR * 0.62f, headY - skullR * 0.15f, skullR * 0.5f, skullR * 0.55f);
-    g.fillEllipse (hx + skullR * 0.12f, headY - skullR * 0.15f, skullR * 0.5f, skullR * 0.55f);
-    g.fillRect (hx - skullR * 0.08f, headY + skullR * 0.45f, skullR * 0.16f, skullR * 0.25f);
-    for (int t = -2; t <= 2; ++t)
-        g.drawLine (hx + (float) t * skullR * 0.22f, headY + skullR * 0.8f, hx + (float) t * skullR * 0.22f, headY + skullR * 1.25f,
-                    std::max (0.6f, lw * 0.4f));
-    // glowing eyes
-    g.setColour (juce::Colour (0xffff8a20).withAlpha (alpha * 0.9f));
-    g.fillEllipse (hx - skullR * 0.45f, headY + skullR * 0.02f, skullR * 0.16f, skullR * 0.16f);
-    g.fillEllipse (hx + skullR * 0.29f, headY + skullR * 0.02f, skullR * 0.16f, skullR * 0.16f);
 }
 
 void drawLavaStrip (juce::Graphics& g, juce::Rectangle<float> area, float time)
@@ -416,6 +446,9 @@ void drawHellScene (juce::Graphics& g, juce::Rectangle<float> a)
     g.setColour (juce::Colours::black.withAlpha (0.35f));
     g.strokePath (v, juce::PathStrokeType (2.0f));
 
+    // the sky is a wall too: someone kept count up here
+    drawWallScratches (g, a.withHeight (a.getHeight() * 0.45f).reduced (10.0f, 6.0f), 999u, 0.8f);
+
     // lava lake
     auto lake = juce::Rectangle<float> (a.getX(), lavaY, a.getWidth(), a.getBottom() - lavaY);
     for (int y = 0; y < (int) lake.getHeight(); y += 2)
@@ -431,8 +464,8 @@ void drawHellScene (juce::Graphics& g, juce::Rectangle<float> a)
     for (int i = 0; i < n; ++i)
     {
         const float x = a.getX() + a.getWidth() * (0.08f + 0.84f * ((float) i + r.uni() * 0.6f) / (float) n);
-        const float h = a.getHeight() * (0.28f + r.uni() * 0.2f);
-        drawSkeleton (g, x, lavaY + lake.getHeight() * (0.25f + r.uni() * 0.4f), h, r.bi() * 0.5f, 0.85f, (uint32_t) i + 1u);
+        const float h = a.getHeight() * (0.2f + r.uni() * 0.14f);
+        drawSkeleton (g, x, lavaY + lake.getHeight() * (0.25f + r.uni() * 0.4f), h, r.bi() * 0.5f, 0.7f, (uint32_t) i + 1u);
     }
     drawLavaStrip (g, lake.withTrimmedTop (lake.getHeight() * 0.55f), 0.0f);
 }
@@ -511,6 +544,140 @@ void drawDoodle (juce::Graphics& g, Doodle d, juce::Rectangle<float> a, juce::Co
             }
             line ({ P (0.32f, 0.58f), P (0.2f, 0.45f), P (0.16f, 0.36f) }, 20);   // thumb
             break;
+    }
+}
+
+//==============================================================================
+void drawWallScratches (juce::Graphics& g, juce::Rectangle<float> area, uint32_t seed, float strength)
+{
+    juce::Graphics::ScopedSaveState ss (g);
+    g.reduceClipRegion (area.toNearestInt());
+    Rng r; r.seed (seed * 2654435761u + 1013u);
+
+    // one scratch = a dark gouge with a pale, dusty edge (like plaster scraped with a nail)
+    auto scratch = [&] (const juce::Path& p, float width, float alpha)
+    {
+        g.setColour (juce::Colours::black.withAlpha (0.55f * alpha));
+        g.strokePath (p, juce::PathStrokeType (width + 0.9f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded),
+                      juce::AffineTransform::translation (0.7f, 0.9f));
+        g.setColour (juce::Colour (0xffe9d9c0).withAlpha (alpha));
+        g.strokePath (p, juce::PathStrokeType (width, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+    };
+    auto line = [&] (juce::Point<float> a, juce::Point<float> b, float wob, uint32_t s)
+    {
+        const auto m = (a + b) * 0.5f;
+        return shaky ({ a, m, b }, wob, s);
+    };
+    auto pick = [&] (float lo, float hi) { return lo + (hi - lo) * r.uni(); };
+
+    const int items = 18 + (int) (r.uni() * 10.0f);
+    for (int it = 0; it < items; ++it)
+    {
+        const float x = area.getX() + area.getWidth() * r.uni();
+        const float y = area.getY() + area.getHeight() * r.uni();
+        const float alpha = strength * (r.uni() < 0.25f ? pick (0.05f, 0.1f) : pick (0.12f, 0.3f));   // some almost rubbed out
+        const float rot = r.bi() * 0.25f;
+        const float sc = pick (0.7f, 1.3f);
+        const auto tr = juce::AffineTransform::rotation (rot, x, y);
+        const float kind = r.uni();
+
+        if (kind < 0.42f)
+        {   // counting days: groups of four bars crossed by a fifth
+            const int groups = 1 + (int) (r.uni() * 5.0f);
+            const float h = 15.0f * sc, gap = 4.5f * sc;
+            float gx = x;
+            const bool lastPartial = r.uni() < 0.6f;
+            for (int gi = 0; gi < groups; ++gi)
+            {
+                const int bars = (gi == groups - 1 && lastPartial) ? 1 + (int) (r.uni() * 4.0f) : 5;
+                juce::Path p;
+                for (int k = 0; k < std::min (4, bars); ++k)
+                {
+                    const float bx = gx + (float) k * gap + r.bi() * 0.8f;
+                    p.addPath (line ({ bx + r.bi(), y + r.bi() * 1.5f }, { bx + r.bi() * 1.5f, y + h + r.bi() * 1.5f }, 0.5f, seed + (uint32_t) (it * 50 + gi * 7 + k)));
+                }
+                if (bars == 5)
+                    p.addPath (line ({ gx - 2.0f * sc, y + h * 0.8f }, { gx + 3.0f * gap + 2.0f * sc, y + h * 0.15f }, 0.6f, seed + (uint32_t) (it * 50 + gi)));
+                p.applyTransform (tr);
+                scratch (p, 1.0f, alpha);
+                gx += 4.0f * gap + 5.0f * sc;
+            }
+            if (r.uni() < 0.2f)
+            {   // the whole row struck out
+                auto p = line ({ x - 4.0f, y + h * 0.5f + r.bi() * 3.0f }, { gx, y + h * 0.5f + r.bi() * 4.0f }, 1.2f, seed + (uint32_t) it * 3u);
+                p.applyTransform (tr);
+                scratch (p, 1.2f, alpha);
+            }
+        }
+        else if (kind < 0.58f)
+        {   // illegible scribble
+            std::vector<juce::Point<float>> pts;
+            float px = x, py = y, ang = r.uni() * 6.28f;
+            const int n = 6 + (int) (r.uni() * 10.0f);
+            for (int k = 0; k < n; ++k)
+            {
+                pts.push_back ({ px, py });
+                ang += r.bi() * 2.2f;
+                px += std::cos (ang) * 7.0f * sc;
+                py += std::sin (ang) * 5.0f * sc;
+            }
+            auto p = shaky (pts, 0.8f, seed + (uint32_t) it);
+            p.applyTransform (tr);
+            scratch (p, 0.9f, alpha);
+        }
+        else if (kind < 0.76f)
+        {   // a half-legible word carved with a nail
+            static const char* words[] = { "HELP", "666", "NO", "WHY", "LET ME OUT", "DAY 13", "HE SEES", "SIN", "RUN", "NEVER", "BURN", "FORGIVE" };
+            const juce::String w (words[r.next() % (uint32_t) std::size (words)]);
+            juce::GlyphArrangement ga;
+            ga.addLineOfText (PyraLookAndFeel::titleFont (13.0f * sc), w, x, y);
+            juce::Path glyphs;
+            ga.createPath (glyphs);
+            // scratch only the outline of each letter, roughly
+            juce::Path rough;
+            juce::PathFlatteningIterator fi (glyphs, {}, 1.2f);
+            bool started = false;
+            while (fi.next())
+            {
+                const juce::Point<float> a { fi.x1 + r.bi() * 0.7f, fi.y1 + r.bi() * 0.7f };
+                if (! started || fi.subPathIndex == 0) { rough.startNewSubPath (a); started = true; }
+                rough.lineTo (fi.x2 + r.bi() * 0.7f, fi.y2 + r.bi() * 0.7f);
+                if (fi.closesSubPath) rough.closeSubPath();
+            }
+            rough.applyTransform (tr);
+            scratch (rough, 0.7f, alpha * 1.1f);
+        }
+        else if (kind < 0.86f)
+        {   // crude sketch: skull, demon, eyes, ghost or hand, scratched small and crooked
+            const auto d = (Doodle) (r.next() % 5u);
+            juce::Graphics::ScopedSaveState s2 (g);
+            g.addTransform (tr);
+            const float sz = 24.0f * sc;
+            g.setColour (juce::Colours::black.withAlpha (0.5f * alpha));
+            drawDoodle (g, d, { x + 0.8f, y + 0.9f, sz, sz * 1.15f }, juce::Colours::black.withAlpha (0.5f * alpha), 1.6f, seed + (uint32_t) it);
+            drawDoodle (g, d, { x, y, sz, sz * 1.15f }, juce::Colour (0xffe9d9c0).withAlpha (alpha), 1.0f, seed + (uint32_t) it);
+        }
+        else if (kind < 0.93f)
+        {   // X marks / crosses
+            juce::Path p;
+            const float s3 = 6.0f * sc;
+            p.addPath (line ({ x - s3, y - s3 }, { x + s3, y + s3 }, 0.6f, seed + (uint32_t) it));
+            p.addPath (line ({ x + s3, y - s3 }, { x - s3, y + s3 }, 0.6f, seed + (uint32_t) it + 1u));
+            p.applyTransform (tr);
+            scratch (p, 1.1f, alpha);
+        }
+        else
+        {   // a spiral, scratched round and round
+            std::vector<juce::Point<float>> pts;
+            for (int k = 0; k < 28; ++k)
+            {
+                const float t = (float) k / 27.0f, a2 = t * 15.0f;
+                pts.push_back ({ x + std::cos (a2) * t * 10.0f * sc, y + std::sin (a2) * t * 10.0f * sc });
+            }
+            auto p = shaky (pts, 0.4f, seed + (uint32_t) it);
+            p.applyTransform (tr);
+            scratch (p, 0.8f, alpha);
+        }
     }
 }
 

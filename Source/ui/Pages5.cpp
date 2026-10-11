@@ -32,7 +32,6 @@ namespace
             ui.knobs.add (&knob);
             knob.slider.setMouseDragSensitivity (320);
             knob.slider.getProperties().set ("lava", true);           // a molten face, like a magma ball
-            knob.slider.getProperties().set ("doodle", (int) face);   // with a creepy drawing scratched into it
             knob.getProperties().set ("bigLabel", true);
         }
 
@@ -44,11 +43,6 @@ namespace
             const auto b = knob.slider.getBounds().toFloat();
             const auto c = b.getCentre();
             const float r = std::min (b.getWidth(), b.getHeight()) * 0.5f;
-            // scratchy doodles in the corners, like drawings on a wall in hell
-            const auto bone = juce::Colour (0xffe8d6bc).withAlpha (0.22f);
-            art::drawDoodle (g, leftDoodle, { 2.0f, 34.0f, 36.0f, 44.0f }, bone, 1.4f, 11u);
-            art::drawDoodle (g, rightDoodle, { (float) getWidth() - 38.0f, 34.0f, 36.0f, 44.0f }, bone, 1.4f, 29u);
-            art::drawDoodle (g, art::DoodleEyes, { 0.0f, (float) getHeight() - 96.0f, 40.0f, 60.0f }, colours::hot.withAlpha (0.3f), 1.2f, 47u);
             const float glow = juce::jlimit (0.0f, 1.0f, v * (0.85f + 0.3f * activity));
             if (glow > 0.01f)
             {
@@ -86,13 +80,24 @@ namespace
     class MacroPanel : public Panel
     {
     public:
-        MacroPanel (const juce::String& t, const juce::String& sub) : Panel (t), subtitle (sub) {}
+        MacroPanel (const juce::String& t, const juce::String& sub, uint32_t wallSeed) : Panel (t), subtitle (sub), seed (wallSeed) {}
         void paint (juce::Graphics& g) override
         {
             Panel::paint (g);
+            // behind the big knob: a cell wall, scratched by whoever was locked in here
+            const auto area = juce::Rectangle<int> (6, 42, getWidth() - 12, 278);   // stays above the controls
+            if (wall.isNull() || wall.getWidth() != area.getWidth())
+            {
+                wall = juce::Image (juce::Image::ARGB, area.getWidth(), area.getHeight(), true);
+                juce::Graphics wg (wall);
+                art::drawWallScratches (wg, wall.getBounds().toFloat(), seed, 1.0f);
+            }
+            g.drawImageAt (wall, area.getX(), area.getY());
             text (g, subtitle, { 12, 26, getWidth() - 24, 34 }, 12.0f, colours::textDim, juce::Justification::topLeft, false, 2);
         }
         juce::String subtitle;
+        uint32_t seed;
+        juce::Image wall;
     };
 
     //==========================================================================
@@ -101,9 +106,9 @@ namespace
     public:
         explicit ChaosPage (UiContext& u)
             : ui (u), proc (u.proc),
-              chaosPanel ("CHAOS", tr ("Random movement. Up to half it keeps the sound alive; towards the top it tears it apart (see MANGLE).")),
-              focusPanel ("FOCUS", tr ("One knob, many targets: you choose what it moves, how far and with which curve.")),
-              motionPanel ("MOTION", tr ("Rhythmic movement locked to the tempo of your DAW.")),
+              chaosPanel ("CHAOS", tr ("Random movement. Up to half it keeps the sound alive; towards the top it tears it apart (see MANGLE)."), 666u),
+              focusPanel ("FOCUS", tr ("One knob, many targets: you choose what it moves, how far and with which curve."), 1313u),
+              motionPanel ("MOTION", tr ("Rhythmic movement locked to the tempo of your DAW."), 4040u),
               chaosKnob (u, "chaos_amt", "CHAOS", colours::hot, art::DoodleDemon, art::DoodleSkull, art::DoodleHand),
               focusKnob (u, "focus_amt", "FOCUS", colours::accent2, art::DoodleSkull, art::DoodleGhost, art::DoodleDemon),
               motionKnob (u, "motion_amt", "MOTION", colours::mod, art::DoodleGhost, art::DoodleHand, art::DoodleSkull)

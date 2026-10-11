@@ -9,7 +9,7 @@ namespace
 {
     struct Faces
     {
-        juce::Typeface::Ptr medium, semi, condSemi, condBold, display;
+        juce::Typeface::Ptr medium, semi, condSemi, condBold, display, logo;
         Faces()
         {
             auto load = [] (const char* data, int size) { return juce::Typeface::createSystemTypefaceFor (data, (size_t) size); };
@@ -17,7 +17,8 @@ namespace
             semi     = load (BinaryData::BarlowSemiBold_ttf, BinaryData::BarlowSemiBold_ttfSize);
             condSemi = load (BinaryData::BarlowCondensedSemiBold_ttf, BinaryData::BarlowCondensedSemiBold_ttfSize);
             condBold = load (BinaryData::BarlowCondensedBold_ttf, BinaryData::BarlowCondensedBold_ttfSize);
-            display  = load (BinaryData::CinzelDecorativeBlack_ttf, BinaryData::CinzelDecorativeBlack_ttfSize);
+            display  = load (BinaryData::NewRockerRegular_ttf, BinaryData::NewRockerRegular_ttfSize);
+            logo     = load (BinaryData::UnifrakturCookBold_ttf, BinaryData::UnifrakturCookBold_ttfSize);
         }
     };
     const Faces& faces() { static Faces f; return f; }
@@ -71,6 +72,11 @@ juce::Font PyraLookAndFeel::font (float height, bool bold)
 juce::Font PyraLookAndFeel::titleFont (float height)
 {
     return juce::Font (juce::FontOptions().withTypeface (faces().condBold).withHeight (height).withKerningFactor (0.06f));
+}
+
+juce::Font PyraLookAndFeel::logoFont (float height)
+{
+    return juce::Font (juce::FontOptions().withTypeface (faces().logo).withHeight (height));
 }
 
 juce::Font PyraLookAndFeel::displayFont (float height)

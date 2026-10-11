@@ -16,6 +16,13 @@ namespace art
     /** The logo: a treble clef on fire (time makes the flames flicker). */
     void drawLogo (juce::Graphics&, juce::Rectangle<float> area, float time = 0.0f);
 
+    /** Chrome gothic lettering with hellfire behind (the PYRA name). */
+    void drawChromeText (juce::Graphics&, const juce::String& text, const juce::Font&, float x, float baseline, float time);
+
+    /** Prison-wall scratches: tally marks counting days, crossed-out rows, scribbles, half-legible words, crude sketches.
+        Irregular on purpose. Drawn faint, as a background. */
+    void drawWallScratches (juce::Graphics&, juce::Rectangle<float> area, uint32_t seed, float strength = 1.0f);
+
     /** Seamless dark stone grain, tiled inside panels. */
     const juce::Image& stone();
     /** A few hairline cracks inside an area. */
