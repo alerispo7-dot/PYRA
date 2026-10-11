@@ -68,6 +68,7 @@ set(PYRA_SOURCES
     Source/dsp/Voice.cpp
     Source/dsp/Engine.cpp
     Source/ui/PyraLookAndFeel.cpp
+    Source/ui/HellArt.cpp
     Source/ui/Widgets.cpp
     Source/ui/Pages.cpp
     Source/ui/Pages3.cpp

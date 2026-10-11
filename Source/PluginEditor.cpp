@@ -1,6 +1,7 @@
 #include "PluginEditor.h"
 #include "Lang.h"
 #include "Randomizer.h"
+#include "ui/HellArt.h"
 
 using pyra::lang::tr;
 namespace colours = pyra::colours;
@@ -158,6 +159,7 @@ void PyraAudioProcessorEditor::paint (juce::Graphics& g)
     g.fillAll (colours::bg);
 }
 
+
 void PyraAudioProcessorEditor::resized()
 {
     const float scale = (float) getWidth() / (float) baseW;
@@ -187,30 +189,42 @@ void PyraAudioProcessorEditor::timerCallback()
 //==============================================================================
 void PyraAudioProcessorEditor::Root::paint (juce::Graphics& g)
 {
-    g.fillAll (colours::bg);
+    // hell behind everything
+    g.drawImageAt (pyra::art::background (getWidth(), getHeight()), 0, 0);
 
-    // top bar
-    auto bar = getLocalBounds().removeFromTop (46);
-    g.setGradientFill (juce::ColourGradient (juce::Colour (0xff1c1416), 0, 0, colours::bg, 0, 46, false));
+    // top bar: smoke above a line of lava
+    auto bar = getLocalBounds().removeFromTop (46).toFloat();
+    g.setGradientFill (juce::ColourGradient (juce::Colour (0xf0080303), 0, 0, juce::Colour (0xd0180605), 0, 46, false));
     g.fillRect (bar);
-    g.setColour (colours::edge);
-    g.drawHorizontalLine (45, 0.0f, (float) getWidth());
 
-    // logo: a small flame + the name
-    juce::Path flame;
-    const float fx = 18.0f, fy = 8.0f;
-    flame.startNewSubPath (fx + 10, fy);
-    flame.cubicTo (fx + 22, fy + 12, fx + 20, fy + 20, fx + 17, fy + 30);
-    flame.cubicTo (fx + 15, fy + 24, fx + 12, fy + 22, fx + 11, fy + 19);
-    flame.cubicTo (fx + 10, fy + 24, fx + 7, fy + 26, fx + 6, fy + 30);
-    flame.cubicTo (fx - 2, fy + 22, fx + 3, fy + 10, fx + 10, fy);
-    flame.closeSubPath();
-    g.setGradientFill (juce::ColourGradient (colours::accent2, fx + 10, fy + 30, colours::hot, fx + 10, fy, false));
-    g.fillPath (flame);
+    // the damned, reaching out of the lava in the free corner of the bar
+    {
+        juce::Graphics::ScopedSaveState ss (g);
+        g.reduceClipRegion (juce::Rectangle<int> (896, 0, 104, 46));
+        juce::ColourGradient pit (juce::Colour (0x00ff6020), 948, 20, juce::Colour (0x90ff5a1a), 948, 46, false);
+        g.setGradientFill (pit);
+        g.fillRect (896, 20, 104, 26);
+        pyra::art::drawSkeleton (g, 914.0f, 46.0f, 34.0f, -0.4f, 0.55f, 3u);
+        pyra::art::drawSkeleton (g, 948.0f, 48.0f, 42.0f, 0.1f, 0.6f, 5u);
+        pyra::art::drawSkeleton (g, 982.0f, 46.0f, 30.0f, 0.5f, 0.5f, 9u);
+        pyra::art::drawLavaStrip (g, { 896.0f, 41.0f, 104.0f, 5.0f });
+    }
+    g.setGradientFill (juce::ColourGradient (colours::accent2, 0, 45, colours::hot, (float) getWidth(), 45, false));
+    g.fillRect (0.0f, 44.5f, (float) getWidth(), 1.5f);
+    g.setColour (colours::accent.withAlpha (0.18f));
+    g.fillRect (0.0f, 46.0f, (float) getWidth(), 3.0f);
 
-    g.setColour (colours::text);
-    g.setFont (pyra::PyraLookAndFeel::font (26.0f, true));
-    g.drawText ("PYRA", 46, 4, 100, 38, juce::Justification::centredLeft);
+    // logo: the treble clef on fire + the name in molten letters
+    pyra::art::drawLogo (g, { 10.0f, 4.0f, 34.0f, 38.0f });
+    const auto name = juce::String ("PYRA");
+    juce::GlyphArrangement ga;
+    ga.addLineOfText (pyra::PyraLookAndFeel::font (27.0f, true), name, 48.0f, 33.0f);
+    juce::Path letters;
+    ga.createPath (letters);
+    g.setColour (colours::accent.withAlpha (0.35f));
+    g.strokePath (letters, juce::PathStrokeType (3.0f));
+    g.setGradientFill (juce::ColourGradient (juce::Colour (0xfffff0c0), 0, 10, colours::accent, 0, 34, false));
+    g.fillPath (letters);
     g.setColour (colours::textDim);
     g.setFont (pyra::PyraLookAndFeel::font (10.0f));
     g.drawText ("v" JucePlugin_VersionString, 120, 22, 60, 14, juce::Justification::centredLeft);

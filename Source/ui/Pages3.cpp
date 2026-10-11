@@ -142,7 +142,7 @@ namespace
     class ChainInfo : public Panel
     {
     public:
-        ChainInfo() : Panel (tr ("SIGNAL CHAIN")) {}
+        ChainInfo() : Panel (tr ("SIGNAL CHAIN")) { tint = colours::accent2; }
         void paint (juce::Graphics& g) override
         {
             Panel::paint (g);
@@ -189,6 +189,7 @@ namespace
         {
             title = tr ("GLITCH");
             titleX = 34;
+            tint = colours::hot;
             Builder b { ui, *this, owned };
             on = b.toggle ("fx_glt_on");
             rate = b.combo ("fx_glt_rate", false);
@@ -373,7 +374,7 @@ namespace
     class CreativeInfo : public Panel
     {
     public:
-        CreativeInfo() : Panel (tr ("TIP")) {}
+        CreativeInfo() : Panel (tr ("TIP")) { tint = colours::accent2; }
         void paint (juce::Graphics& g) override
         {
             Panel::paint (g);
@@ -443,6 +444,8 @@ namespace
                  std::initializer_list<std::pair<const char*, const char*>> {
                    { "fx_shf_freq", "Frequency" }, { "fx_shf_fb", "Feedback" }, { "fx_shf_width", "Stereo" }, { "fx_shf_mix", "Mix" } });
             granular->syncToggle->setTooltip (tr ("Freeze: stops recording and keeps playing grains of what is in the buffer"));
+            granular->tint = colours::mod;
+            shifter->tint = colours::accent2;
             creativeView.addAndMakeVisible (*granular);
             creativeView.addAndMakeVisible (*shifter);
             creativeView.addAndMakeVisible (creativeInfo);
@@ -525,6 +528,8 @@ namespace
               converter (tr ("VINTAGE CONVERTER"))
         {
             for (auto* p : { &agePanel, &movement, &character, &noise, &converter }) addAndMakeVisible (p);
+            agePanel.tint = colours::hot; movement.tint = colours::accent2; character.tint = colours::accent;
+            noise.tint = colours::mod; converter.tint = colours::accent2;
             Builder ba { ui, agePanel, owned };   age = ba.knob ("an_age", "AGE");
             Builder bm { ui, movement, owned };   drift = bm.knob ("drift", "Drift"); spread = bm.knob ("spread", "Voice Spread");
                                                   tolerance = bm.knob ("an_tolerance", "Tolerance");
@@ -823,6 +828,7 @@ namespace
             addAndMakeVisible (top);
             addAndMakeVisible (editorPanel);
             editorPanel.addAndMakeVisible (editor);
+            editorPanel.tint = colours::mod;
 
             Builder b { ui, top, owned };
             on = b.toggle ("arp_on", tr ("ARP ON"));

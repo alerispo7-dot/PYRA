@@ -340,6 +340,7 @@ namespace
         {
             addAndMakeVisible (top);
             addAndMakeVisible (progression);
+            progression.tint = colours::accent2;
             progression.addAndMakeVisible (cards);
 
             auto combo = [this] (const char* id, bool translate = true)

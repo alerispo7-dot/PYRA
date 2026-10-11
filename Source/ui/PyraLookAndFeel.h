@@ -6,17 +6,19 @@ namespace pyra
 {
 namespace colours
 {
-    const juce::Colour bg        { 0xff111114 };
-    const juce::Colour panel     { 0xff19191e };
-    const juce::Colour panelHi   { 0xff202027 };
-    const juce::Colour edge      { 0xff2b2b33 };
-    const juce::Colour text      { 0xffe9e6e1 };
-    const juce::Colour textDim   { 0xff8c8994 };
-    const juce::Colour accent    { 0xffff6a2b };   // ember orange
-    const juce::Colour accent2   { 0xffffb04a };   // glow
-    const juce::Colour hot       { 0xffe8402a };
-    const juce::Colour mod       { 0xff46c8ff };   // modulation (cyan)
-    const juce::Colour knobBody  { 0xff26262d };
+    // "inferno" palette: soot, embers, lava, bone; violet for modulation (the eyes-castle sky)
+    const juce::Colour bg        { 0xff0c0606 };
+    const juce::Colour panel     { 0xff1b0e0c };
+    const juce::Colour panelHi   { 0xff28140f };
+    const juce::Colour edge      { 0xff4a1d14 };
+    const juce::Colour text      { 0xfff2e4d2 };   // bone
+    const juce::Colour textDim   { 0xffa48b7c };
+    const juce::Colour accent    { 0xffff5a1a };   // lava
+    const juce::Colour accent2   { 0xffffac32 };   // molten glow
+    const juce::Colour hot       { 0xffe0281a };   // blood red
+    const juce::Colour mod       { 0xffb578ff };   // modulation (hell violet)
+    const juce::Colour knobBody  { 0xff2a1713 };
+    const juce::Colour display   { 0xff0d0504 };   // screens (wavetable, envelope, filter...)
 }
 
 class PyraLookAndFeel : public juce::LookAndFeel_V4
@@ -37,6 +39,9 @@ public:
     juce::Label* createSliderTextBox (juce::Slider&) override;
 
     static juce::Font font (float height, bool bold = false);
+
+    void drawPopupMenuBackground (juce::Graphics&, int width, int height) override;
+    void drawTooltip (juce::Graphics&, const juce::String& text, int width, int height) override;
 };
 
 } // namespace pyra

@@ -4,6 +4,7 @@
 #include "../Lang.h"
 #include "../PluginProcessor.h"
 #include "../Randomizer.h"
+#include "HellArt.h"
 
 namespace pyra
 {
@@ -23,12 +24,15 @@ namespace
     class BigKnob : public juce::Component
     {
     public:
-        BigKnob (UiContext& ui, const juce::String& id, const juce::String& label, juce::Colour c)
-            : knob (ui.st, id, label, nullptr), colour (c)
+        BigKnob (UiContext& ui, const juce::String& id, const juce::String& label, juce::Colour c,
+                 art::Doodle face, art::Doodle left, art::Doodle right)
+            : knob (ui.st, id, label, nullptr), colour (c), leftDoodle (left), rightDoodle (right)
         {
             addAndMakeVisible (knob);
             ui.knobs.add (&knob);
             knob.slider.setMouseDragSensitivity (320);
+            knob.slider.getProperties().set ("lava", true);           // a molten face, like a magma ball
+            knob.slider.getProperties().set ("doodle", (int) face);   // with a creepy drawing scratched into it
         }
 
         void setActivity (float a) { if (std::abs (a - activity) > 0.01f) { activity = a; repaint(); } }
@@ -39,6 +43,11 @@ namespace
             const auto b = knob.slider.getBounds().toFloat();
             const auto c = b.getCentre();
             const float r = std::min (b.getWidth(), b.getHeight()) * 0.5f;
+            // scratchy doodles in the corners, like drawings on a wall in hell
+            const auto bone = juce::Colour (0xffe8d6bc).withAlpha (0.22f);
+            art::drawDoodle (g, leftDoodle, { 2.0f, 34.0f, 36.0f, 44.0f }, bone, 1.4f, 11u);
+            art::drawDoodle (g, rightDoodle, { (float) getWidth() - 38.0f, 34.0f, 36.0f, 44.0f }, bone, 1.4f, 29u);
+            art::drawDoodle (g, art::DoodleEyes, { 0.0f, (float) getHeight() - 96.0f, 40.0f, 60.0f }, colours::hot.withAlpha (0.3f), 1.2f, 47u);
             const float glow = juce::jlimit (0.0f, 1.0f, v * (0.85f + 0.3f * activity));
             if (glow > 0.01f)
             {
@@ -61,6 +70,7 @@ namespace
 
         Knob knob;
         juce::Colour colour;
+        art::Doodle leftDoodle, rightDoodle;
         float activity = 0, lastV = -1;
     };
 
@@ -85,11 +95,12 @@ namespace
               chaosPanel ("CHAOS", tr ("Random movement. Up to half it keeps the sound alive; towards the top it tears it apart (see MANGLE).")),
               focusPanel ("FOCUS", tr ("One knob, many targets: you choose what it moves, how far and with which curve.")),
               motionPanel ("MOTION", tr ("Rhythmic movement locked to the tempo of your DAW.")),
-              chaosKnob (u, "chaos_amt", "CHAOS", colours::hot),
-              focusKnob (u, "focus_amt", "FOCUS", colours::accent2),
-              motionKnob (u, "motion_amt", "MOTION", colours::mod)
+              chaosKnob (u, "chaos_amt", "CHAOS", colours::hot, art::DoodleDemon, art::DoodleSkull, art::DoodleHand),
+              focusKnob (u, "focus_amt", "FOCUS", colours::accent2, art::DoodleSkull, art::DoodleGhost, art::DoodleDemon),
+              motionKnob (u, "motion_amt", "MOTION", colours::mod, art::DoodleGhost, art::DoodleHand, art::DoodleSkull)
         {
             for (auto* p : { &chaosPanel, &focusPanel, &motionPanel }) addAndMakeVisible (p);
+            chaosPanel.tint = colours::hot; focusPanel.tint = colours::accent2; motionPanel.tint = colours::mod;
             chaosPanel.addAndMakeVisible (chaosKnob);
             focusPanel.addAndMakeVisible (focusKnob);
             motionPanel.addAndMakeVisible (motionKnob);
@@ -204,7 +215,7 @@ namespace
             // ---- chaos activity bars
             {
                 auto area = chaosBarsArea().translated (chaosPanel.getX(), chaosPanel.getY());
-                g.setColour (juce::Colour (0xff0d0d10));
+                g.setColour (colours::display);
                 g.fillRoundedRectangle (area.toFloat(), 5.0f);
                 const int n = Movement::kGens;
                 const float bw = (float) area.getWidth() / (float) n;
@@ -234,7 +245,7 @@ namespace
             // ---- motion shape preview with live dot
             {
                 auto area = motionViewArea().translated (motionPanel.getX(), motionPanel.getY());
-                g.setColour (juce::Colour (0xff0d0d10));
+                g.setColour (colours::display);
                 g.fillRoundedRectangle (area.toFloat(), 5.0f);
                 auto in = area.toFloat().reduced (8.0f, 10.0f);
                 const int sh = (int) std::lround (shapeParam->load());

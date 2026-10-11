@@ -4,6 +4,7 @@
 #include "../PluginProcessor.h"
 #include "../dsp/Wavetables.h"
 #include "../Randomizer.h"
+#include "HellArt.h"
 
 namespace pyra
 {
@@ -114,6 +115,8 @@ namespace
         void paint (juce::Graphics& g) override
         {
             Panel::paint (g);
+            drawInset (g, { 5.0f, 113.0f, (float) getWidth() - 10.0f, 122.0f });
+            drawInset (g, { 5.0f, 237.0f, (float) getWidth() - 10.0f, 58.0f });
             drawSmallLabel (g, tr ("Warp"), { 10, 240, 96, 14 });
             drawSmallLabel (g, "FM", { 166, 240, 96, 14 });
             drawSmallLabel (g, tr ("Output"), { 322, 240, 90, 14 });
@@ -172,8 +175,10 @@ namespace
         void paint (juce::Graphics& g) override
         {
             Panel::paint (g);
-            g.setColour (colours::edge);
-            g.drawHorizontalLine (96, 10.0f, (float) getWidth() - 10.0f);
+            drawInset (g, { 5.0f, 29.0f, (float) getWidth() - 10.0f, 64.0f });
+            drawInset (g, { 5.0f, 124.0f, (float) getWidth() - 10.0f, (float) getHeight() - 129.0f });
+            g.setColour (tint.withAlpha (0.25f));
+            g.fillRect (10.0f, 96.0f, (float) getWidth() - 20.0f, 1.0f);
         }
 
         void resized() override
@@ -270,7 +275,7 @@ namespace
         void paint (juce::Graphics& g) override
         {
             auto r = getLocalBounds().toFloat();
-            g.setColour (juce::Colour (0xff0d0d10));
+            g.setColour (colours::display);
             g.fillRoundedRectangle (r, 5.0f);
             auto area = r.reduced (6.0f, 8.0f);
 
@@ -316,6 +321,7 @@ namespace
         {
             Builder b { ui, *this, owned };
             title = tr ("FILTER") + " " + juce::String (index + 1);
+            tint = colours::hot;
             titleX = 34;
             on = b.toggle (pid::filt (index, "on"));
             type = b.combo (pid::filt (index, "type"), false);
@@ -358,6 +364,7 @@ namespace
     public:
         explicit EnvPanel (UiContext& ui) : proc (ui.proc), view (ui.st)
         {
+            tint = colours::mod;
             Builder b { ui, *this, owned };
             for (int e = 0; e < kNumEnv; ++e)
             {
@@ -445,6 +452,7 @@ namespace
     public:
         explicit LfoPanel (UiContext& ui) : proc (ui.proc), st (ui.st), view (ui.st)
         {
+            tint = colours::mod;
             Builder b { ui, *this, owned };
             for (int l = 0; l < kNumLfo; ++l)
             {
@@ -541,6 +549,7 @@ namespace
     public:
         explicit MacroPanel (UiContext& ui) : Panel ("MACRO")
         {
+            tint = colours::accent2;
             Builder b { ui, *this, owned };
             for (int m = 0; m < kNumMacros; ++m)
             {
@@ -577,6 +586,7 @@ namespace
     public:
         explicit VoicePanel (UiContext& ui) : Panel (tr ("VOICE & PORTAMENTO"))
         {
+            tint = colours::accent2;
             Builder b { ui, *this, owned };
             mode = b.combo ("voiceMode");
             type = b.combo ("glide_type");
@@ -789,6 +799,7 @@ namespace
               about (tr ("ABOUT")), onLanguageChanged (std::move (onLang))
         {
             for (auto* p : { &voice, &mpePanel, &language, &about }) addAndMakeVisible (p);
+            mpePanel.tint = colours::mod; language.tint = colours::accent2; about.tint = colours::hot;
 
             Builder bv { ui, voice, owned };
             poly = bv.knob ("polyphony", "Voices", false);
@@ -840,7 +851,11 @@ namespace
             juce::MessageManager::callAsync ([cb = onLanguageChanged] { if (cb) cb(); });
         }
 
-        void paint (juce::Graphics&) override {}
+        void paint (juce::Graphics& g) override
+        {
+            // the empty corner becomes a window on hell
+            art::drawHellScene (g, { 8.0f, 414.0f, 820.0f, (float) getHeight() - 422.0f });
+        }
 
         void paintOverChildren (juce::Graphics& g) override
         {

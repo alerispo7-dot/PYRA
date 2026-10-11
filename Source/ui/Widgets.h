@@ -156,6 +156,10 @@ public:
     juce::String title;
     int titleX = 10;
     static constexpr int headerH = 26;
+    juce::Colour tint { 0xffff5a1a };   // header colour: sets sections apart (lava, blood, violet, gold)
+
+    /** A darker recessed area that groups controls inside a panel. */
+    static void drawInset (juce::Graphics&, juce::Rectangle<float>);
 
     /** Shows the dice: `roll (variation)` randomizes this section only. */
     void enableDice (std::function<void (bool variation)> roll);

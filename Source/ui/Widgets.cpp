@@ -439,17 +439,47 @@ void Panel::enableDice (std::function<void (bool)> roll)
 void Panel::paint (juce::Graphics& g)
 {
     auto r = getLocalBounds().toFloat().reduced (0.5f);
-    g.setColour (colours::panel);
+    // body: soot, slightly see-through so the hell glow behind shows a little
+    g.setGradientFill (juce::ColourGradient (juce::Colour (0xf0201010), 0.0f, r.getY(), juce::Colour (0xf2100706), 0.0f, r.getBottom(), false));
     g.fillRoundedRectangle (r, 7.0f);
+
+    // header band in the section colour
+    {
+        juce::Graphics::ScopedSaveState ss (g);
+        juce::Path clip; clip.addRoundedRectangle (r, 7.0f);
+        g.reduceClipRegion (clip);
+        auto head = r.withHeight ((float) headerH);
+        g.setGradientFill (juce::ColourGradient (tint.withAlpha (0.30f), head.getX(), 0.0f, tint.withAlpha (0.0f), head.getRight() * 0.85f, 0.0f, false));
+        g.fillRect (head);
+        g.setColour (tint.withAlpha (0.35f));
+        g.fillRect (head.getX() + 8.0f, head.getBottom() - 1.0f, head.getWidth() - 16.0f, 1.0f);
+    }
+
+    // rim: dark outer line + a glowing top edge in the section colour
+    g.setColour (juce::Colours::black.withAlpha (0.7f));
+    g.drawRoundedRectangle (r.expanded (0.5f), 7.5f, 1.2f);
     g.setColour (colours::edge);
     g.drawRoundedRectangle (r, 7.0f, 1.0f);
+    g.setGradientFill (juce::ColourGradient (tint.withAlpha (0.9f), r.getX(), 0.0f, tint.withAlpha (0.0f), r.getRight(), 0.0f, false));
+    g.fillRoundedRectangle (r.getX() + 6.0f, r.getY(), r.getWidth() * 0.6f, 1.6f, 0.8f);
+
     if (title.isNotEmpty())
     {
-        g.setColour (colours::accent);
+        g.setColour (tint.interpolatedWith (colours::text, 0.25f));
         g.setFont (PyraLookAndFeel::font (13.0f, true));
         g.drawText (title, getLocalBounds().removeFromTop (headerH).withTrimmedLeft (titleX).withTrimmedRight (10),
                     juce::Justification::centredLeft);
     }
+}
+
+void Panel::drawInset (juce::Graphics& g, juce::Rectangle<float> r)
+{
+    g.setColour (juce::Colours::black.withAlpha (0.4f));
+    g.fillRoundedRectangle (r, 6.0f);
+    g.setColour (juce::Colours::black.withAlpha (0.45f));
+    g.drawHorizontalLine ((int) r.getY(), r.getX() + 4.0f, r.getRight() - 4.0f);
+    g.setColour (juce::Colours::white.withAlpha (0.035f));
+    g.drawRoundedRectangle (r, 6.0f, 1.0f);
 }
 
 //==============================================================================
@@ -479,8 +509,10 @@ void WavetableView::refresh()
 void WavetableView::paint (juce::Graphics& g)
 {
     auto r = getLocalBounds().toFloat();
-    g.setColour (juce::Colour (0xff0d0d10));
+    g.setColour (colours::display);
     g.fillRoundedRectangle (r, 5.0f);
+    g.setColour (colours::edge.withAlpha (0.7f));
+    g.drawRoundedRectangle (r.reduced (0.5f), 5.0f, 1.0f);
 
     const auto& t = Wavetables::get().table (lastWt < 0 ? 0 : lastWt);
     const int frames = t.numFrames;
@@ -549,8 +581,10 @@ void EnvelopeView::refresh (bool force)
 void EnvelopeView::paint (juce::Graphics& g)
 {
     auto r = getLocalBounds().toFloat();
-    g.setColour (juce::Colour (0xff0d0d10));
+    g.setColour (colours::display);
     g.fillRoundedRectangle (r, 5.0f);
+    g.setColour (colours::edge.withAlpha (0.7f));
+    g.drawRoundedRectangle (r.reduced (0.5f), 5.0f, 1.0f);
 
     auto val = [this] (const char* n) { return st.getRawParameterValue (pid::env (env, n))->load(); };
     const float times[] = { val ("dly"), val ("att"), val ("hold"), val ("dec"), 0.0f, val ("rel") };
@@ -610,8 +644,10 @@ void LfoView::refresh (bool force)
 void LfoView::paint (juce::Graphics& g)
 {
     auto r = getLocalBounds().toFloat();
-    g.setColour (juce::Colour (0xff0d0d10));
+    g.setColour (colours::display);
     g.fillRoundedRectangle (r, 5.0f);
+    g.setColour (colours::edge.withAlpha (0.7f));
+    g.drawRoundedRectangle (r.reduced (0.5f), 5.0f, 1.0f);
     auto area = r.reduced (8.0f, 10.0f);
 
     g.setColour (colours::edge);

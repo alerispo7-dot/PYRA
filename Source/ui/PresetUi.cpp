@@ -324,6 +324,7 @@ namespace
         explicit SampleLayerPanel (UiContext& ui) : Panel (tr ("SAMPLE LAYER"))
         {
             titleX = 34;
+            tint = colours::mod;
             on = std::make_unique<ParamToggle> (ui.st, "smp_on");
             inst = std::make_unique<ParamCombo> (ui.st, "smp_inst");
             route = std::make_unique<ParamCombo> (ui.st, "smp_route");
