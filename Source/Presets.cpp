@@ -216,7 +216,31 @@ bool PresetManager::load (const juce::String& id)
 
     presetdata::apply (proc, data);
     markLoaded (info->id, info->name);
+    addRecent (info->id);
     return true;
+}
+
+void PresetManager::addRecent (const juce::String& id)
+{
+    if (id.isEmpty()) return;
+    // other PYRAs (other tracks, other projects) add to the same list: start from what is on disk
+    const auto v = juce::JSON::parse (getUserFolder().getChildFile ("UserData.json"));
+    if (auto* r = v["recent"].getArray())
+    {
+        recent.clear();
+        for (auto& x : *r) recent.add (x.toString());
+    }
+    recent.removeString (id);
+    recent.insert (0, id);
+    while (recent.size() > maxRecent) recent.remove (recent.size() - 1);
+    saveUserData();
+}
+
+void PresetManager::clearRecent()
+{
+    recent.clear();
+    saveUserData();
+    sendChangeMessage();
 }
 
 void PresetManager::loadInit()
@@ -321,6 +345,9 @@ void PresetManager::loadUserData()
     personalTags.clear();
     if (auto* f = v["favourites"].getArray())
         for (auto& id : *f) favourites.addIfNotAlreadyThere (id.toString());
+    recent.clear();
+    if (auto* r = v["recent"].getArray())
+        for (auto& id : *r) recent.addIfNotAlreadyThere (id.toString());
     if (auto* t = v["tags"].getDynamicObject())
         for (auto& prop : t->getProperties())
             if (auto* arr = prop.value.getArray())
@@ -337,6 +364,9 @@ void PresetManager::saveUserData()
     juce::Array<juce::var> fav;
     for (auto& f : favourites) fav.add (f);
     obj->setProperty ("favourites", fav);
+    juce::Array<juce::var> rec;
+    for (auto& r : recent) rec.add (r);
+    obj->setProperty ("recent", rec);
     auto* tags = new juce::DynamicObject();
     for (auto& [id, list] : personalTags)
     {

@@ -71,6 +71,7 @@ public:
     // (own preset, oscillators, FX, ARP, CHORDS), played by the same MIDI and mixed into the output.
     bool isLayerChild = false;
     /** Set by the main sound before each block: its CHORDS / ARP are on, so this layer's own stay quiet. */
+    std::atomic<int> editorWidth { 0 };   // last size of this instance's window (0 = use the global default)
     std::atomic<bool> parentChordsOn { false }, parentArpOn { false };
     /** 0 = this processor; 1..7 = the extra layer (nullptr if never used). */
     PyraAudioProcessor* getLayer (int k) const;

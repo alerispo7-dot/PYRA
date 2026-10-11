@@ -25,15 +25,16 @@ namespace
     class BigKnob : public juce::Component
     {
     public:
-        BigKnob (UiContext& ui, const juce::String& id, const juce::String& label, juce::Colour c,
-                 art::Doodle face, art::Doodle left, art::Doodle right)
-            : knob (ui.st, id, label, nullptr), colour (c), leftDoodle (left), rightDoodle (right)
+        BigKnob (UiContext& ui, const juce::String& id, const juce::String& label, juce::Colour c, int emblem)
+            : knob (ui.st, id, label, nullptr), colour (c)
         {
             addAndMakeVisible (knob);
             ui.knobs.add (&knob);
             knob.slider.setMouseDragSensitivity (320);
             knob.slider.getProperties().set ("lava", true);           // a molten face, like a magma ball
+            knob.slider.getProperties().set ("emblem", emblem);       // the picture cracked into the stone
             knob.getProperties().set ("bigLabel", true);
+            setInterceptsMouseClicks (false, true);
         }
 
         void setActivity (float a) { if (std::abs (a - activity) > 0.01f) { activity = a; repaint(); } }
@@ -41,22 +42,32 @@ namespace
         void paint (juce::Graphics& g) override
         {
             const float v = (float) knob.slider.valueToProportionOfLength (knob.slider.getValue());
-            const auto b = knob.slider.getBounds().toFloat();
+            // the slider lives inside the knob component: work in this component's coordinates
+            const auto b = getLocalArea (&knob, knob.slider.getBounds()).toFloat();
             const auto c = b.getCentre();
             const float r = std::min (b.getWidth(), b.getHeight()) * 0.5f;
             const float glow = juce::jlimit (0.0f, 1.0f, v * (0.85f + 0.3f * activity));
             if (glow > 0.01f)
             {
-                const float gr = r * (1.05f + 0.45f * glow);
-                juce::ColourGradient grad (colour.withAlpha (0.55f * glow), c.x, c.y, colour.withAlpha (0.0f), c.x + gr, c.y, true);
+                // never wider than the room around the knob, and fully faded before the edge: no cut borders
+                const float room = std::min ({ c.x, (float) getWidth() - c.x, c.y, (float) getHeight() - c.y });
+                const float gr = std::min (r * (1.12f + 0.5f * glow), room);
+                juce::ColourGradient grad (colour.withAlpha (0.0f), c.x, c.y, colour.withAlpha (0.0f), c.x + gr, c.y, true);
+                const float inner = juce::jlimit (0.3f, 0.95f, (r * 0.78f) / gr);
+                grad.addColour (inner, colour.withAlpha (0.50f * glow));
+                grad.addColour (inner + (1.0f - inner) * 0.35f, colour.withAlpha (0.24f * glow));
+                grad.addColour (inner + (1.0f - inner) * 0.7f, colour.withAlpha (0.07f * glow));
                 g.setGradientFill (grad);
                 g.fillEllipse (c.x - gr, c.y - gr, gr * 2.0f, gr * 2.0f);
             }
             lastV = v;
         }
 
-        // the glow needs room around the knob, so the knob sits inside a larger area
-        void resized() override { knob.setBounds (getLocalBounds().reduced (40, 0).withTrimmedTop (22).withTrimmedBottom (14)); }
+        // the glow needs room around the knob, so the knob sits in the middle of a larger area
+        void resized() override
+        {
+            knob.setBounds (getLocalBounds().withSizeKeepingCentre (220, 248).withY (22));
+        }
 
         void tick()
         {
@@ -73,7 +84,6 @@ namespace
 
         Knob knob;
         juce::Colour colour;
-        art::Doodle leftDoodle, rightDoodle;
         int frame = 0; float time = 0.0f;
         float activity = 0, lastV = -1;
     };
@@ -110,9 +120,9 @@ namespace
               chaosPanel ("CHAOS", tr ("Random movement. Up to half it keeps the sound alive; towards the top it tears it apart (see MANGLE)."), 666u),
               focusPanel ("FOCUS", tr ("One knob, many targets: you choose what it moves, how far and with which curve."), 1313u),
               motionPanel ("MOTION", tr ("Rhythmic movement locked to the tempo of your DAW."), 4040u),
-              chaosKnob (u, "chaos_amt", "CHAOS", colours::hot, art::DoodleDemon, art::DoodleSkull, art::DoodleHand),
-              focusKnob (u, "focus_amt", "FOCUS", colours::accent2, art::DoodleSkull, art::DoodleGhost, art::DoodleDemon),
-              motionKnob (u, "motion_amt", "MOTION", colours::mod, art::DoodleGhost, art::DoodleHand, art::DoodleSkull)
+              chaosKnob (u, "chaos_amt", "CHAOS", colours::hot, 1),
+              focusKnob (u, "focus_amt", "FOCUS", colours::accent2, 2),
+              motionKnob (u, "motion_amt", "MOTION", colours::mod, 3)
         {
             for (auto* p : { &chaosPanel, &focusPanel, &motionPanel }) addAndMakeVisible (p);
             chaosPanel.tint = colours::hot; focusPanel.tint = colours::accent2; motionPanel.tint = colours::mod;
@@ -195,7 +205,7 @@ namespace
 
             const int big = 230;
             for (auto* k : { &chaosKnob, &focusKnob, &motionKnob })
-                k->setBounds ((w - 300) / 2, 44, 300, 284);
+                k->setBounds (2, 44, w - 4, 290);
 
             // chaos
             const int ky = 66 + big + 34;

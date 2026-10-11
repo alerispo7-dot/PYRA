@@ -55,6 +55,11 @@ public:
     void setPersonalTags (const juce::String& id, const juce::StringArray& tags);
     juce::StringArray getAllPersonalTags() const;
 
+    /** The presets loaded most recently (newest first), shared by every PYRA and every project. */
+    juce::StringArray getRecent() const { return recent; }
+    void clearRecent();
+    static constexpr int maxRecent = 100;
+
     juce::String getCurrentId() const;
     juce::String getCurrentName() const;
     bool isModified() const;
@@ -69,13 +74,14 @@ private:
     void saveUserData();
     juce::var factoryData (int index) const;
     void markLoaded (const juce::String& id, const juce::String& name);
+    void addRecent (const juce::String& id);
 
     PyraAudioProcessor& proc;
     juce::Array<PresetInfo> presets;
     juce::var factoryBank;   // array of preset objects
     struct SharedBank { juce::var bank; };
     juce::SharedResourcePointer<SharedBank> sharedBank;
-    juce::StringArray favourites;
+    juce::StringArray favourites, recent;
     std::map<juce::String, juce::StringArray> personalTags;
     std::vector<float> loadedSnapshot;
 

@@ -1,0 +1,4 @@
+974|Finestra più piccola|Ventana más pequeña|Fenêtre plus petite|Kleineres Fenster|Janela menor
+975|Finestra più grande|Ventana más grande|Fenêtre plus grande|Größeres Fenster|Janela maior
+976|Usati di recente|Usados recientemente|Utilisés récemment|Zuletzt verwendet|Usados recentemente
+977|Cancella la cronologia|Borrar el historial|Effacer l'historique|Verlauf löschen|Limpar o histórico

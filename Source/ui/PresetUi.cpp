@@ -30,8 +30,17 @@ namespace
     {
         juce::Array<const PresetInfo*> out;
         const auto words = juce::StringArray::fromTokens (f.search.toLowerCase(), " ", "");
-        for (auto& p : pm.getAll())
+        juce::Array<const PresetInfo*> source;
+        if (f.category == "*recent")
+        {   // newest first
+            for (auto& id : pm.getRecent())
+                if (auto* p = pm.find (id)) source.add (p);
+        }
+        else
+            for (auto& p : pm.getAll()) source.add (&p);
+        for (auto* pp : source)
         {
+            auto& p = *pp;
             if (f.category == "*fav" && ! pm.isFavourite (p.id)) continue;
             if (f.category == "*user" && p.factory) continue;
             if (f.category == "*smp" && p.sampleInstrument <= 0) continue;
@@ -456,6 +465,9 @@ namespace
             for (auto& p : pm.getAll()) { if (pm.isFavourite (p.id)) ++fav; if (! p.factory) ++user; if (p.sampleInstrument > 0) ++smp; }
             items.push_back ({ "", tr ("All Presets"), pm.getAll().size() });
             items.push_back ({ "*fav", juce::String (juce::CharPointer_UTF8 ("\xe2\x98\x85 ")) + tr ("Favourites"), fav });
+            int recentCount = 0;
+            for (auto& id : pm.getRecent()) if (pm.find (id) != nullptr) ++recentCount;
+            items.push_back ({ "*recent", juce::String (juce::CharPointer_UTF8 ("\xe2\x86\xba ")) + tr ("Recently used"), recentCount });
             items.push_back ({ "*user", tr ("My Presets"), user });
             items.push_back ({ "*smp", tr ("Sample Bank"), smp });
             items.push_back ({ "-", tr ("CATEGORIES"), 0, true });
@@ -604,7 +616,18 @@ namespace
             for (auto& it : sideItems())
             {
                 if (it.header) { y += 28; continue; }
-                if (e.y >= y && e.y < y + 27) { filter.category = it.key; filter.subCategory = {}; refresh(); repaint(); return; }
+                if (e.y >= y && e.y < y + 27)
+                {
+                    if (it.key == "*recent" && e.mods.isPopupMenu())
+                    {   // right click: forget the history
+                        juce::PopupMenu m;
+                        m.addItem (1, tr ("Clear the history"));
+                        juce::Component::SafePointer<PresetPage> safe (this);
+                        m.showMenuAsync (juce::PopupMenu::Options(), [safe] (int r) { if (safe != nullptr && r == 1) safe->pm.clearRecent(); });
+                        return;
+                    }
+                    filter.category = it.key; filter.subCategory = {}; refresh(); repaint(); return;
+                }
                 y += 27;
             }
         }

@@ -966,9 +966,9 @@ namespace
     class GlobalPage : public Page
     {
     public:
-        GlobalPage (UiContext& ui, std::function<void()> onLang, std::function<void (float)> onScale)
+        GlobalPage (UiContext& ui, std::function<void()> onLang, std::function<void (int)> onScale, std::function<int()> getScale)
             : voice (tr ("VOICE")), mpePanel ("MPE"), language (tr ("LANGUAGE")), personal (tr ("PERSONALIZE")),
-              about (tr ("ABOUT")), onLanguageChanged (std::move (onLang)), onWindowScale (std::move (onScale))
+              about (tr ("ABOUT")), onLanguageChanged (std::move (onLang)), onWindowScale (std::move (onScale)), windowPercent (std::move (getScale))
         {
             for (auto* p : { &voice, &mpePanel, &language, &personal, &about }) addAndMakeVisible (p);
             mpePanel.tint = colours::accent2; language.tint = colours::accent2; about.tint = colours::hot; personal.tint = colours::accent;
@@ -1030,11 +1030,28 @@ namespace
             speedCombo = combo (prefs::KnobSpeed, { tr ("Fine"), tr ("Normal"), tr ("Fast") }, tr ("How far a knob turns for each movement of the mouse (Shift = extra fine)"));
             wheelToggle = toggle (prefs::WheelKnobs, tr ("On"), tr ("The mouse wheel turns the knob under the mouse"));
             startCombo = combo (prefs::StartPage, { tr ("Last page used"), "SYNTH" }, tr ("Which page opens when you open PYRA"));
-            for (float s : { 0.75f, 0.9f, 1.0f, 1.25f, 1.5f })
+            // window size: - / + in steps of 5%, or straight to a size. 50% = the size PYRA first opens at.
+            auto stepSize = [this] (int delta)
             {
-                auto* b = sizeButtons.add (new juce::TextButton (juce::String (juce::roundToInt (s * 100.0f)) + "%"));
+                if (! onWindowScale || ! windowPercent) return;
+                const int pct = windowPercent();
+                onWindowScale (delta > 0 ? (pct / 5 + 1) * 5 : ((pct + 4) / 5 - 1) * 5);
+            };
+            sizeMinus.setButtonText (juce::String::charToString (0x2212));
+            sizePlus.setButtonText ("+");
+            sizeMinus.setTooltip (tr ("Smaller window"));
+            sizePlus.setTooltip (tr ("Bigger window"));
+            sizeMinus.onClick = [stepSize] { stepSize (-1); };
+            sizePlus.onClick = [stepSize] { stepSize (1); };
+            sizeMinus.setRepeatSpeed (400, 120);
+            sizePlus.setRepeatSpeed (400, 120);
+            personal.addAndMakeVisible (sizeMinus);
+            personal.addAndMakeVisible (sizePlus);
+            for (int pct : { 30, 40, 50, 75, 100 })
+            {
+                auto* b = sizeButtons.add (new juce::TextButton (juce::String (pct) + "%"));
                 b->setTooltip (tr ("Size of the PYRA window (you can also drag its corner)"));
-                b->onClick = [this, s] { if (onWindowScale) onWindowScale (s); };
+                b->onClick = [this, pct] { if (onWindowScale) onWindowScale (pct); };
                 personal.addAndMakeVisible (b);
             }
             resetPrefs.setButtonText (tr ("RESET"));
@@ -1084,7 +1101,33 @@ namespace
             label (speedCombo, tr ("Knob speed"));
             label (wheelToggle, tr ("Mouse wheel on knobs"));
             label (startCombo, tr ("Open on"));
-            label (sizeButtons[0], tr ("Window size"));
+            label (&sizeMinus, tr ("Window size"));
+            {
+                auto r = sizeValueArea().translated (pb.getX(), pb.getY());
+                g.setColour (colours::display);
+                g.fillRoundedRectangle (r.toFloat(), 4.0f);
+                g.setColour (colours::accent2);
+                g.setFont (PyraLookAndFeel::font (14.0f, true));
+                g.drawText (juce::String (windowPercent ? windowPercent() : shownPercent) + "%", r, juce::Justification::centred);
+            }
+            // the version, kept out of the way
+            g.setColour (colours::textDim.withAlpha (0.6f));
+            g.setFont (PyraLookAndFeel::font (11.0f));
+            g.drawText ("PYRA v" JucePlugin_VersionString, about.getRight() - 150, about.getY() + 6, 138, 16, juce::Justification::centredRight);
+        }
+
+        juce::Rectangle<int> sizeValueArea() const { return sizeMinus.getBounds().withX (sizeMinus.getRight() + 4).withWidth (58); }
+
+        void tick() override
+        {
+            const int pct = windowPercent ? windowPercent() : 50;
+            if (pct != shownPercent)
+            {
+                shownPercent = pct;
+                for (int i = 0; i < sizeButtons.size(); ++i)
+                    sizeButtons[i]->setToggleState (sizeButtons[i]->getButtonText().getIntValue() == pct, juce::dontSendNotification);
+                repaint();
+            }
         }
 
         void resized() override
@@ -1117,8 +1160,10 @@ namespace
             place (animToggle, 0, 2, 80);   place (valuesCombo, 0, 3, 190);
             place (dragCombo, 1, 0, 190);   place (speedCombo, 1, 1, 190);
             place (wheelToggle, 1, 2, 80);  place (startCombo, 1, 3, 190);
+            sizeMinus.setBounds (206, y0 + 4 * rowH + 8, 30, 28);
+            sizePlus.setBounds (sizeValueArea().getRight() + 4, y0 + 4 * rowH + 8, 30, 28);
             for (int i = 0; i < sizeButtons.size(); ++i)
-                sizeButtons[i]->setBounds (206 + i * 82, y0 + 4 * rowH + 8, 74, 28);
+                sizeButtons[i]->setBounds (sizePlus.getRight() + 14 + i * 60, y0 + 4 * rowH + 8, 54, 28);
             resetPrefs.setBounds (personal.getWidth() - 14 - 120, y0 + 4 * rowH + 8, 120, 28);
 
             aboutText.setBounds (about.getLocalBounds().withTrimmedTop (28).reduced (10, 4));
@@ -1126,7 +1171,10 @@ namespace
 
         Panel voice, mpePanel, language, personal, about;
         std::function<void()> onLanguageChanged;
-        std::function<void (float)> onWindowScale;
+        std::function<void (int)> onWindowScale;
+        std::function<int()> windowPercent;
+        juce::TextButton sizeMinus, sizePlus;
+        int shownPercent = -1;
         juce::OwnedArray<juce::Component> owned, prefControls;
         Knob* poly, *glide, *bendUp, *bendDown, *velAmp, *transpose, *tune, *master, *mpeRange;
         ParamCombo* mode, *glideType; ParamToggle* glideLegato, *mpe;
@@ -1174,9 +1222,9 @@ namespace
 
 std::unique_ptr<Page> createSynthPage (UiContext& ui)  { return std::make_unique<SynthPage> (ui); }
 std::unique_ptr<Page> createMatrixPage (UiContext& ui) { return std::make_unique<MatrixPage> (ui); }
-std::unique_ptr<Page> createGlobalPage (UiContext& ui, std::function<void()> cb, std::function<void (float)> scale)
+std::unique_ptr<Page> createGlobalPage (UiContext& ui, std::function<void()> cb, std::function<void (int)> scale, std::function<int()> getScale)
 {
-    return std::make_unique<GlobalPage> (ui, std::move (cb), std::move (scale));
+    return std::make_unique<GlobalPage> (ui, std::move (cb), std::move (scale), std::move (getScale));
 }
 std::unique_ptr<Page> createComingSoonPage (const juce::String& t, const juce::StringArray& l) { return std::make_unique<ComingSoonPage> (t, l); }
 

@@ -197,6 +197,8 @@ static void snapshots (pyra::lang::Language language, const juce::String& suffix
     set (p, "an_age", 0.7f); set (p, "drift", 0.5f); set (p, "spread", 0.4f); set (p, "an_tolerance", 0.3f); set (p, "an_circuit", 0.6f);
     set (p, "an_noise", 0.35f); set (p, "an_hum", 0.3f); set (p, "an_bits", 0.55f); set (p, "an_rate", 0.4f);
     snap ("ANALOG", "x_analog_active");
+    set (p, "chaos_amt", 1.0f); set (p, "focus_amt", 0.15f); set (p, "motion_amt", 0.85f);
+    snap ("CHAOS", "x_chaos_full");
     for (int k = 1; k < 4; ++k)
     {
         auto& l = p.getOrCreateLayer (k);

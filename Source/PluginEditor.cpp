@@ -28,12 +28,16 @@ PyraAudioProcessorEditor::PyraAudioProcessorEditor (PyraAudioProcessor& p)
     buildUi();
 
     setResizable (true, true);
-    setResizeLimits (baseW * 6 / 10, baseH * 6 / 10, baseW * 2, baseH * 2);
+    const int minW = percentToWidth (minPercent), maxW = percentToWidth (maxPercent);
+    setResizeLimits (minW, minW * baseH / baseW, maxW, maxW * baseH / baseW);
     getConstrainer()->setFixedAspectRatio ((double) baseW / (double) baseH);
 
-    const int savedW = pyra::lang::settings().getIntValue ("windowWidth", 1120);
-    const int w = juce::jlimit (baseW * 6 / 10, baseW * 2, savedW);
+    // the size this PYRA had last time (saved in the project); a new PYRA opens at the last size you chose
+    int w = proc.editorWidth.load();
+    if (w <= 0) w = pyra::lang::settings().getIntValue ("windowWidth2", defaultW);
+    w = juce::jlimit (minW, maxW, w);
     setSize (w, juce::roundToInt ((float) w * (float) baseH / (float) baseW));
+    pendingWidth = 0;
 
     root.addMouseListener (this, true);
     pyra::prefs::broadcaster().addChangeListener (this);
@@ -89,7 +93,8 @@ void PyraAudioProcessorEditor::buildUi()
     pages.push_back (pyra::createAnalogPage (*ui));
     pages.push_back (pyra::createMatrixPage (*ui));
     pages.push_back (pyra::createGlobalPage (*ui, [this] { buildUi(); resized(); },
-                                             [this] (float scale) { setSize (juce::roundToInt ((float) baseW * scale), juce::roundToInt ((float) baseH * scale)); }));
+                                             [this] (int pct) { setWindowPercent (pct); },
+                                             [this] { return windowPercent(); }));
 
     for (auto& pg : pages) root.addChildComponent (*pg);
 
@@ -285,11 +290,39 @@ void PyraAudioProcessorEditor::resized()
     const float scale = (float) getWidth() / (float) baseW;
     root.setTransform (juce::AffineTransform::scale (scale));
     root.setBounds (0, 0, baseW, baseH);
-    pyra::lang::settings().setValue ("windowWidth", getWidth());
+    // hosts sometimes shrink or move the window while closing it: only a size that stays put is remembered
+    pendingWidth = getWidth();
+    pendingSince = juce::Time::getMillisecondCounterHiRes();
+}
+
+void PyraAudioProcessorEditor::rememberWidth (int w)
+{
+    pendingWidth = 0;
+    if (w <= 0) return;
+    proc.editorWidth = w;
+    pyra::lang::settings().setValue ("windowWidth2", w);
+}
+
+void PyraAudioProcessorEditor::setWindowPercent (int pct)
+{
+    pct = juce::jlimit (minPercent, maxPercent, pct);
+    int w = percentToWidth (pct);
+    // never bigger than the screen
+    if (auto* d = juce::Desktop::getInstance().getDisplays().getDisplayForRect (getScreenBounds()))
+    {
+        const auto area = d->userArea;
+        w = std::min (w, std::min (area.getWidth() - 20, (area.getHeight() - 60) * baseW / baseH));
+    }
+    w = std::max (w, percentToWidth (minPercent));
+    setSize (w, juce::roundToInt ((float) w * (float) baseH / (float) baseW));
+    rememberWidth (getWidth());
 }
 
 void PyraAudioProcessorEditor::timerCallback()
 {
+    if (pendingWidth > 0 && isShowing() && juce::Time::getMillisecondCounterHiRes() - pendingSince > 600.0)
+        rememberWidth (pendingWidth);
+
     if (currentPage >= 0 && currentPage < (int) pages.size())
         pages[(size_t) currentPage]->tick();
 
@@ -354,33 +387,47 @@ void PyraAudioProcessorEditor::Root::paint (juce::Graphics& g)
         pyra::art::drawSpikeWave (g, pit.reduced (4.0f, 3.0f), owner.scopeLevel, owner.animTime);
     }
 
-    // logo + wordmark, exactly as drawn (a soft red breath behind the headphones)
+    // logo + wordmark, centred in the space before the tabs; the wordmark slightly widened to fill it
     {
         const float breath = 0.5f + 0.5f * std::sin (owner.animTime * 1.7f);
-        juce::ColourGradient glow (pyra::colours::accent.withAlpha (0.10f + 0.10f * breath), 25.0f, 23.0f, juce::Colours::transparentBlack, 25.0f + 30.0f, 23.0f, true);
+        const juce::Rectangle<float> logoR (20.0f, 0.0f, 42.0f, 46.0f), wordR (66.0f, 0.0f, 100.0f, 46.0f);
+        const auto lc = logoR.getCentre();
+        juce::ColourGradient glow (pyra::colours::accent.withAlpha (0.12f + 0.10f * breath), lc.x, lc.y, juce::Colours::transparentBlack, lc.x + 32.0f, lc.y, true);
         g.setGradientFill (glow);
-        g.fillEllipse (-5.0f, -7.0f, 60.0f, 60.0f);
-        g.setImageResamplingQuality (juce::Graphics::highResamplingQuality);
-        g.drawImage (pyra::art::logo(), { 6.0f, 1.0f, 38.0f, 44.0f }, juce::RectanglePlacement::centred);
-        g.drawImage (pyra::art::wordmark(), { 44.0f, 2.0f, 76.0f, 42.0f }, juce::RectanglePlacement::centred);
+        g.fillEllipse (lc.x - 32.0f, lc.y - 30.0f, 64.0f, 60.0f);
+        // shrink the big pictures in steps (sharp, no sparkle) to the real pixel size of the window
+        const float px = g.getInternalContext().getPhysicalPixelScaleFactor();
+        if (std::abs (px - cachedArtScale) > 0.01f || cachedLogo.isNull())
+        {
+            cachedArtScale = px;
+            auto shrink = [] (juce::Image img, int w, int h)
+            {
+                while (img.getWidth() / 2 >= w && img.getHeight() / 2 >= h)
+                    img = img.rescaled (img.getWidth() / 2, img.getHeight() / 2, juce::Graphics::mediumResamplingQuality);
+                return img.rescaled (std::max (1, w), std::max (1, h), juce::Graphics::highResamplingQuality);
+            };
+            const auto& L = pyra::art::logo();
+            const float lh = logoR.getHeight() * px, lw = lh * (float) L.getWidth() / (float) L.getHeight();
+            cachedLogo = shrink (L, juce::roundToInt (lw), juce::roundToInt (lh));
+            cachedWord = shrink (pyra::art::wordmark(), juce::roundToInt (wordR.getWidth() * px), juce::roundToInt (wordR.getHeight() * px));
+        }
+        g.drawImage (cachedLogo, logoR, juce::RectanglePlacement::centred);
+        g.drawImage (cachedWord, wordR, juce::RectanglePlacement::stretchToFit);
     }
-    g.setColour (pyra::colours::textDim);
-    g.setFont (pyra::PyraLookAndFeel::font (10.0f));
-    g.drawText ("v" JucePlugin_VersionString, 121, 26, 60, 14, juce::Justification::centredLeft);
 
     // what the window is editing (the main sound or one of the layers)
     if (owner.editLayer > 0)
     {
         g.setColour (pyra::colours::accent2);
         g.setFont (pyra::PyraLookAndFeel::titleFont (11.0f));
-        g.drawText (tr ("LAYER") + " " + juce::String::charToString ((juce::juce_wchar) ('A' + owner.editLayer)), 121, 8, 62, 14, juce::Justification::centredLeft);
+        g.drawText (tr ("LAYER") + " " + juce::String::charToString ((juce::juce_wchar) ('A' + owner.editLayer)), getWidth() - 330, 24, 130, 18, juce::Justification::centredRight);
     }
 
     // voice meter
     const int v = owner.lastVoices;
     g.setColour (v > 0 ? pyra::colours::accent2 : pyra::colours::textDim);
     g.setFont (pyra::PyraLookAndFeel::font (12.0f, true));
-    g.drawText (tr ("Voices") + ": " + juce::String (juce::jmax (0, v)), getWidth() - 330, 0, 130, 46, juce::Justification::centredRight);
+    g.drawText (tr ("Voices") + ": " + juce::String (juce::jmax (0, v)), getWidth() - 330, 0, 130, owner.editLayer > 0 ? 28 : 46, juce::Justification::centredRight);
 }
 
 void PyraAudioProcessorEditor::layoutTabs()

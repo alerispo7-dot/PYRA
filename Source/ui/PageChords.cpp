@@ -40,7 +40,30 @@ namespace
             const int w = (getWidth() - gap * (kMaxChordSlots - 1)) / kMaxChordSlots;
             return { k * (w + gap), 0, w, cardH };
         }
-        juce::Rectangle<int> lockRect (int k) const    { auto c = cardBounds (k); return { c.getRight() - 30, c.getY() + 4, 26, 22 }; }
+        juce::Rectangle<int> lockRect (int k) const    { auto c = cardBounds (k); return { c.getRight() - 56, c.getY() + 4, 26, 22 }; }
+        juce::Rectangle<int> removeRect (int k) const  { auto c = cardBounds (k); return { c.getRight() - 28, c.getY() + 4, 24, 22 }; }
+
+        /** Takes chord k out of the progression: the ones after it move one place to the left. */
+        void removeChord (int k)
+        {
+            const int count = juce::jlimit (1, kMaxChordSlots, proc.chords.readSettings().count);
+            if (count <= 1 || k >= count) return;
+            for (int i = k; i < kMaxChordSlots - 1; ++i)
+            {
+                auto& a = pattern.slots[(size_t) i];
+                const auto& b = pattern.slots[(size_t) i + 1];
+                a.degree = b.degree.load(); a.shift = b.shift.load(); a.quality = b.quality.load();
+                a.length = b.length.load(); a.lock = b.lock.load();
+            }
+            auto& last = pattern.slots[(size_t) kMaxChordSlots - 1];
+            last.degree = 0; last.shift = 0; last.quality = QAuto; last.length = 2; last.lock = false;
+            countParam->beginChangeGesture();
+            countParam->setValueNotifyingHost (countParam->convertTo0to1 ((float) (count - 1)));
+            countParam->endChangeGesture();
+            selected = juce::jlimit (0, count - 2, selected);
+            ++pattern.changeCounter;
+            repaint();
+        }
         juce::Rectangle<int> upRect (int k) const      { auto c = cardBounds (k); return { c.getCentreX() - 22, c.getY() + 32, 44, 22 }; }
         juce::Rectangle<int> downRect (int k) const    { auto c = cardBounds (k); return { c.getCentreX() - 22, c.getY() + 140, 44, 22 }; }
         juce::Rectangle<int> qualityRect (int k) const { auto c = cardBounds (k); return { c.getX() + 8, c.getY() + 196, c.getWidth() - 16, 26 }; }
@@ -91,6 +114,21 @@ namespace
                 g.setColour ((slot.lock.load() ? colours::accent2 : colours::edge).withMultipliedAlpha (alpha));
                 g.fillRoundedRectangle (lk.withTrimmedTop (lk.getHeight() * 0.45f), 2.0f);
                 g.drawEllipse (lk.withTrimmedBottom (lk.getHeight() * 0.4f).reduced (lk.getWidth() * 0.22f, 1.0f), 1.5f);
+
+                // remove (only when there is more than one chord)
+                if (used && count > 1)
+                {
+                    auto xr = removeRect (k).toFloat().reduced (6.0f, 5.0f);
+                    const bool hot = over && removeRect (k).contains (mouse);
+                    if (hot)
+                    {
+                        g.setColour (colours::accent.withAlpha (0.25f));
+                        g.fillRoundedRectangle (removeRect (k).toFloat().reduced (1.0f), 4.0f);
+                    }
+                    g.setColour (hot ? colours::accent2 : colours::textDim);
+                    g.drawLine (xr.getX(), xr.getY(), xr.getRight(), xr.getBottom(), 2.0f);
+                    g.drawLine (xr.getRight(), xr.getY(), xr.getX(), xr.getBottom(), 2.0f);
+                }
 
                 if (! used)
                 {
@@ -195,6 +233,7 @@ namespace
                     return;
                 }
                 selected = k;
+                if (removeRect (k).contains (e.getPosition())) { removeChord (k); return; }
                 if (lockRect (k).contains (e.getPosition())) slot.lock = ! slot.lock.load();
                 else if (upRect (k).contains (e.getPosition())) { slot.degree = juce::jmin (21, slot.degree.load() + 1); slot.shift = 0; proc.chords.preview (k); }
                 else if (downRect (k).contains (e.getPosition())) { slot.degree = juce::jmax (-7, slot.degree.load() - 1); slot.shift = 0; proc.chords.preview (k); }

@@ -23,6 +23,11 @@ public:
     void mouseWheelMove (const juce::MouseEvent&, const juce::MouseWheelDetails&) override;
 
     static constexpr int baseW = 1280, baseH = 880;
+    static constexpr int defaultW = 1120;              // the size PYRA opens at the first time = "50%"
+    static constexpr int minPercent = 10, maxPercent = 100;
+    static int percentToWidth (int pct) { return juce::roundToInt ((float) defaultW * (float) pct / 50.0f); }
+    int windowPercent() const { return juce::roundToInt ((float) getWidth() * 50.0f / (float) defaultW); }
+    void setWindowPercent (int pct);
     static constexpr int topH = 46, presetH = 38;
 
 private:
@@ -36,6 +41,8 @@ private:
         PyraAudioProcessorEditor& owner;
         juce::Path headerCrack;
         int headerCrackWidth = -1;
+        juce::Image cachedLogo, cachedWord;
+        float cachedArtScale = 0.0f;
     };
 
     void timerCallback() override;
@@ -74,6 +81,8 @@ private:
     void applyPrefs();
     void changeListenerCallback (juce::ChangeBroadcaster*) override;
     int prefsSignature = -1;
+    int pendingWidth = 0; double pendingSince = 0.0;   // the size is remembered once it has stayed put for a moment
+    void rememberWidth (int w);
     int lastVoices = -1, historyCounter = 0, animCounter = 0;
     float animTime = 0.0f, scopeLevel = 0.0f;
     int editLayer = 0;   // 0 = the main sound (layer A), 1..7 = layers B..H

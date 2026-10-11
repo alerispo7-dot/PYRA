@@ -137,14 +137,21 @@ juce::AudioProcessorEditor* PyraAudioProcessor::createEditor()
 void PyraAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     if (auto xml = captureState (true).createXml())
+    {
+        if (editorWidth.load() > 0) xml->setAttribute ("uiWidth", editorWidth.load());   // the window keeps its size in the project
         copyXmlToBinary (*xml, destData);
+    }
 }
 
 void PyraAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     if (auto xml = getXmlFromBinary (data, sizeInBytes))
         if (xml->hasTagName (apvts.state.getType()))
+        {
+            if (xml->hasAttribute ("uiWidth")) editorWidth = xml->getIntAttribute ("uiWidth");
+            xml->removeAttribute ("uiWidth");
             restoreState (juce::ValueTree::fromXml (*xml));
+        }
 }
 
 pyra::PresetManager& PyraAudioProcessor::getPresetManager()

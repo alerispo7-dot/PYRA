@@ -23,7 +23,8 @@ public:
 
 std::unique_ptr<Page> createSynthPage (UiContext&);
 std::unique_ptr<Page> createMatrixPage (UiContext&);
-std::unique_ptr<Page> createGlobalPage (UiContext&, std::function<void()> onLanguageChanged, std::function<void (float)> onWindowScale);
+std::unique_ptr<Page> createGlobalPage (UiContext&, std::function<void()> onLanguageChanged, std::function<void (int)> setWindowPercent,
+                                        std::function<int()> getWindowPercent);
 std::unique_ptr<Page> createFxPage (UiContext&);
 std::unique_ptr<Page> createAnalogPage (UiContext&);
 std::unique_ptr<Page> createArpPage (UiContext&);
