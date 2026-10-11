@@ -10,6 +10,7 @@ namespace art
     // pictures (embedded)
     const juce::Image& logo();       // horned headphones (transparent)
     const juce::Image& wordmark();   // PYRA in cracked stone (transparent)
+    const juce::Image& knobFace (int which, bool hot);   // big CHAOS (1) / FOCUS (2) / MOTION (3) knob faces, lava hot or cooled
     const juce::Image& stone();      // seamless cracked stone, for panels / buttons / knobs
     const juce::Image& lava (int size = 512);   // charcoal stone with glowing lava veins (big knobs)
 

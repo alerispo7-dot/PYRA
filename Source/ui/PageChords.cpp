@@ -25,13 +25,14 @@ namespace
     }
 
     /** The 8 chord cards + a small keyboard showing the notes. */
-    class ChordCards : public juce::Component
+    class ChordCards : public juce::Component, public juce::SettableTooltipClient
     {
     public:
         explicit ChordCards (PyraAudioProcessor& p) : proc (p), pattern (p.chordPattern)
         {
             countParam = p.apvts.getParameter ("chord_count");
             setRepaintsOnMouseActivity (true);
+            setTooltip (tr ("Drag a chord onto another one to swap them, or onto an empty place to move it there (its old place becomes a rest)."));
         }
 
         juce::Rectangle<int> cardBounds (int k) const
@@ -43,27 +44,6 @@ namespace
         juce::Rectangle<int> lockRect (int k) const    { auto c = cardBounds (k); return { c.getRight() - 56, c.getY() + 4, 26, 22 }; }
         juce::Rectangle<int> removeRect (int k) const  { auto c = cardBounds (k); return { c.getRight() - 28, c.getY() + 4, 24, 22 }; }
 
-        /** Takes chord k out of the progression: the ones after it move one place to the left. */
-        void removeChord (int k)
-        {
-            const int count = juce::jlimit (1, kMaxChordSlots, proc.chords.readSettings().count);
-            if (count <= 1 || k >= count) return;
-            for (int i = k; i < kMaxChordSlots - 1; ++i)
-            {
-                auto& a = pattern.slots[(size_t) i];
-                const auto& b = pattern.slots[(size_t) i + 1];
-                a.degree = b.degree.load(); a.shift = b.shift.load(); a.quality = b.quality.load();
-                a.length = b.length.load(); a.lock = b.lock.load();
-            }
-            auto& last = pattern.slots[(size_t) kMaxChordSlots - 1];
-            last.degree = 0; last.shift = 0; last.quality = QAuto; last.length = 2; last.lock = false;
-            countParam->beginChangeGesture();
-            countParam->setValueNotifyingHost (countParam->convertTo0to1 ((float) (count - 1)));
-            countParam->endChangeGesture();
-            selected = juce::jlimit (0, count - 2, selected);
-            ++pattern.changeCounter;
-            repaint();
-        }
         juce::Rectangle<int> upRect (int k) const      { auto c = cardBounds (k); return { c.getCentreX() - 22, c.getY() + 32, 44, 22 }; }
         juce::Rectangle<int> downRect (int k) const    { auto c = cardBounds (k); return { c.getCentreX() - 22, c.getY() + 140, 44, 22 }; }
         juce::Rectangle<int> qualityRect (int k) const { auto c = cardBounds (k); return { c.getX() + 8, c.getY() + 196, c.getWidth() - 16, 26 }; }
@@ -71,16 +51,108 @@ namespace
         juce::Rectangle<int> playRect (int k) const    { auto c = cardBounds (k); return { c.getX() + 8, c.getY() + 260, c.getWidth() - 16, 28 }; }
         juce::Rectangle<int> keysArea() const          { return { 0, cardH + 14, getWidth(), getHeight() - cardH - 14 }; }
 
+        static void copySlot (ChordSlot& d, const ChordSlot& src)
+        {
+            d.degree = src.degree.load(); d.shift = src.shift.load(); d.quality = src.quality.load();
+            d.length = src.length.load(); d.lock = src.lock.load(); d.empty = src.empty.load();
+        }
+        static void resetSlot (ChordSlot& d, bool empty)
+        {
+            d.degree = 0; d.shift = 0; d.quality = QAuto; d.length = 2; d.lock = false; d.empty = empty;
+        }
+        int currentCount() const { return juce::jlimit (1, kMaxChordSlots, proc.chords.readSettings().count); }
+
+        /** Sets how many places the progression uses; holes at the end are dropped (they would only add silence). */
+        void setCount (int n)
+        {
+            while (n > 1 && pattern.slots[(size_t) n - 1].empty.load()) --n;
+            n = juce::jlimit (1, kMaxChordSlots, n);
+            if (n != currentCount())
+            {
+                countParam->beginChangeGesture();
+                countParam->setValueNotifyingHost (countParam->convertTo0to1 ((float) n));
+                countParam->endChangeGesture();
+            }
+            ++pattern.changeCounter;
+            repaint();
+        }
+
+        /** Takes chord k out of the progression: the ones after it move one place to the left. */
+        void removeChord (int k)
+        {
+            const int count = currentCount();
+            if (count <= 1 || k >= count) return;
+            for (int i = k; i < kMaxChordSlots - 1; ++i)
+                copySlot (pattern.slots[(size_t) i], pattern.slots[(size_t) i + 1]);
+            resetSlot (pattern.slots[(size_t) kMaxChordSlots - 1], false);
+            selected = juce::jlimit (0, count - 2, selected);
+            setCount (count - 1);
+        }
+
+        /** Drag and drop: onto a chord = swap them; onto an empty place = move it there (its old place stays empty). */
+        void dropChord (int from, int to)
+        {
+            const int count = currentCount();
+            if (from == to || from < 0 || from >= count || to < 0 || to >= kMaxChordSlots) return;
+            auto& a = pattern.slots[(size_t) from];
+            auto& b = pattern.slots[(size_t) to];
+            int newCount = count;
+            if (to < count && ! b.empty.load())
+            {
+                ChordSlot tmp;
+                copySlot (tmp, b); copySlot (b, a); copySlot (a, tmp);
+            }
+            else
+            {
+                for (int i = count; i < to; ++i) resetSlot (pattern.slots[(size_t) i], true);   // holes up to the new place
+                copySlot (b, a);
+                b.empty = false;
+                resetSlot (a, true);
+                newCount = std::max (count, to + 1);
+            }
+            selected = to;
+            setCount (newCount);
+            proc.chords.preview (to);
+        }
+
+        int cardAt (juce::Point<int> p) const
+        {
+            for (int k = 0; k < kMaxChordSlots; ++k)
+                if (cardBounds (k).expanded (4, 0).contains (p)) return k;
+            return -1;
+        }
+        bool onControl (int k, juce::Point<int> p) const
+        {
+            return removeRect (k).contains (p) || lockRect (k).contains (p) || upRect (k).contains (p) || downRect (k).contains (p)
+                || qualityRect (k).contains (p) || lengthRect (k).contains (p) || playRect (k).contains (p);
+        }
+
+        void mouseDown (const juce::MouseEvent& e) override
+        {
+            dragFrom = -1; dragging = false;
+            const int k = cardAt (e.getPosition());
+            if (k >= 0 && k < currentCount() && ! pattern.slots[(size_t) k].empty.load() && ! onControl (k, e.getPosition()) && ! e.mods.isPopupMenu())
+                dragFrom = k;
+        }
+
+        void mouseDrag (const juce::MouseEvent& e) override
+        {
+            if (dragFrom < 0) return;
+            if (! dragging && e.getDistanceFromDragStart() > 6) { dragging = true; setMouseCursor (juce::MouseCursor::DraggingHandCursor); }
+            if (dragging) { dragPos = e.getPosition(); dropTarget = cardAt (dragPos); repaint(); }
+        }
+
         std::vector<std::vector<int>> allNotes (const ChordSettings& s) const
         {
             std::vector<std::vector<int>> out ((size_t) kMaxChordSlots);
             const int count = juce::jlimit (1, kMaxChordSlots, s.count);
             std::vector<int> prev;
-            if (s.inversion == 0 && count > 1) prev = chordNotes (pattern, count - 1, s, {});
+            if (s.inversion == 0 && count > 1)
+                for (int k = count - 1; k >= 0 && prev.empty(); --k) prev = chordNotes (pattern, k, s, {});
             for (int k = 0; k < kMaxChordSlots; ++k)
             {
                 out[(size_t) k] = chordNotes (pattern, k, s, k < count ? prev : std::vector<int> {});
-                if (k < count) prev = out[(size_t) k];
+                if (k < count && ! out[(size_t) k].empty()) prev = out[(size_t) k];
             }
             return out;
         }
@@ -110,10 +182,12 @@ namespace
                 text (g, juce::String (k + 1), cb.withHeight (30).reduced (10, 0), 12.0f, colours::textDim.withMultipliedAlpha (alpha),
                       juce::Justification::centredLeft, true);
                 // lock
+                if (! slot.empty.load()) {
                 auto lk = lockRect (k).toFloat().reduced (5.0f, 3.0f);
                 g.setColour ((slot.lock.load() ? colours::accent2 : colours::edge).withMultipliedAlpha (alpha));
                 g.fillRoundedRectangle (lk.withTrimmedTop (lk.getHeight() * 0.45f), 2.0f);
                 g.drawEllipse (lk.withTrimmedBottom (lk.getHeight() * 0.4f).reduced (lk.getWidth() * 0.22f, 1.0f), 1.5f);
+                }
 
                 // remove (only when there is more than one chord)
                 if (used && count > 1)
@@ -130,9 +204,19 @@ namespace
                     g.drawLine (xr.getRight(), xr.getY(), xr.getX(), xr.getBottom(), 2.0f);
                 }
 
-                if (! used)
+                if (! used || slot.empty.load())
                 {
-                    text (g, "+", cb.withTrimmedTop (60).withHeight (80), 34.0f, colours::textDim.withAlpha (0.6f), juce::Justification::centred);
+                    if (used)
+                    {   // a hole inside the progression: silence
+                        juce::Path dash, out; out.addRoundedRectangle (cb.toFloat().reduced (6.0f), 6.0f);
+                        const float dl[] = { 6.0f, 5.0f };
+                        juce::PathStrokeType (1.2f).createDashedStroke (dash, out, dl, 2);
+                        g.setColour (colours::textDim.withAlpha (0.5f));
+                        g.fillPath (dash);
+                        text (g, tr ("Rest"), cb.withTrimmedTop (70).withHeight (40), 20.0f, colours::textDim, juce::Justification::centred, true);
+                    }
+                    else
+                        text (g, "+", cb.withTrimmedTop (60).withHeight (80), 34.0f, colours::textDim.withAlpha (0.6f), juce::Justification::centred);
                     text (g, tr ("click to add"), cb.withTrimmedTop (130).withHeight (24), 11.5f, colours::textDim.withAlpha (0.6f),
                           juce::Justification::centred);
                     continue;
@@ -185,6 +269,31 @@ namespace
                 g.fillRoundedRectangle (bar.withWidth (bar.getWidth() * juce::jlimit (0.05f, 1.0f, rel)), 2.0f);
             }
 
+            // ---- drag and drop: where the chord will land, and the chord under the mouse
+            if (dragging && dragFrom >= 0)
+            {
+                if (dropTarget >= 0 && dropTarget != dragFrom)
+                {
+                    const bool swap = dropTarget < count && ! pattern.slots[(size_t) dropTarget].empty.load();
+                    auto tb = cardBounds (dropTarget).toFloat();
+                    g.setColour (colours::accent2.withAlpha (0.15f));
+                    g.fillRoundedRectangle (tb, 8.0f);
+                    g.setColour (colours::accent2);
+                    g.drawRoundedRectangle (tb.reduced (1.0f), 8.0f, 2.5f);
+                    text (g, swap ? tr ("Swap") : tr ("Move here"), cardBounds (dropTarget).withTrimmedTop (cardH - 46).withHeight (24), 12.5f,
+                          colours::accent2, juce::Justification::centred, true);
+                }
+                auto ghost = cardBounds (dragFrom).toFloat().withCentre (dragPos.toFloat()).withHeight (120.0f).translated (0.0f, -40.0f);
+                g.setColour (colours::panelHi.withAlpha (0.92f));
+                g.fillRoundedRectangle (ghost, 8.0f);
+                g.setColour (colours::accent);
+                g.drawRoundedRectangle (ghost.reduced (0.5f), 8.0f, 2.0f);
+                text (g, chordRoman (pattern, dragFrom, s), ghost.toNearestInt().withHeight (64).translated (0, 8), 28.0f, colours::text,
+                      juce::Justification::centred, true);
+                text (g, chordName (pattern, dragFrom, s), ghost.toNearestInt().withTrimmedTop (66).withHeight (32), 18.0f, colours::accent,
+                      juce::Justification::centred, true);
+            }
+
             // ---- keyboard with the notes of the chord that plays (or the selected one)
             const int show = playing >= 0 ? playing : juce::jlimit (0, count - 1, selected);
             const auto& shown = notes[(size_t) show];
@@ -217,6 +326,16 @@ namespace
 
         void mouseUp (const juce::MouseEvent& e) override
         {
+            if (dragging)
+            {
+                const int from = dragFrom, to = dropTarget;
+                dragging = false; dragFrom = -1; dropTarget = -1;
+                setMouseCursor (juce::MouseCursor::NormalCursor);
+                if (auto& hook = userActivityHook()) hook();
+                if (to >= 0) dropChord (from, to); else repaint();
+                return;
+            }
+            dragFrom = -1;
             const auto s = proc.chords.readSettings();
             const int count = juce::jlimit (1, kMaxChordSlots, s.count);
             for (int k = 0; k < kMaxChordSlots; ++k)
@@ -226,14 +345,24 @@ namespace
                 auto& slot = pattern.slots[(size_t) k];
                 if (k >= count)
                 {   // add chords up to this one
+                    for (int i = count; i <= k; ++i) pattern.slots[(size_t) i].empty = false;
                     countParam->beginChangeGesture();
                     countParam->setValueNotifyingHost (countParam->convertTo0to1 ((float) (k + 1)));
                     countParam->endChangeGesture();
+                    ++pattern.changeCounter;
                     repaint();
                     return;
                 }
                 selected = k;
-                if (removeRect (k).contains (e.getPosition())) { removeChord (k); return; }
+                if (removeRect (k).contains (e.getPosition()) && count > 1) { removeChord (k); return; }
+                if (slot.empty.load())
+                {   // a hole: click puts a chord back in
+                    resetSlot (slot, false);
+                    ++pattern.changeCounter;
+                    proc.chords.preview (k);
+                    repaint();
+                    return;
+                }
                 if (lockRect (k).contains (e.getPosition())) slot.lock = ! slot.lock.load();
                 else if (upRect (k).contains (e.getPosition())) { slot.degree = juce::jmin (21, slot.degree.load() + 1); slot.shift = 0; proc.chords.preview (k); }
                 else if (downRect (k).contains (e.getPosition())) { slot.degree = juce::jmax (-7, slot.degree.load() - 1); slot.shift = 0; proc.chords.preview (k); }
@@ -255,6 +384,7 @@ namespace
                 if (cardBounds (k).contains (e.getPosition()))
                 {
                     auto& slot = pattern.slots[(size_t) k];
+                    if (slot.empty.load()) return;
                     const int d = w.deltaY > 0 ? 1 : -1;
                     slot.degree = juce::jlimit (-7, 21, slot.degree.load() + d);
                     slot.shift = 0;
@@ -317,6 +447,9 @@ namespace
         ChordPattern& pattern;
         juce::RangedAudioParameter* countParam = nullptr;
         int selected = 0;
+        int dragFrom = -1, dropTarget = -1;
+        bool dragging = false;
+        juce::Point<int> dragPos;
         juce::int64 lastSig = -1;
     };
 

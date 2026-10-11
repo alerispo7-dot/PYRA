@@ -25,6 +25,7 @@ struct ChordSlot
     std::atomic<int>  quality { QAuto };
     std::atomic<int>  length { 2 };     // index into chordSlotLengths() (default 1x)
     std::atomic<bool> lock { false };
+    std::atomic<bool> empty { false };   // a hole in the progression: silence for the length of the slot
 };
 
 struct ChordSettings

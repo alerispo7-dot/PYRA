@@ -115,6 +115,15 @@ namespace
 
 const juce::Image& logo()       { static auto i = asset (BinaryData::logo_png, BinaryData::logo_pngSize); return i; }
 const juce::Image& wordmark()   { static auto i = asset (BinaryData::wordmark_png, BinaryData::wordmark_pngSize); return i; }
+
+const juce::Image& knobFace (int which, bool hot)
+{
+    static const juce::Image faces[6] = {
+        asset (BinaryData::face_chaos_cold_png, BinaryData::face_chaos_cold_pngSize),   asset (BinaryData::face_chaos_png, BinaryData::face_chaos_pngSize),
+        asset (BinaryData::face_focus_cold_png, BinaryData::face_focus_cold_pngSize),   asset (BinaryData::face_focus_png, BinaryData::face_focus_pngSize),
+        asset (BinaryData::face_motion_cold_png, BinaryData::face_motion_cold_pngSize), asset (BinaryData::face_motion_png, BinaryData::face_motion_pngSize) };
+    return faces[juce::jlimit (0, 2, which - 1) * 2 + (hot ? 1 : 0)];
+}
 const juce::Image& stone()      { static auto i = asset (BinaryData::stone_jpg, BinaryData::stone_jpgSize); return i; }
 const juce::Image& lava (int)   { static auto i = asset (BinaryData::magma_jpg, BinaryData::magma_jpgSize); return i; }
 const juce::Image& basalt()     { static auto i = asset (BinaryData::bg_jpg, BinaryData::bg_jpgSize); return i; }

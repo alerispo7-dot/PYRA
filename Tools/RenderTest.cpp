@@ -199,6 +199,9 @@ static void snapshots (pyra::lang::Language language, const juce::String& suffix
     snap ("ANALOG", "x_analog_active");
     set (p, "chaos_amt", 1.0f); set (p, "focus_amt", 0.15f); set (p, "motion_amt", 0.85f);
     snap ("CHAOS", "x_chaos_full");
+    p.chordPattern.slots[2].empty = true;   // a rest in the progression
+    snap (pyra::lang::tr ("CHORDS"), "x_chords_rest");
+    p.chordPattern.slots[2].empty = false;
     for (int k = 1; k < 4; ++k)
     {
         auto& l = p.getOrCreateLayer (k);

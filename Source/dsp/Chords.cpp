@@ -119,6 +119,7 @@ int chordRootPc (const ChordPattern& p, int slot, const ChordSettings& s)
 
 std::vector<int> chordNotes (const ChordPattern& p, int slot, const ChordSettings& s, const std::vector<int>& previous)
 {
+    if (p.slots[(size_t) juce::jlimit (0, kMaxChordSlots - 1, slot)].empty.load()) return {};   // a hole: nothing plays
     int rootRel = 0;
     auto tones = slotTones (p, slot, s, rootRel);
     const int rootPc = ((rootRel % 12) + 12) % 12;
@@ -273,7 +274,7 @@ void ChordPattern::clear()
     for (int k = 0; k < kMaxChordSlots; ++k)
     {
         auto& s = slots[(size_t) k];
-        s.degree = def[k]; s.shift = 0; s.quality = QAuto; s.length = 2; s.lock = false;
+        s.degree = def[k]; s.shift = 0; s.quality = QAuto; s.length = 2; s.lock = false; s.empty = false;
     }
     ++changeCounter;
 }
@@ -284,7 +285,7 @@ bool ChordPattern::isDefault() const
     for (int k = 0; k < kMaxChordSlots; ++k)
     {
         auto& s = slots[(size_t) k];
-        if (s.degree.load() != def[k] || s.shift.load() != 0 || s.quality.load() != QAuto || s.length.load() != 2) return false;
+        if (s.degree.load() != def[k] || s.shift.load() != 0 || s.quality.load() != QAuto || s.length.load() != 2 || s.empty.load()) return false;
     }
     return true;
 }
@@ -381,7 +382,7 @@ void ChordPattern::randomize (int count, int scale, float complexity, int sizeMo
 
         int len = 2;
         if (r.uni() < complexity * 0.3f) len = r.uni() < 0.5f ? 1 : 3;
-        s.degree = deg; s.shift = shift; s.quality = q; s.length = len;
+        s.degree = deg; s.shift = shift; s.quality = q; s.length = len; s.empty = false;
     }
     ++changeCounter;
 }
@@ -390,7 +391,7 @@ juce::var ChordPattern::toVar() const
 {
     juce::Array<juce::var> a;
     for (auto& s : slots)
-        a.add (juce::Array<juce::var> { s.degree.load(), s.shift.load(), s.quality.load(), s.length.load() });
+        a.add (juce::Array<juce::var> { s.degree.load(), s.shift.load(), s.quality.load(), s.length.load(), s.empty.load() ? 1 : 0 });
     return a;
 }
 
@@ -407,6 +408,7 @@ void ChordPattern::fromVar (const juce::var& v)
         s.shift = juce::jlimit (-2, 2, (int) e[1]);
         s.quality = juce::jlimit (0, QCount - 1, (int) e[2]);
         s.length = juce::jlimit (0, (int) chordSlotLengths().size() - 1, (int) e[3]);
+        s.empty = e.size() > 4 && (int) e[4] != 0;
         s.lock = false;
     }
     ++changeCounter;
@@ -423,6 +425,7 @@ juce::ValueTree ChordPattern::toTree() const
         c.setProperty ("q", s.quality.load(), nullptr);
         c.setProperty ("len", s.length.load(), nullptr);
         c.setProperty ("lock", s.lock.load(), nullptr);
+        c.setProperty ("empty", s.empty.load(), nullptr);
         t.appendChild (c, nullptr);
     }
     return t;
@@ -440,6 +443,7 @@ void ChordPattern::fromTree (const juce::ValueTree& t)
         s.quality = juce::jlimit (0, QCount - 1, (int) c.getProperty ("q", 0));
         s.length = juce::jlimit (0, (int) chordSlotLengths().size() - 1, (int) c.getProperty ("len", 2));
         s.lock = (bool) c.getProperty ("lock", false);
+        s.empty = (bool) c.getProperty ("empty", false);
     }
     ++changeCounter;
 }
@@ -458,7 +462,7 @@ juce::MidiFile chordsToMidiFile (const ChordSettings& s, const ChordPattern& pat
         {
             const double L = base * chordSlotLengths()[(size_t) juce::jlimit (0, 3, pattern.slots[(size_t) k].length.load())];
             auto notes = chordNotes (pattern, k, s, prev);
-            prev = notes;
+            if (! notes.empty()) prev = notes;   // holes do not break the voice leading
             for (auto [o, len] : chordRhythmHits (s.rhythm, L, s.swing))
                 for (size_t j = 0; j < notes.size(); ++j)
                 {
@@ -656,8 +660,9 @@ void ChordGenerator::process (juce::MidiBuffer& midi, int numSamples, const Host
     {
         std::vector<int> prev;
         // start from the last chord so the loop back to chord 1 is smooth too
-        if (s.inversion == 0 && count > 1) prev = chordNotes (*pattern, count - 1, s, {});
-        for (int k = 0; k < count; ++k) { slotNotes[k] = chordNotes (*pattern, k, s, prev); prev = slotNotes[k]; }
+        if (s.inversion == 0 && count > 1)
+            for (int k = count - 1; k >= 0 && prev.empty(); --k) prev = chordNotes (*pattern, k, s, {});
+        for (int k = 0; k < count; ++k) { slotNotes[k] = chordNotes (*pattern, k, s, prev); if (! slotNotes[k].empty()) prev = slotNotes[k]; }
     }
 
     auto beatAt = [&] (int pos) { return startBeat + pos * bps; };

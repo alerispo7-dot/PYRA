@@ -2,3 +2,7 @@
 975|Finestra più grande|Ventana más grande|Fenêtre plus grande|Größeres Fenster|Janela maior
 976|Usati di recente|Usados recientemente|Utilisés récemment|Zuletzt verwendet|Usados recentemente
 977|Cancella la cronologia|Borrar el historial|Effacer l'historique|Verlauf löschen|Limpar o histórico
+978|Pausa|Silencio|Silence|Pause|Pausa
+979|Scambia|Intercambiar|Échanger|Tauschen|Trocar
+980|Sposta qui|Mover aquí|Déplacer ici|Hierher verschieben|Mover para cá
+981|Trascina un accordo su un altro per scambiarli, o su un posto vuoto per spostarlo lì (il suo vecchio posto diventa una pausa).|Arrastra un acorde sobre otro para intercambiarlos, o a un lugar vacío para moverlo allí (su antiguo lugar queda como silencio).|Fais glisser un accord sur un autre pour les échanger, ou sur une place vide pour l'y déplacer (son ancienne place devient un silence).|Ziehe einen Akkord auf einen anderen, um sie zu tauschen, oder auf einen freien Platz, um ihn dorthin zu verschieben (sein alter Platz wird zur Pause).|Arraste um acorde sobre outro para trocá-los, ou para um lugar vazio para movê-lo (o lugar antigo vira uma pausa).

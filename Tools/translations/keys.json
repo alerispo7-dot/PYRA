@@ -976,5 +976,9 @@
 "Smaller window",
 "Bigger window",
 "Recently used",
-"Clear the history"
+"Clear the history",
+"Rest",
+"Swap",
+"Move here",
+"Drag a chord onto another one to swap them, or onto an empty place to move it there (its old place becomes a rest)."
 ]

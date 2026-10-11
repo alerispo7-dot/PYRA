@@ -199,6 +199,7 @@ void ChordPattern::randomizeMood (int mood, int count, int scale, float complexi
     {
         auto& s = slots[(size_t) k];
         if (s.lock.load()) continue;
+        s.empty = false;
         const auto& c = prog[(size_t) k];
         const int pc = ((c.semis % 12) + 12) % 12;
         int degree = 0, shift = 0;

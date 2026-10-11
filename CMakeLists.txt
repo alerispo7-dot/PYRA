@@ -91,7 +91,9 @@ juce_add_binary_data(PyraData SOURCES Resources/FactoryPresets.json.gz
     Resources/Fonts/BarlowCondensed-SemiBold.ttf Resources/Fonts/BarlowCondensed-Bold.ttf
     Resources/Fonts/UnifrakturCook-Bold.ttf Resources/Fonts/NewRocker-Regular.ttf
     Resources/Art/logo.png Resources/Art/wordmark.png
-    Resources/Art/stone.jpg Resources/Art/magma.jpg Resources/Art/bg.jpg)
+    Resources/Art/stone.jpg Resources/Art/magma.jpg Resources/Art/bg.jpg
+    Resources/Art/face_chaos.png Resources/Art/face_chaos_cold.png Resources/Art/face_focus.png
+    Resources/Art/face_focus_cold.png Resources/Art/face_motion.png Resources/Art/face_motion_cold.png)
 set_target_properties(PyraData PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
 target_sources(PYRA PRIVATE ${PYRA_SOURCES})

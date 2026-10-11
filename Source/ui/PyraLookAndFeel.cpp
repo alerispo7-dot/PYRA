@@ -106,270 +106,6 @@ namespace
         return { (float) (h & 511u), (float) ((h >> 9) & 511u) };
     }
 
-    /** The pictures carved into the big CHAOS / FOCUS / MOTION knobs, in a -1..1 square (y down).
-        cracks = thin lava lines, holes = carved hollows full of lava, darks = black shapes over the lava,
-        limbs + head = a raised stone figure outlined by lava. */
-    struct Emblem
-    {
-        juce::Path cracks, fine, holes, darks, limbs, head;
-        float limbW = 0.0f;
-    };
-
-    using Poly = std::vector<juce::Point<float>>;
-
-    void addJagged (juce::Path& p, const Poly& l, float amount, juce::Random& rnd, bool closed = false)
-    {
-        p.startNewSubPath (l.front());
-        for (size_t i = 1; i < l.size(); ++i)
-        {
-            const auto a = l[i - 1], b = l[i];
-            const float len = a.getDistanceFrom (b);
-            const int n = std::max (1, (int) (len / 0.10f));
-            const auto d = (b - a) / std::max (len, 1.0e-4f);
-            const juce::Point<float> nrm (-d.y, d.x);
-            for (int k = 1; k <= n; ++k)
-            {
-                auto q = a + (b - a) * ((float) k / (float) n);
-                if (k < n) q += nrm * ((rnd.nextFloat() - 0.5f) * amount);
-                p.lineTo (q);
-            }
-        }
-        if (closed) p.closeSubPath();
-    }
-
-    Poly blob (float cx, float cy, float rx, float ry, int n, float irregular, juce::Random& rnd, float rot = 0.0f)
-    {
-        Poly l;
-        for (int i = 0; i < n; ++i)
-        {
-            const float a = juce::MathConstants<float>::twoPi * (float) i / (float) n + rot;
-            const float k = 1.0f + (rnd.nextFloat() - 0.5f) * irregular;
-            l.push_back ({ cx + rx * k * std::cos (a), cy + ry * k * std::sin (a) });
-        }
-        l.push_back (l.front());
-        return l;
-    }
-
-    Poly quad (juce::Point<float> a, juce::Point<float> ctrl, juce::Point<float> b, int n = 14)
-    {
-        Poly l;
-        for (int i = 0; i <= n; ++i)
-        {
-            const float t = (float) i / (float) n;
-            l.push_back (a * ((1 - t) * (1 - t)) + ctrl * (2 * (1 - t) * t) + b * (t * t));
-        }
-        return l;
-    }
-
-    Emblem makeEmblem (int which)
-    {
-        Emblem e;
-        juce::Random rnd (0x5eed + which * 7);
-        const float R = 0.97f;   // everything stays inside the stone face
-        auto onCircle = [] (float a, float r) { return juce::Point<float> (r * std::cos (a), r * std::sin (a)); };
-        if (which == 1)
-        {   // CHAOS: the stone shattered by a tangle of crossing cracks
-            for (int k = 0; k < 11; ++k)
-            {
-                const float a0 = juce::MathConstants<float>::twoPi * ((float) k + 0.6f * rnd.nextFloat()) / 11.0f;
-                const float a1 = a0 + juce::MathConstants<float>::pi * (0.45f + 0.6f * rnd.nextFloat());
-                const auto p0 = onCircle (a0, R), p1 = onCircle (a1, R);
-                const auto mid = (p0 + p1) * 0.5f + juce::Point<float> ((rnd.nextFloat() - 0.5f) * 0.3f, (rnd.nextFloat() - 0.5f) * 0.3f);
-                addJagged (k < 6 ? e.cracks : e.fine, { p0, mid, p1 }, 0.16f, rnd);
-                // short splinters off the main lines
-                if (k < 6)
-                    for (int j = 0; j < 2; ++j)
-                    {
-                        const auto from = p0 + (mid - p0) * (0.3f + 0.6f * rnd.nextFloat());
-                        const float a = juce::MathConstants<float>::twoPi * rnd.nextFloat();
-                        addJagged (e.fine, { from, from + onCircle (a, 0.18f + 0.15f * rnd.nextFloat()) }, 0.06f, rnd);
-                    }
-            }
-        }
-        else if (which == 2)
-        {   // FOCUS: rings and a grid closing in on a small square in the middle
-            for (float r : { 0.90f, 0.62f, 0.36f })
-            {
-                Poly l;
-                for (int i = 0; i <= 40; ++i) l.push_back (onCircle (juce::MathConstants<float>::twoPi * (float) i / 40.0f, r));
-                addJagged (r > 0.8f ? e.cracks : e.fine, l, 0.02f, rnd);
-            }
-            for (float x : { -0.48f, -0.24f, 0.24f, 0.48f })
-            {
-                const float h = std::sqrt (0.90f * 0.90f - x * x);
-                addJagged (e.fine, { { x, -h }, { x, h } }, 0.02f, rnd);
-                addJagged (e.fine, { { -h, x }, { h, x } }, 0.02f, rnd);
-            }
-            addJagged (e.cracks, { { 0.0f, -0.90f }, { 0.0f, -0.12f } }, 0.02f, rnd);   // the crosshair
-            addJagged (e.cracks, { { 0.0f, 0.12f }, { 0.0f, 0.90f } }, 0.02f, rnd);
-            addJagged (e.cracks, { { -0.90f, 0.0f }, { -0.12f, 0.0f } }, 0.02f, rnd);
-            addJagged (e.cracks, { { 0.12f, 0.0f }, { 0.90f, 0.0f } }, 0.02f, rnd);
-            addJagged (e.cracks, { { -0.12f, -0.12f }, { 0.12f, -0.12f }, { 0.12f, 0.12f }, { -0.12f, 0.12f }, { -0.12f, -0.12f } }, 0.0f, rnd);
-        }
-        else
-        {   // MOTION: streams of lava flowing across the stone
-            for (int k = 0; k < 7; ++k)
-            {
-                const float y0 = -0.66f + 0.22f * (float) k;
-                const float amp = 0.10f + 0.06f * rnd.nextFloat(), ph = rnd.nextFloat() * 6.0f;
-                Poly l;
-                for (int i = 0; i <= 30; ++i)
-                {
-                    const float x = -1.0f + 2.0f * (float) i / 30.0f;
-                    const float y = y0 - 0.22f * x + amp * std::sin (x * 4.2f + ph);   // rising to the right
-                    if (x * x + y * y < R * R) l.push_back ({ x, y });
-                }
-                if (l.size() > 2) addJagged (k % 2 == 0 ? e.cracks : e.fine, l, 0.03f, rnd);
-            }
-        }
-        return e;
-    }
-
-    /** Draws an emblem carved into the stone face, the lava glowing inside it.
-        stone() redraws the face's stone (for the raised figure). */
-    void drawEmblem (juce::Graphics& g, int which, juce::Point<float> c, float bodyR, float pos, float t,
-                     const std::function<void()>& stone)
-    {
-        static Emblem cache[4];
-        static bool made[4] = {};
-        if (which < 1 || which > 3) return;
-        if (! made[which]) { cache[which] = makeEmblem (which); made[which] = true; }
-        const auto& em = cache[which];
-
-        const float size = bodyR;
-        const auto tr = juce::AffineTransform::scale (size).translated (c.x, c.y);
-        auto get = [&] (const juce::Path& src) { juce::Path p (src); p.applyTransform (tr); return p; };
-        const auto cracks = get (em.cracks), fine = get (em.fine), holes = get (em.holes), darks = get (em.darks), limbs = get (em.limbs), head = get (em.head);
-        const float w = std::max (2.0f, bodyR * 0.066f);
-        auto stroke = [] (float width) { return juce::PathStrokeType (width, juce::PathStrokeType::curved, juce::PathStrokeType::rounded); };
-
-        // the same heat for every picture: dim at 0, burning at the top, never blinding
-        const float breathe = 0.05f * std::sin (t * 2.3f);
-        auto lavaIn = [&] (const juce::Path& region, float extraDark)
-        {
-            if (region.isEmpty()) return;
-            juce::Graphics::ScopedSaveState ss (g);
-            g.reduceClipRegion (region);
-            g.drawImageTransformed (art::lava(), juce::AffineTransform::translation (-256.0f, -256.0f)
-                                                    .rotated (t * 0.04f)
-                                                    .scaled (bodyR * 2.6f / 512.0f)
-                                                    .translated (c.x, c.y));
-            g.setColour (juce::Colour (0xffff5a10).withAlpha (0.18f));
-            g.fillRect (region.getBounds().expanded (2.0f));
-            g.setColour (juce::Colours::black.withAlpha (juce::jlimit (0.0f, 0.8f, 0.48f * (1.0f - pos) + extraDark + breathe)));
-            g.fillRect (region.getBounds().expanded (2.0f));
-        };
-        // a hollow full of molten rock: bright in the middle, darker against the cut edge
-        auto moltenIn = [&] (const juce::Path& region, bool perHollow)
-        {
-            if (region.isEmpty()) return;
-            juce::Graphics::ScopedSaveState ss (g);
-            g.reduceClipRegion (region);
-            const auto rb = region.getBounds();
-            juce::Path::Iterator it (region);
-            // every hollow gets its own little glow, centred on it
-            juce::Path one;
-            auto paintOne = [&] (const juce::Path& h)
-            {
-                const auto hb = h.getBounds();
-                const float rad = std::max (hb.getWidth(), hb.getHeight()) * 0.62f;
-                juce::ColourGradient mg (juce::Colour (0xffffc060), hb.getCentreX(), hb.getCentreY(),
-                                         juce::Colour (0xff5a0604), hb.getCentreX() + rad, hb.getCentreY(), true);
-                mg.addColour (0.45, juce::Colour (0xffff6a14));
-                mg.addColour (0.8, juce::Colour (0xffb01c06));
-                g.setGradientFill (mg);
-                g.fillPath (h);
-            };
-            while (perHollow && it.next())
-            {
-                if (it.elementType == juce::Path::Iterator::startNewSubPath) { if (! one.isEmpty()) paintOne (one); one.clear(); one.startNewSubPath (it.x1, it.y1); }
-                else if (it.elementType == juce::Path::Iterator::lineTo) one.lineTo (it.x1, it.y1);
-                else if (it.elementType == juce::Path::Iterator::closePath) one.closeSubPath();
-            }
-            if (! perHollow) paintOne (region);
-            else if (! one.isEmpty()) paintOne (one);
-            g.setOpacity (0.45f);
-            g.drawImageTransformed (art::lava(), juce::AffineTransform::translation (-256.0f, -256.0f)
-                                                    .rotated (t * 0.04f).scaled (bodyR * 2.6f / 512.0f).translated (c.x, c.y));
-            g.setOpacity (1.0f);
-            g.setColour (juce::Colours::black.withAlpha (juce::jlimit (0.0f, 0.8f, 0.55f * (1.0f - pos) + 0.08f + breathe)));
-            g.fillRect (rb.expanded (2.0f));
-        };
-        auto outline = [&] (const juce::Path& p, float width) { juce::Path o; stroke (width).createStrokedPath (o, p); return o; };
-        auto glowAround = [&] (const juce::Path& p, float width)
-        {
-            g.setColour (colours::accent.withAlpha (0.05f + 0.16f * pos));
-            g.strokePath (p, stroke (width * 2.2f));
-            g.setColour (colours::accent.withAlpha (0.07f + 0.18f * pos));
-            g.strokePath (p, stroke (width * 1.3f));
-        };
-
-        // 1. the raised figure (MOTION): lava all around it, stone on top
-        if (! limbs.isEmpty())
-        {
-            const float lw = em.limbW * size, edge = w * 1.25f;
-            g.setColour (juce::Colours::black.withAlpha (0.85f));
-            g.strokePath (limbs, stroke (lw + edge * 2.6f), juce::AffineTransform::translation (0.0f, w * 0.4f));
-            g.fillPath (head, juce::AffineTransform::translation (0.0f, w * 0.4f));
-            {
-                juce::Path headRing; headRing.addEllipse (head.getBounds().expanded (edge * 1.3f));
-                g.fillPath (headRing, juce::AffineTransform::translation (0.0f, w * 0.4f));
-                g.setColour (colours::accent.withAlpha (0.06f + 0.16f * pos));
-                g.strokePath (limbs, stroke (lw + edge * 4.0f));
-                g.fillEllipse (head.getBounds().expanded (edge * 2.0f));
-                moltenIn (outline (limbs, lw + edge * 2.0f), false);
-                moltenIn (headRing, false);
-            }
-            for (int part = 0; part < 2; ++part)
-            {
-                juce::Graphics::ScopedSaveState ss (g);
-                if (part == 0) g.reduceClipRegion (outline (limbs, lw)); else g.reduceClipRegion (head);
-                stone();
-                g.setColour (juce::Colour (0xff7a6a64).withAlpha (0.16f));   // the raised stone catches more light
-                g.fillRect (limbs.getBounds().getUnion (head.getBounds()).expanded (4.0f));
-                juce::ColourGradient lit (juce::Colours::white.withAlpha (0.12f), c.x, c.y - size, juce::Colours::black.withAlpha (0.25f), c.x, c.y + size, false);
-                g.setGradientFill (lit);
-                g.fillRect (limbs.getBounds().getUnion (head.getBounds()).expanded (4.0f));
-            }
-        }
-
-        // 2. carved hollows full of lava (eyes, mouth, iris)
-        if (! holes.isEmpty())
-        {
-            g.setColour (juce::Colours::black.withAlpha (0.85f));
-            g.strokePath (holes, stroke (w * 1.6f), juce::AffineTransform::translation (0.0f, w * 0.35f));
-            glowAround (holes, w * 1.6f);
-            moltenIn (holes, true);
-            g.setColour (juce::Colours::black.withAlpha (0.55f));   // the cut edge of the hollow
-            g.strokePath (holes, stroke (w * 0.9f));
-            g.setColour (juce::Colour (0xffd8b8a8).withAlpha (0.10f));
-            g.strokePath (holes, stroke (w * 0.6f), juce::AffineTransform::translation (0.0f, -w * 0.6f));
-        }
-        if (! darks.isEmpty())
-        {
-            g.setColour (juce::Colours::black.withAlpha (0.9f));
-            g.fillPath (darks);
-        }
-
-        // 3. cracks: a dark split in the stone with molten rock running inside
-        auto crackLines = [&] (const juce::Path& p, float width)
-        {
-            if (p.isEmpty()) return;
-            const float heat = 0.25f + 0.75f * pos + breathe;
-            g.setColour (juce::Colours::black.withAlpha (0.75f));
-            g.strokePath (p, stroke (width * 1.7f), juce::AffineTransform::translation (0.0f, width * 0.35f));
-            g.setColour (colours::accent.withAlpha (0.04f + 0.10f * pos));
-            g.strokePath (p, stroke (width * 3.2f));
-            g.setColour (juce::Colour (0xff4a0806).interpolatedWith (juce::Colour (0xffc8300a), heat));
-            g.strokePath (p, stroke (width));
-            g.setColour (juce::Colour (0xff7a1606).interpolatedWith (juce::Colour (0xffff7418), heat));
-            g.strokePath (p, stroke (width * 0.62f));
-            g.setColour (juce::Colour (0xff9a3a10).interpolatedWith (juce::Colour (0xffffd88a), heat).withAlpha (0.35f + 0.65f * pos));
-            g.strokePath (p, stroke (std::max (0.7f, width * 0.24f)));
-        };
-        crackLines (fine, w * 0.55f);
-        crackLines (cracks, w);
-    }
 }
 
 void PyraLookAndFeel::drawRotarySlider (juce::Graphics& g, int x, int y, int w, int h, float pos,
@@ -456,9 +192,12 @@ void PyraLookAndFeel::drawRotarySlider (juce::Graphics& g, int x, int y, int w, 
             const float sc = juce::jlimit (0.12f, 0.4f, bodyR / 110.0f);
             g.drawImageTransformed (art::stone(), juce::AffineTransform::translation (-off.x, -off.y).rotated (angle * 0.5f).scaled (sc).translated (c.x, c.y));
             if (emblem != 0)
-            {   // a lighter, weathered stone, so the lava drawing reads clearly
-                g.setColour (juce::Colour (0xff8c7f79).withAlpha (0.22f));
-                g.fillEllipse (body);
+            {   // the carved picture: cooled lava at 0, burning as the knob goes up
+                g.setImageResamplingQuality (juce::Graphics::highResamplingQuality);
+                g.drawImage (art::knobFace (emblem, false), body);
+                g.setOpacity (juce::jlimit (0.0f, 1.0f, (enabled ? 0.22f + 0.78f * pos : 0.0f) + 0.05f * std::sin (t * 2.3f)));
+                g.drawImage (art::knobFace (emblem, true), body);
+                g.setOpacity (1.0f);
             }
             else if (enabled && heat > 0.02f)
             {
@@ -467,7 +206,9 @@ void PyraLookAndFeel::drawRotarySlider (juce::Graphics& g, int x, int y, int w, 
                 g.setOpacity (1.0f);
             }
         }
-        // round it: light from above, dark rim
+        // round it: light from above, dark rim (the carved faces are already lit)
+        if (emblem == 0)
+        {
         juce::ColourGradient shade (juce::Colours::white.withAlpha (0.10f), c.x, c.y - bodyR, juce::Colours::black.withAlpha (0.55f), c.x, c.y + bodyR, false);
         g.setGradientFill (shade);
         g.fillEllipse (body);
@@ -475,12 +216,14 @@ void PyraLookAndFeel::drawRotarySlider (juce::Graphics& g, int x, int y, int w, 
         rim.addColour (0.72, juce::Colours::transparentBlack);
         g.setGradientFill (rim);
         g.fillEllipse (body);
-        if (emblem != 0)
-            drawEmblem (g, emblem, c, bodyR, enabled ? pos : 0.0f, t, [&]
-            {
-                const float sc = juce::jlimit (0.12f, 0.4f, bodyR / 110.0f);
-                g.drawImageTransformed (art::stone(), juce::AffineTransform::translation (-off.x, -off.y).rotated (angle * 0.5f).scaled (sc).translated (c.x, c.y));
-            });
+        }
+        else
+        {
+            juce::ColourGradient rim (juce::Colours::transparentBlack, c.x, c.y, juce::Colours::black.withAlpha (0.55f), c.x + bodyR, c.y, true);
+            rim.addColour (0.82, juce::Colours::transparentBlack);
+            g.setGradientFill (rim);
+            g.fillEllipse (body);
+        }
     }
     g.setColour (lavaFace ? accent.withAlpha (0.35f + 0.55f * pos) : juce::Colour (0xff5a4842).withAlpha (0.9f));
     g.drawEllipse (body.reduced (0.5f), lavaFace ? 1.5f : 1.0f);
@@ -490,7 +233,8 @@ void PyraLookAndFeel::drawRotarySlider (juce::Graphics& g, int x, int y, int w, 
     // pointer: a white-hot shard
     juce::Path p;
     const float pw = std::max (1.6f, bodyR * (lavaFace ? 0.09f : 0.14f));
-    p.addRoundedRectangle (-pw * 0.5f, -bodyR + 2.0f, pw, bodyR * (lavaFace ? 0.38f : 0.55f), pw * 0.5f);
+    const bool carved = (int) s.getProperties().getWithDefault ("emblem", 0) != 0;   // short notch: the picture stays visible
+    p.addRoundedRectangle (-pw * 0.5f, -bodyR + 2.0f, pw, bodyR * (carved ? 0.22f : (lavaFace ? 0.38f : 0.55f)), pw * 0.5f);
     const auto tr = juce::AffineTransform::rotation (angle).translated (c.x, c.y);
     g.setColour (juce::Colours::black.withAlpha (0.6f));
     g.strokePath (p, juce::PathStrokeType (1.2f), tr);
