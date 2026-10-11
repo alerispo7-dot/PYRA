@@ -13,8 +13,20 @@ const juce::StringArray& chordQualityNames()
     return a;
 }
 
-const std::vector<double>& chordSlotLengths() { static const std::vector<double> v { 0.25, 0.5, 1.0, 2.0 }; return v; }
-const juce::StringArray& chordSlotLengthNames() { static juce::StringArray a { "1/4 x", "1/2 x", "1 x", "2 x" }; return a; }
+// 0..3: a multiple of the chord length (CHORD LENGTH); from 4 on: a fixed note value in beats (append only: saved by index)
+const std::vector<double>& chordSlotLengths() { static const std::vector<double> v { 0.25, 0.5, 1.0, 2.0, 0.25, 1.0 / 3.0, 0.5, 2.0 / 3.0, 1.0, 4.0 / 3.0, 2.0, 4.0, 8.0 }; return v; }
+const juce::StringArray& chordSlotLengthNames()
+{
+    static juce::StringArray a { "1/4 x", "1/2 x", "1 x", "2 x", "1/16", "1/12 (1/8 T)", "1/8", "1/6 (1/4 T)", "1/4", "1/3 (1/2 T)", "1/2", "1 Bar", "2 Bars" };
+    return a;
+}
+int chordSlotRelativeCount() { return 4; }
+double chordSlotBeats (int index, double chordLengthBeats)
+{
+    const auto& v = chordSlotLengths();
+    index = juce::jlimit (0, (int) v.size() - 1, index);
+    return index < chordSlotRelativeCount() ? chordLengthBeats * v[(size_t) index] : v[(size_t) index];
+}
 
 namespace
 {
@@ -460,7 +472,7 @@ juce::MidiFile chordsToMidiFile (const ChordSettings& s, const ChordPattern& pat
     for (int loop = 0; loop < std::max (1, loops); ++loop)
         for (int k = 0; k < count; ++k)
         {
-            const double L = base * chordSlotLengths()[(size_t) juce::jlimit (0, 3, pattern.slots[(size_t) k].length.load())];
+            const double L = chordSlotBeats (pattern.slots[(size_t) k].length.load(), base);
             auto notes = chordNotes (pattern, k, s, prev);
             if (! notes.empty()) prev = notes;   // holes do not break the voice leading
             for (auto [o, len] : chordRhythmHits (s.rhythm, L, s.swing))
@@ -652,7 +664,7 @@ void ChordGenerator::process (juce::MidiBuffer& midi, int numSamples, const Host
     const double base = choices::chordLengthBeats (s.lengthIndex);
     double starts[kMaxChordSlots + 1] {};
     for (int k = 0; k < count; ++k)
-        starts[k + 1] = starts[k] + base * chordSlotLengths()[(size_t) juce::jlimit (0, 3, pattern->slots[(size_t) k].length.load())];
+        starts[k + 1] = starts[k] + chordSlotBeats (pattern->slots[(size_t) k].length.load(), base);
     const double T = std::max (0.25, starts[count]);
 
     // chords of this block (voice leading follows the progression order)

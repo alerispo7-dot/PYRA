@@ -17,6 +17,8 @@ const juce::StringArray& chordQualityNames();
 /** Lengths of one slot as a multiple of the base chord length. */
 const std::vector<double>& chordSlotLengths();
 const juce::StringArray& chordSlotLengthNames();
+int chordSlotRelativeCount();                                  // the first options are multiples of the chord length
+double chordSlotBeats (int lengthIndex, double chordLengthBeats);   // how long a slot lasts, in beats
 
 struct ChordSlot
 {

@@ -980,5 +980,8 @@
 "Rest",
 "Swap",
 "Move here",
-"Drag a chord onto another one to swap them, or onto an empty place to move it there (its old place becomes a rest)."
+"Drag a chord onto another one to swap them, or onto an empty place to move it there (its old place becomes a rest).",
+"click for a chord",
+"Relative to CHORD LENGTH",
+"Note values (T = triplet)"
 ]

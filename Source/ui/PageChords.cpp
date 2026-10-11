@@ -107,7 +107,9 @@ namespace
                 for (int i = count; i < to; ++i) resetSlot (pattern.slots[(size_t) i], true);   // holes up to the new place
                 copySlot (b, a);
                 b.empty = false;
+                const int keepLength = a.length.load();   // the rest lasts as long as the chord that left: the others keep their timing
                 resetSlot (a, true);
+                a.length = keepLength;
                 newCount = std::max (count, to + 1);
             }
             selected = to;
@@ -204,10 +206,34 @@ namespace
                     g.drawLine (xr.getRight(), xr.getY(), xr.getX(), xr.getBottom(), 2.0f);
                 }
 
+                auto button = [&] (juce::Rectangle<int> r, const juce::String& label, bool accent)
+                {
+                    const bool hot = over && r.contains (mouse);
+                    g.setColour (accent ? colours::accent.darker (hot ? 0.1f : 0.4f) : (hot ? colours::panel.brighter (0.15f) : colours::knobBody));
+                    g.fillRoundedRectangle (r.toFloat(), 5.0f);
+                    g.setColour (colours::edge);
+                    g.drawRoundedRectangle (r.toFloat().reduced (0.5f), 5.0f, 1.0f);
+                    text (g, label, r.reduced (6, 0), 12.0f, colours::text, juce::Justification::centred, accent);
+                };
+                // how long this chord (or rest) lasts: the button and a bar (full = 2 x the chord length)
+                auto lengthControls = [&]
+                {
+                    const int li = juce::jlimit (0, chordSlotLengthNames().size() - 1, slot.length.load());
+                    button (lengthRect (k), tr ("Length") + " " + tr (chordSlotLengthNames()[li]), false);
+                    const double base = choices::chordLengthBeats (s.lengthIndex);
+                    const float rel = (float) (chordSlotBeats (li, base) / (2.0 * base));
+                    auto bar = juce::Rectangle<float> ((float) cb.getX() + 8.0f, (float) cb.getBottom() - 12.0f, (float) (cb.getWidth() - 16), 4.0f);
+                    g.setColour (colours::knobBody);
+                    g.fillRoundedRectangle (bar, 2.0f);
+                    g.setColour (colours::accent2.withAlpha (0.8f));
+                    g.fillRoundedRectangle (bar.withWidth (bar.getWidth() * juce::jlimit (0.03f, 1.0f, rel)), 2.0f);
+                };
+
                 if (! used || slot.empty.load())
                 {
                     if (used)
-                    {   // a hole inside the progression: silence
+                    {   // a hole inside the progression: silence, as long as you choose
+                        lengthControls();
                         juce::Path dash, out; out.addRoundedRectangle (cb.toFloat().reduced (6.0f), 6.0f);
                         const float dl[] = { 6.0f, 5.0f };
                         juce::PathStrokeType (1.2f).createDashedStroke (dash, out, dl, 2);
@@ -217,8 +243,8 @@ namespace
                     }
                     else
                         text (g, "+", cb.withTrimmedTop (60).withHeight (80), 34.0f, colours::textDim.withAlpha (0.6f), juce::Justification::centred);
-                    text (g, tr ("click to add"), cb.withTrimmedTop (130).withHeight (24), 11.5f, colours::textDim.withAlpha (0.6f),
-                          juce::Justification::centred);
+                    text (g, used ? tr ("click for a chord") : tr ("click to add"), cb.withTrimmedTop (130).withHeight (24), 11.5f,
+                          colours::textDim.withAlpha (0.6f), juce::Justification::centred);
                     continue;
                 }
 
@@ -246,27 +272,10 @@ namespace
                 text (g, ns.joinIntoString (" "), { cb.getX() + 6, cb.getY() + 166, cb.getWidth() - 12, 24 }, 11.0f, colours::textDim,
                       juce::Justification::centred, false, 2);
 
-                auto button = [&] (juce::Rectangle<int> r, const juce::String& label, bool accent)
-                {
-                    const bool hot = over && r.contains (mouse);
-                    g.setColour (accent ? colours::accent.darker (hot ? 0.1f : 0.4f) : (hot ? colours::panel.brighter (0.15f) : colours::knobBody));
-                    g.fillRoundedRectangle (r.toFloat(), 5.0f);
-                    g.setColour (colours::edge);
-                    g.drawRoundedRectangle (r.toFloat().reduced (0.5f), 5.0f, 1.0f);
-                    text (g, label, r.reduced (6, 0), 12.0f, colours::text, juce::Justification::centred, accent);
-                };
                 const int q = slot.quality.load();
                 button (qualityRect (k), q == QAuto ? tr ("Auto (scale)") : tr (chordQualityNames()[q]), false);
-                button (lengthRect (k), tr ("Length") + " " + chordSlotLengthNames()[juce::jlimit (0, 3, slot.length.load())], false);
+                lengthControls();
                 button (playRect (k), juce::String (juce::CharPointer_UTF8 ("\xe2\x96\xb6  ")) + tr ("PLAY"), true);
-
-                // length bar
-                const float rel = (float) chordSlotLengths()[(size_t) juce::jlimit (0, 3, slot.length.load())] / 2.0f;
-                auto bar = juce::Rectangle<float> ((float) cb.getX() + 8.0f, (float) cb.getBottom() - 12.0f, (float) (cb.getWidth() - 16), 4.0f);
-                g.setColour (colours::knobBody);
-                g.fillRoundedRectangle (bar, 2.0f);
-                g.setColour (colours::accent2.withAlpha (0.8f));
-                g.fillRoundedRectangle (bar.withWidth (bar.getWidth() * juce::jlimit (0.05f, 1.0f, rel)), 2.0f);
             }
 
             // ---- drag and drop: where the chord will land, and the chord under the mouse
@@ -355,6 +364,7 @@ namespace
                 }
                 selected = k;
                 if (removeRect (k).contains (e.getPosition()) && count > 1) { removeChord (k); return; }
+                if (slot.empty.load() && lengthRect (k).contains (e.getPosition())) { showLengthMenu (k); return; }
                 if (slot.empty.load())
                 {   // a hole: click puts a chord back in
                     resetSlot (slot, false);
@@ -421,8 +431,12 @@ namespace
         {
             juce::PopupMenu m;
             const int len = pattern.slots[(size_t) k].length.load();
-            for (int i = 0; i < chordSlotLengthNames().size(); ++i)
+            m.addSectionHeader (tr ("Relative to CHORD LENGTH"));
+            for (int i = 0; i < chordSlotRelativeCount(); ++i)
                 m.addItem (i + 1, chordSlotLengthNames()[i] + "  (" + tr ("of the chord length") + ")", true, i == len);
+            m.addSectionHeader (tr ("Note values (T = triplet)"));
+            for (int i = chordSlotRelativeCount(); i < chordSlotLengthNames().size(); ++i)
+                m.addItem (i + 1, tr (chordSlotLengthNames()[i]), true, i == len);
             juce::Component::SafePointer<ChordCards> safe (this);
             m.showMenuAsync (juce::PopupMenu::Options().withTargetScreenArea (localAreaToGlobal (lengthRect (k))), [safe, k] (int r)
             {
