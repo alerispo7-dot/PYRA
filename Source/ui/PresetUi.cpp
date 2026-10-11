@@ -324,8 +324,9 @@ namespace
         explicit SampleLayerPanel (UiContext& ui) : Panel (tr ("SAMPLE LAYER"))
         {
             titleX = 34;
-            tint = colours::mod;
+            tint = colours::accent2;
             on = std::make_unique<ParamToggle> (ui.st, "smp_on");
+            setPowerButton (on.get());
             inst = std::make_unique<ParamCombo> (ui.st, "smp_inst");
             route = std::make_unique<ParamCombo> (ui.st, "smp_route");
             for (juce::Component* c : { (juce::Component*) on.get(), (juce::Component*) inst.get(), (juce::Component*) route.get() })
@@ -534,7 +535,7 @@ namespace
                             r.removeFromTop (22), juce::Justification::centredLeft);
                 if (p->sampleInstrument > 0)
                 {
-                    g.setColour (colours::mod);
+                    g.setColour (colours::accent2);
                     g.drawText (tr ("From the sample bank:") + " " + tr (SampleBank::displayNames()[p->sampleInstrument]),
                                 r.removeFromTop (22), juce::Justification::centredLeft);
                 }
@@ -639,9 +640,9 @@ namespace
                 g.setFont (PyraLookAndFeel::font (11.0f, true));
                 const int bw = juce::GlyphArrangement::getStringWidthInt (g.getCurrentFont(), t) + 16;
                 auto badge = juce::Rectangle<float> ((float) (right - bw), (float) h * 0.5f - 9.0f, (float) bw, 18.0f);
-                g.setColour (colours::mod.withAlpha (0.16f));
+                g.setColour (colours::accent2.withAlpha (0.16f));
                 g.fillRoundedRectangle (badge, 9.0f);
-                g.setColour (colours::mod);
+                g.setColour (colours::accent2);
                 g.drawText (t, badge.toNearestInt(), juce::Justification::centred);
             }
         }

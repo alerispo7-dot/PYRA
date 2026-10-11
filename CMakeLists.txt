@@ -76,7 +76,10 @@ set(PYRA_SOURCES
     Source/ui/PageChords.cpp
     Source/ui/PresetUi.cpp)
 
-juce_add_binary_data(PyraData SOURCES Resources/FactoryPresets.json.gz)
+juce_add_binary_data(PyraData SOURCES Resources/FactoryPresets.json.gz
+    Resources/Fonts/Barlow-Medium.ttf Resources/Fonts/Barlow-SemiBold.ttf
+    Resources/Fonts/BarlowCondensed-SemiBold.ttf Resources/Fonts/BarlowCondensed-Bold.ttf
+    Resources/Fonts/CinzelDecorative-Black.ttf)
 set_target_properties(PyraData PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
 target_sources(PYRA PRIVATE ${PYRA_SOURCES})

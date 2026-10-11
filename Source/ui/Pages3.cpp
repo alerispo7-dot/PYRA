@@ -65,6 +65,7 @@ namespace
             title = titleText;
             titleX = 34;
             on = b.toggle ("fx_" + prefix + "_on");
+            setPowerButton (on);
             for (auto* c : comboIds)
             {
                 const juce::String id (c);
@@ -192,6 +193,7 @@ namespace
             tint = colours::hot;
             Builder b { ui, *this, owned };
             on = b.toggle ("fx_glt_on");
+            setPowerButton (on);
             rate = b.combo ("fx_glt_rate", false);
             rate->setTooltip (tr ("Length of one step"));
             steps = b.knob ("fx_glt_steps", "Steps");
@@ -444,7 +446,7 @@ namespace
                  std::initializer_list<std::pair<const char*, const char*>> {
                    { "fx_shf_freq", "Frequency" }, { "fx_shf_fb", "Feedback" }, { "fx_shf_width", "Stereo" }, { "fx_shf_mix", "Mix" } });
             granular->syncToggle->setTooltip (tr ("Freeze: stops recording and keeps playing grains of what is in the buffer"));
-            granular->tint = colours::mod;
+            granular->tint = colours::hot;
             shifter->tint = colours::accent2;
             creativeView.addAndMakeVisible (*granular);
             creativeView.addAndMakeVisible (*shifter);
@@ -529,7 +531,7 @@ namespace
         {
             for (auto* p : { &agePanel, &movement, &character, &noise, &converter }) addAndMakeVisible (p);
             agePanel.tint = colours::hot; movement.tint = colours::accent2; character.tint = colours::accent;
-            noise.tint = colours::mod; converter.tint = colours::accent2;
+            noise.tint = colours::accent; converter.tint = colours::accent2;
             Builder ba { ui, agePanel, owned };   age = ba.knob ("an_age", "AGE");
             Builder bm { ui, movement, owned };   drift = bm.knob ("drift", "Drift"); spread = bm.knob ("spread", "Voice Spread");
                                                   tolerance = bm.knob ("an_tolerance", "Tolerance");
@@ -828,10 +830,11 @@ namespace
             addAndMakeVisible (top);
             addAndMakeVisible (editorPanel);
             editorPanel.addAndMakeVisible (editor);
-            editorPanel.tint = colours::mod;
+            editorPanel.tint = colours::accent;
 
             Builder b { ui, top, owned };
             on = b.toggle ("arp_on", tr ("ARP ON"));
+            top.setPowerButton (on);
             latch = b.toggle ("arp_latch", tr ("Latch"));
             mode = b.combo ("arp_mode");
             rate = b.combo ("arp_rate", false);

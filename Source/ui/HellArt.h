@@ -13,8 +13,13 @@ namespace art
     /** Square molten-lava texture (cached), like a cracked magma ball. */
     const juce::Image& lava (int size);
 
-    /** The logo: a treble clef on fire. */
-    void drawLogo (juce::Graphics&, juce::Rectangle<float> area);
+    /** The logo: a treble clef on fire (time makes the flames flicker). */
+    void drawLogo (juce::Graphics&, juce::Rectangle<float> area, float time = 0.0f);
+
+    /** Seamless dark stone grain, tiled inside panels. */
+    const juce::Image& stone();
+    /** A few hairline cracks inside an area. */
+    juce::Path cracks (juce::Rectangle<float> area, uint32_t seed);
 
     /** A skeleton sinking in lava, arms raised. x = centre, baseY = lava surface, h = visible height. */
     void drawSkeleton (juce::Graphics&, float x, float baseY, float h, float lean, float alpha, uint32_t seed);

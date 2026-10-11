@@ -58,7 +58,8 @@ private:
     juce::TextButton langButton;
     juce::MidiKeyboardComponent keyboard;
     juce::TooltipWindow tooltips { this, 600 };
-    int lastVoices = -1, historyCounter = 0;
+    int lastVoices = -1, historyCounter = 0, animCounter = 0;
+    float animTime = 0.0f;
     juce::StringArray tabNames;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PyraAudioProcessorEditor)

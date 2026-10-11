@@ -1,12 +1,32 @@
 #include "PyraLookAndFeel.h"
 #include <juce_audio_utils/juce_audio_utils.h>
 #include "HellArt.h"
+#include "BinaryData.h"
 
 namespace pyra
 {
+namespace
+{
+    struct Faces
+    {
+        juce::Typeface::Ptr medium, semi, condSemi, condBold, display;
+        Faces()
+        {
+            auto load = [] (const char* data, int size) { return juce::Typeface::createSystemTypefaceFor (data, (size_t) size); };
+            medium   = load (BinaryData::BarlowMedium_ttf, BinaryData::BarlowMedium_ttfSize);
+            semi     = load (BinaryData::BarlowSemiBold_ttf, BinaryData::BarlowSemiBold_ttfSize);
+            condSemi = load (BinaryData::BarlowCondensedSemiBold_ttf, BinaryData::BarlowCondensedSemiBold_ttfSize);
+            condBold = load (BinaryData::BarlowCondensedBold_ttf, BinaryData::BarlowCondensedBold_ttfSize);
+            display  = load (BinaryData::CinzelDecorativeBlack_ttf, BinaryData::CinzelDecorativeBlack_ttfSize);
+        }
+    };
+    const Faces& faces() { static Faces f; return f; }
+}
+
 PyraLookAndFeel::PyraLookAndFeel()
 {
     using namespace colours;
+    setDefaultSansSerifTypeface (faces().medium);
     setColour (juce::ResizableWindow::backgroundColourId, bg);
     setColour (juce::Label::textColourId, text);
     setColour (juce::ComboBox::backgroundColourId, knobBody);
@@ -41,9 +61,21 @@ PyraLookAndFeel::PyraLookAndFeel()
     setColour (juce::MidiKeyboardComponent::shadowColourId, juce::Colours::transparentBlack);
 }
 
+
 juce::Font PyraLookAndFeel::font (float height, bool bold)
 {
-    return juce::Font (juce::FontOptions (height, bold ? juce::Font::bold : juce::Font::plain));
+    // Barlow runs a little small: +6% keeps the old sizes readable (nothing under ~11 px on screen)
+    return juce::Font (juce::FontOptions().withTypeface (bold ? faces().semi : faces().medium).withHeight (std::max (11.0f, height * 1.06f)));
+}
+
+juce::Font PyraLookAndFeel::titleFont (float height)
+{
+    return juce::Font (juce::FontOptions().withTypeface (faces().condBold).withHeight (height).withKerningFactor (0.06f));
+}
+
+juce::Font PyraLookAndFeel::displayFont (float height)
+{
+    return juce::Font (juce::FontOptions().withTypeface (faces().display).withHeight (height));
 }
 
 namespace
@@ -115,11 +147,12 @@ void PyraLookAndFeel::drawRotarySlider (juce::Graphics& g, int x, int y, int w, 
             juce::Graphics::ScopedSaveState ss (g);
             juce::Path clip; clip.addEllipse (body);
             g.reduceClipRegion (clip);
+            const float t = (float) (double) s.getProperties().getWithDefault ("time", 0.0);
             g.drawImageTransformed (tex, juce::AffineTransform::translation (-256.0f, -256.0f)
-                                             .rotated (angle * 0.35f)
+                                             .rotated (angle * 0.35f + t * 0.05f)
                                              .scaled (bodyR * 2.0f / 512.0f * 1.04f)
                                              .translated (c.x, c.y));
-            g.setColour (juce::Colours::black.withAlpha (0.5f * (1.0f - pos)));
+            g.setColour (juce::Colours::black.withAlpha (juce::jlimit (0.0f, 0.8f, 0.5f * (1.0f - pos) + 0.07f * std::sin (t * 2.3f))));   // breathing glow
             g.fillEllipse (body);
             const int doodle = (int) s.getProperties().getWithDefault ("doodle", -1);
             if (doodle >= 0)
@@ -284,7 +317,7 @@ void PyraLookAndFeel::drawTooltip (juce::Graphics& g, const juce::String& t, int
 
 juce::Font PyraLookAndFeel::getTextButtonFont (juce::TextButton&, int h)
 {
-    return font (std::min (14.0f, (float) h * 0.55f), true);
+    return titleFont (std::min (16.0f, (float) h * 0.62f));
 }
 
 juce::Label* PyraLookAndFeel::createSliderTextBox (juce::Slider& s)

@@ -230,7 +230,49 @@ const juce::Image& lava (int size)
 }
 
 //==============================================================================
-void drawLogo (juce::Graphics& g, juce::Rectangle<float> a)
+const juce::Image& stone()
+{
+    static juce::Image img = []
+    {
+        const int n = 192;
+        juce::Image im (juce::Image::ARGB, n, n, true);
+        juce::Image::BitmapData bd (im, juce::Image::BitmapData::writeOnly);
+        for (int y = 0; y < n; ++y)
+            for (int x = 0; x < n; ++x)
+            {
+                // tileable: sample noise on a torus
+                const float u = (float) x / (float) n * juce::MathConstants<float>::twoPi, v = (float) y / (float) n * juce::MathConstants<float>::twoPi;
+                const float nx = 3.0f + std::cos (u) * 1.6f, ny = 3.0f + std::sin (u) * 1.6f, nz = 3.0f + std::cos (v) * 1.6f + std::sin (v) * 0.9f;
+                const float a = fbm (nx * 2.0f + nz, ny * 2.0f - nz * 0.5f, 13u, 4);
+                const float speck = hash2 (x, y, 5u) > 0.985f ? 0.6f : 0.0f;
+                const float l = juce::jlimit (0.0f, 1.0f, (a - 0.35f) * 1.6f + speck);
+                bd.setPixelColour (x, y, juce::Colour::fromFloatRGBA (0.55f, 0.32f, 0.25f, l));
+            }
+        return im;
+    }();
+    return img;
+}
+
+juce::Path cracks (juce::Rectangle<float> a, uint32_t seed)
+{
+    juce::Path p;
+    Rng r; r.seed (seed * 7u + 1u);
+    for (int k = 0; k < 3; ++k)
+    {
+        float x = a.getRight(), y = a.getBottom() - r.uni() * a.getHeight() * 0.5f;
+        p.startNewSubPath (x, y);
+        const int segs = 4 + (int) (r.uni() * 3.0f);
+        for (int s = 0; s < segs; ++s)
+        {
+            x -= a.getWidth() / (float) segs * (0.6f + r.uni() * 0.6f);
+            y -= a.getHeight() / (float) segs * (r.uni() * 1.2f - 0.2f);
+            p.lineTo (x, y);
+        }
+    }
+    return p;
+}
+
+void drawLogo (juce::Graphics& g, juce::Rectangle<float> a, float time)
 {
     // flames behind the clef
     const float cx = a.getCentreX(), base = a.getBottom() - a.getHeight() * 0.18f;
@@ -240,7 +282,8 @@ void drawLogo (juce::Graphics& g, juce::Rectangle<float> a)
     for (int pass = 0; pass < 2; ++pass)
         for (auto& f : flames)
         {
-            const float w = a.getWidth() * f.w * (pass == 0 ? 1.0f : 0.55f), h = a.getHeight() * f.h * (pass == 0 ? 1.0f : 0.7f);
+            const float flick = 1.0f + 0.09f * std::sin (time * (5.0f + f.dx * 7.0f) + f.w * 11.0f) + 0.05f * std::sin (time * 13.0f + f.h * 5.0f);
+            const float w = a.getWidth() * f.w * (pass == 0 ? 1.0f : 0.55f), h = a.getHeight() * f.h * (pass == 0 ? 1.0f : 0.7f) * flick;
             auto p = flameTongue (cx + a.getWidth() * f.dx, base, w, h, a.getWidth() * f.lean);
             if (pass == 0)
                 g.setGradientFill (juce::ColourGradient (juce::Colour (0xffffa020), cx, base, juce::Colour (0xffd8200a).withAlpha (0.9f),

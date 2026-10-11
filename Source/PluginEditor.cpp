@@ -178,6 +178,15 @@ void PyraAudioProcessorEditor::timerCallback()
     const int v = proc.engine.uiVoices.load();
     if (v != lastVoices) { lastVoices = v; root.repaint (baseW - 330, 0, 140, topH); }
 
+    // flickering flames in the logo and the lava pit (only the top bar is redrawn)
+    if (++animCounter >= 2)
+    {
+        animCounter = 0;
+        animTime += 0.066f;
+        root.repaint (0, 0, 180, 44);
+        root.repaint (896, 0, 104, 46);
+    }
+
     if (++historyCounter >= 3)
     {
         historyCounter = 0;
@@ -207,7 +216,7 @@ void PyraAudioProcessorEditor::Root::paint (juce::Graphics& g)
         pyra::art::drawSkeleton (g, 914.0f, 46.0f, 34.0f, -0.4f, 0.55f, 3u);
         pyra::art::drawSkeleton (g, 948.0f, 48.0f, 42.0f, 0.1f, 0.6f, 5u);
         pyra::art::drawSkeleton (g, 982.0f, 46.0f, 30.0f, 0.5f, 0.5f, 9u);
-        pyra::art::drawLavaStrip (g, { 896.0f, 41.0f, 104.0f, 5.0f });
+        pyra::art::drawLavaStrip (g, { 896.0f, 41.0f, 104.0f, 5.0f }, owner.animTime * 3.0f);
     }
     g.setGradientFill (juce::ColourGradient (colours::accent2, 0, 45, colours::hot, (float) getWidth(), 45, false));
     g.fillRect (0.0f, 44.5f, (float) getWidth(), 1.5f);
@@ -215,10 +224,10 @@ void PyraAudioProcessorEditor::Root::paint (juce::Graphics& g)
     g.fillRect (0.0f, 46.0f, (float) getWidth(), 3.0f);
 
     // logo: the treble clef on fire + the name in molten letters
-    pyra::art::drawLogo (g, { 10.0f, 4.0f, 34.0f, 38.0f });
+    pyra::art::drawLogo (g, { 10.0f, 4.0f, 34.0f, 38.0f }, owner.animTime);
     const auto name = juce::String ("PYRA");
     juce::GlyphArrangement ga;
-    ga.addLineOfText (pyra::PyraLookAndFeel::font (27.0f, true), name, 48.0f, 33.0f);
+    ga.addLineOfText (pyra::PyraLookAndFeel::displayFont (28.0f), name, 46.0f, 33.0f);
     juce::Path letters;
     ga.createPath (letters);
     g.setColour (colours::accent.withAlpha (0.35f));
@@ -227,7 +236,7 @@ void PyraAudioProcessorEditor::Root::paint (juce::Graphics& g)
     g.fillPath (letters);
     g.setColour (colours::textDim);
     g.setFont (pyra::PyraLookAndFeel::font (10.0f));
-    g.drawText ("v" JucePlugin_VersionString, 120, 22, 60, 14, juce::Justification::centredLeft);
+    g.drawText ("v" JucePlugin_VersionString, 46 + (int) letters.getBounds().getWidth() + 4, 22, 60, 14, juce::Justification::centredLeft);
 
     // voice meter
     const int v = owner.proc.engine.uiVoices.load();

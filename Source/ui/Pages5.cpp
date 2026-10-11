@@ -33,6 +33,7 @@ namespace
             knob.slider.setMouseDragSensitivity (320);
             knob.slider.getProperties().set ("lava", true);           // a molten face, like a magma ball
             knob.slider.getProperties().set ("doodle", (int) face);   // with a creepy drawing scratched into it
+            knob.getProperties().set ("bigLabel", true);
         }
 
         void setActivity (float a) { if (std::abs (a - activity) > 0.01f) { activity = a; repaint(); } }
@@ -66,11 +67,19 @@ namespace
         {
             const float v = (float) knob.slider.valueToProportionOfLength (knob.slider.getValue());
             if (std::abs (v - lastV) > 0.002f) repaint();
+            // the lava keeps flowing (15 frames per second is plenty)
+            if (++frame % 2 == 0)
+            {
+                time += 0.066f;
+                knob.slider.getProperties().set ("time", time);
+                knob.slider.repaint();
+            }
         }
 
         Knob knob;
         juce::Colour colour;
         art::Doodle leftDoodle, rightDoodle;
+        int frame = 0; float time = 0.0f;
         float activity = 0, lastV = -1;
     };
 

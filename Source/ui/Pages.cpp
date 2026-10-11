@@ -71,6 +71,7 @@ namespace
             title = "OSC " + juce::String::charToString ((juce::juce_wchar) ('A' + index));
             titleX = 34;
             on = b.toggle (pid::osc (index, "on"));
+            setPowerButton (on);
             wt = b.combo (pid::osc (index, "wt"), false);
             addAndMakeVisible (view);
 
@@ -324,6 +325,7 @@ namespace
             tint = colours::hot;
             titleX = 34;
             on = b.toggle (pid::filt (index, "on"));
+            setPowerButton (on);
             type = b.combo (pid::filt (index, "type"), false);
             if (index == 0)
             {
@@ -799,7 +801,7 @@ namespace
               about (tr ("ABOUT")), onLanguageChanged (std::move (onLang))
         {
             for (auto* p : { &voice, &mpePanel, &language, &about }) addAndMakeVisible (p);
-            mpePanel.tint = colours::mod; language.tint = colours::accent2; about.tint = colours::hot;
+            mpePanel.tint = colours::accent2; language.tint = colours::accent2; about.tint = colours::hot;
 
             Builder bv { ui, voice, owned };
             poly = bv.knob ("polyphony", "Voices", false);

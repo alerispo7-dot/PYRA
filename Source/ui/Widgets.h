@@ -78,6 +78,7 @@ private:
     bool dragOver = false;
     juce::Array<ModMatrixAccess::Assignment> mods;
     float modSignature = 0.0f;
+    float hover = 0.0f;   // animated 0..1 when the mouse is over the knob
     std::unique_ptr<juce::TextEditor> valueEditor;
 };
 
@@ -158,6 +159,14 @@ public:
     static constexpr int headerH = 26;
     juce::Colour tint { 0xffff5a1a };   // header colour: sets sections apart (lava, blood, violet, gold)
 
+    /** The section's on/off switch: the header lights up when it is on, dims when off. */
+    void setPowerButton (juce::Button* b)
+    {
+        power = b;
+        if (b != nullptr) b->onStateChange = [this] { if (power != nullptr && power->getToggleState() != lastPower) { lastPower = power->getToggleState(); repaint(); } };
+        lastPower = b != nullptr && b->getToggleState();
+    }
+
     /** A darker recessed area that groups controls inside a panel. */
     static void drawInset (juce::Graphics&, juce::Rectangle<float>);
 
@@ -169,6 +178,8 @@ private:
     void componentMovedOrResized (juce::Component&, bool, bool) override { placeDice(); }
     void placeDice() { if (dice != nullptr) { dice->setBounds (getWidth() - 25, 4, 20, 18); dice->toFront (false); } }
     std::unique_ptr<DiceButton> dice;
+    juce::Button* power = nullptr;
+    bool lastPower = false;
 };
 
 //==============================================================================

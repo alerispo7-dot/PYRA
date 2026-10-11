@@ -143,7 +143,7 @@ namespace
                 auto bar = juce::Rectangle<float> ((float) cb.getX() + 8.0f, (float) cb.getBottom() - 12.0f, (float) (cb.getWidth() - 16), 4.0f);
                 g.setColour (colours::knobBody);
                 g.fillRoundedRectangle (bar, 2.0f);
-                g.setColour (colours::mod.withAlpha (0.8f));
+                g.setColour (colours::accent2.withAlpha (0.8f));
                 g.fillRoundedRectangle (bar.withWidth (bar.getWidth() * juce::jlimit (0.05f, 1.0f, rel)), 2.0f);
             }
 
@@ -358,6 +358,7 @@ namespace
             on = std::make_unique<ParamToggle> (ui.st, "chord_on", tr ("CHORDS ON"));
             bass = std::make_unique<ParamToggle> (ui.st, "chord_bass", tr ("Bass note"));
             top.addAndMakeVisible (on.get());
+            top.setPowerButton (on.get());
             top.addAndMakeVisible (bass.get());
             mode = combo ("chord_mode"); trigger = combo ("chord_trigger"); key = combo ("chord_key", false); scale = combo ("chord_scale");
             length = combo ("chord_len", false); rhythm = combo ("chord_rhythm"); size = combo ("chord_size"); voicing = combo ("chord_voicing");

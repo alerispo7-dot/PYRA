@@ -12,7 +12,7 @@ namespace colours
     const juce::Colour panelHi   { 0xff28140f };
     const juce::Colour edge      { 0xff4a1d14 };
     const juce::Colour text      { 0xfff2e4d2 };   // bone
-    const juce::Colour textDim   { 0xffa48b7c };
+    const juce::Colour textDim   { 0xffbea595 };   // brighter than before: readable on soot
     const juce::Colour accent    { 0xffff5a1a };   // lava
     const juce::Colour accent2   { 0xffffac32 };   // molten glow
     const juce::Colour hot       { 0xffe0281a };   // blood red
@@ -38,7 +38,9 @@ public:
     juce::Font getTextButtonFont (juce::TextButton&, int buttonHeight) override;
     juce::Label* createSliderTextBox (juce::Slider&) override;
 
-    static juce::Font font (float height, bool bold = false);
+    static juce::Font font (float height, bool bold = false);      // Barlow: labels and values
+    static juce::Font titleFont (float height);                    // Barlow Condensed Bold: titles, tabs, buttons
+    static juce::Font displayFont (float height);                  // Cinzel Decorative: the name, big knob labels
 
     void drawPopupMenuBackground (juce::Graphics&, int width, int height) override;
     void drawTooltip (juce::Graphics&, const juce::String& text, int width, int height) override;

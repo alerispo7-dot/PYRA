@@ -3,6 +3,7 @@
 #include "../Lang.h"
 #include "../dsp/Wavetables.h"
 #include "../dsp/Envelope.h"
+#include "HellArt.h"
 
 namespace pyra
 {
@@ -107,7 +108,7 @@ Knob::Knob (juce::AudioProcessorValueTreeState& state, const juce::String& id, c
 void Knob::resized()
 {
     auto r = getLocalBounds();
-    r.removeFromBottom (15);
+    r.removeFromBottom ((bool) getProperties().getWithDefault ("bigLabel", false) ? 24 : 15);
     const int sz = std::min (r.getWidth(), r.getHeight());
     slider.setBounds (r.withSizeKeepingCentre (sz, sz));
 }
@@ -115,9 +116,19 @@ void Knob::resized()
 void Knob::paint (juce::Graphics& g)
 {
     const bool showValue = slider.isMouseButtonDown() || slider.isMouseOverOrDragging() || isMouseOver (true);
-    auto r = getLocalBounds().removeFromBottom (15);
-    g.setFont (PyraLookAndFeel::font (11.5f, ! showValue));
-    g.setColour (showValue ? colours::accent2 : colours::textDim);
+    const bool big = (bool) getProperties().getWithDefault ("bigLabel", false);
+    auto r = getLocalBounds().removeFromBottom (big ? 24 : 15);
+    if (big && ! showValue)
+    {   // CHAOS / FOCUS / MOTION: engraved letters with a burning glow
+        g.setFont (PyraLookAndFeel::displayFont (19.0f));
+        g.setColour (colours::accent.withAlpha (0.35f));
+        g.drawText (tr (label), r.translated (0, 1), juce::Justification::centred);
+        g.setColour (colours::accent2.interpolatedWith (colours::text, 0.3f));
+        g.drawText (tr (label), r, juce::Justification::centred);
+        return;
+    }
+    g.setFont (PyraLookAndFeel::font (big ? 14.0f : 11.5f, ! showValue));
+    g.setColour (showValue ? colours::accent2 : colours::textDim.interpolatedWith (colours::text, 0.35f * hover));
     if (showValue && ! slider.isMouseButtonDown())
     {   // a hint that the value can be clicked and typed
         g.setColour (colours::knobBody);
@@ -131,6 +142,12 @@ void Knob::paint (juce::Graphics& g)
 void Knob::paintOverChildren (juce::Graphics& g)
 {
     const auto b = slider.getBounds().toFloat();
+    if (hover > 0.01f)
+    {   // hover: a soft ember halo fades in (and out)
+        const float rr = std::min (b.getWidth(), b.getHeight()) * 0.5f;
+        g.setColour (colours::accent2.withAlpha (0.22f * hover));
+        g.drawEllipse (b.getCentreX() - rr + 1.0f, b.getCentreY() - rr + 1.0f, rr * 2.0f - 2.0f, rr * 2.0f - 2.0f, 1.5f);
+    }
     if (dragOver)
     {
         g.setColour (colours::mod.withAlpha (0.35f));
@@ -322,6 +339,13 @@ void Knob::itemDropped (const SourceDetails& d)
 
 void Knob::refreshModulation()
 {
+    // hover animation (~200 ms), driven by the editor timer
+    const float target = (isMouseOver (true) || slider.isMouseButtonDown()) ? 1.0f : 0.0f;
+    if (std::abs (target - hover) > 0.001f)
+    {
+        hover = target > hover ? std::min (1.0f, hover + 0.2f) : std::max (0.0f, hover - 0.14f);
+        repaint();
+    }
     if (matrix == nullptr || dest <= 0) return;
     matrix->getAssignments (dest, mods);
     float sig = (float) mods.size() * 1000.0f;
@@ -442,14 +466,25 @@ void Panel::paint (juce::Graphics& g)
     // body: soot, slightly see-through so the hell glow behind shows a little
     g.setGradientFill (juce::ColourGradient (juce::Colour (0xf0201010), 0.0f, r.getY(), juce::Colour (0xf2100706), 0.0f, r.getBottom(), false));
     g.fillRoundedRectangle (r, 7.0f);
+    // scorched stone grain
+    {
+        juce::Graphics::ScopedSaveState ss (g);
+        g.setTiledImageFill (art::stone(), 0, 0, 0.09f);
+        g.fillRoundedRectangle (r, 7.0f);
+    }
+    // a few cracks in the bottom corner
+    g.setColour (juce::Colours::black.withAlpha (0.5f));
+    g.strokePath (art::cracks ({ r.getRight() - 46.0f, r.getBottom() - 30.0f, 42.0f, 28.0f }, (uint32_t) title.hashCode()), juce::PathStrokeType (1.0f));
 
-    // header band in the section colour
+    const bool powered = power == nullptr || power->getToggleState();
+    // header band in the section colour (bright when the section is on)
     {
         juce::Graphics::ScopedSaveState ss (g);
         juce::Path clip; clip.addRoundedRectangle (r, 7.0f);
         g.reduceClipRegion (clip);
         auto head = r.withHeight ((float) headerH);
-        g.setGradientFill (juce::ColourGradient (tint.withAlpha (0.30f), head.getX(), 0.0f, tint.withAlpha (0.0f), head.getRight() * 0.85f, 0.0f, false));
+        g.setGradientFill (juce::ColourGradient (tint.withAlpha (powered ? 0.36f : 0.10f), head.getX(), 0.0f, tint.withAlpha (0.0f),
+                                                 head.getRight() * 0.85f, 0.0f, false));
         g.fillRect (head);
         g.setColour (tint.withAlpha (0.35f));
         g.fillRect (head.getX() + 8.0f, head.getBottom() - 1.0f, head.getWidth() - 16.0f, 1.0f);
@@ -460,15 +495,20 @@ void Panel::paint (juce::Graphics& g)
     g.drawRoundedRectangle (r.expanded (0.5f), 7.5f, 1.2f);
     g.setColour (colours::edge);
     g.drawRoundedRectangle (r, 7.0f, 1.0f);
-    g.setGradientFill (juce::ColourGradient (tint.withAlpha (0.9f), r.getX(), 0.0f, tint.withAlpha (0.0f), r.getRight(), 0.0f, false));
+    g.setGradientFill (juce::ColourGradient (tint.withAlpha (powered ? 0.95f : 0.3f), r.getX(), 0.0f, tint.withAlpha (0.0f), r.getRight(), 0.0f, false));
     g.fillRoundedRectangle (r.getX() + 6.0f, r.getY(), r.getWidth() * 0.6f, 1.6f, 0.8f);
 
     if (title.isNotEmpty())
     {
-        g.setColour (tint.interpolatedWith (colours::text, 0.25f));
-        g.setFont (PyraLookAndFeel::font (13.0f, true));
-        g.drawText (title, getLocalBounds().removeFromTop (headerH).withTrimmedLeft (titleX).withTrimmedRight (10),
-                    juce::Justification::centredLeft);
+        auto tr = getLocalBounds().removeFromTop (headerH).withTrimmedLeft (titleX).withTrimmedRight (10);
+        g.setFont (PyraLookAndFeel::titleFont (16.0f));
+        if (powered && power != nullptr)
+        {   // switched on: the title burns
+            g.setColour (tint.withAlpha (0.45f));
+            g.drawText (title.toUpperCase(), tr.translated (0, 1), juce::Justification::centredLeft);
+        }
+        g.setColour (powered ? tint.interpolatedWith (colours::text, 0.3f) : colours::textDim.withAlpha (0.8f));
+        g.drawText (title.toUpperCase(), tr, juce::Justification::centredLeft);
     }
 }
 
