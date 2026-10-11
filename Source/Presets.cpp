@@ -5,6 +5,8 @@
 namespace pyra
 {
 //==============================================================================
+bool isLayerParam (const juce::String& id) { return id.startsWith ("layer"); }
+
 namespace presetdata
 {
     juce::var capture (PyraAudioProcessor& p)
@@ -13,6 +15,7 @@ namespace presetdata
         for (auto* ap : p.getParameters())
             if (auto* rp = dynamic_cast<juce::RangedAudioParameter*> (ap))
             {
+                if (isLayerParam (rp->getParameterID())) continue;   // the LAYERS mix belongs to the instance, not to a sound
                 const float norm = rp->getValue();
                 if (std::abs (norm - rp->getDefaultValue()) > 1.0e-5f)
                     params->setProperty (rp->getParameterID(), rp->convertFrom0to1 (norm));
@@ -43,6 +46,7 @@ namespace presetdata
         for (auto* ap : p.getParameters())
             if (auto* rp = dynamic_cast<juce::RangedAudioParameter*> (ap))
             {
+                if (isLayerParam (rp->getParameterID())) continue;
                 float norm = rp->getDefaultValue();
                 if (params != nullptr && params->hasProperty (rp->getParameterID()))
                     norm = rp->convertTo0to1 ((float) params->getProperty (rp->getParameterID()));
@@ -117,9 +121,14 @@ void PresetManager::loadFactory()
     int size = 0;
     if (auto* raw = BinaryData::getNamedResource ("FactoryPresets_json_gz", size))
     {
-        juce::MemoryInputStream mis (raw, (size_t) size, false);
-        juce::GZIPDecompressorInputStream gz (&mis, false, juce::GZIPDecompressorInputStream::gzipFormat);
-        factoryBank = juce::JSON::parse (gz.readEntireStreamAsString());
+        // parsed once and shared by every PYRA sound alive (the layers each have a preset manager)
+        if (sharedBank->bank.isVoid())
+        {
+            juce::MemoryInputStream mis (raw, (size_t) size, false);
+            juce::GZIPDecompressorInputStream gz (&mis, false, juce::GZIPDecompressorInputStream::gzipFormat);
+            sharedBank->bank = juce::JSON::parse (gz.readEntireStreamAsString());
+        }
+        factoryBank = sharedBank->bank;
     }
 
     if (auto* arr = factoryBank.getArray())
@@ -228,7 +237,9 @@ bool PresetManager::isModified() const
     const auto& params = proc.getParameters();
     if (loadedSnapshot.size() != (size_t) params.size()) return false;
     for (int i = 0; i < params.size(); ++i)
-        if (std::abs (params[i]->getValue() - loadedSnapshot[(size_t) i]) > 1.0e-4f) return true;
+        if (std::abs (params[i]->getValue() - loadedSnapshot[(size_t) i]) > 1.0e-4f)
+            if (auto* rp = dynamic_cast<juce::RangedAudioParameter*> (params[i]); rp == nullptr || ! isLayerParam (rp->getParameterID()))
+                return true;
     return false;
 }
 

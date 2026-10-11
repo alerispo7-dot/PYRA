@@ -19,6 +19,9 @@ xattr -dr com.apple.quarantine "$VST3/PYRA.vst3" "$AU/PYRA.component" 2>/dev/nul
 if [ -d PYRA.app ]; then
   rm -rf /Applications/PYRA.app
   cp -R PYRA.app /Applications/ && xattr -dr com.apple.quarantine /Applications/PYRA.app 2>/dev/null
+  # show the new icon right away (macOS caches app icons)
+  touch /Applications/PYRA.app
+  /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/PYRA.app 2>/dev/null
 fi
 killall -9 AudioComponentRegistrar 2>/dev/null   # Logic: refresh the Audio Unit list
 echo ""

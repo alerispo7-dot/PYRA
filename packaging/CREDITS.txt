@@ -16,6 +16,9 @@ Sampled instruments / Strumenti campionati
 The samples were edited for PYRA (trimmed, tuned, looped, levelled).
 I campioni sono stati adattati per PYRA (tagliati, accordati, messi in loop, bilanciati).
 
+Logo (horned headphones), PYRA lettering and the ballroom illustration: provided by Alessio for PYRA.
+Logo (cuffie con le corna), scritta PYRA e illustrazione della sala da ballo: fornite da Alessio per PYRA.
+
 Built with JUCE (https://juce.com).
 
 Fonts: Barlow and Barlow Condensed (The Barlow Project Authors) Unifraktur Cook (j. 'mach' wust) and New Rocker (Impallari Type),

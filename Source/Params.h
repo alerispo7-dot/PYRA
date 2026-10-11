@@ -62,6 +62,11 @@ void addPhase3Parameters (juce::AudioProcessorValueTreeState::ParameterLayout&);
 void addPhase5Parameters (juce::AudioProcessorValueTreeState::ParameterLayout&);
 void addSamplerParameters (juce::AudioProcessorValueTreeState::ParameterLayout&);
 void addPhase6Parameters (juce::AudioProcessorValueTreeState::ParameterLayout&);
+void addPhase7Parameters (juce::AudioProcessorValueTreeState::ParameterLayout&);
+/** LAYERS: layer 0 (A) is the sound of this PYRA, 1..7 (B..H) are complete extra sounds. */
+constexpr int kNumLayers = 8;
+juce::String layerParam (int layer, const char* name);   // "layer3_level"
+namespace choices { const juce::StringArray& layerChannels(); }
 
 constexpr int kNumFocusSlots = 8;
 

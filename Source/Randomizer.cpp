@@ -1,6 +1,7 @@
 #include "Randomizer.h"
 #include "PluginProcessor.h"
 #include "dsp/Wavetables.h"
+#include "Presets.h"
 
 namespace pyra
 {
@@ -61,7 +62,7 @@ namespace
             case Synth:    return any ({ "osc", "sub_", "noise_", "f1_", "f2_", "env", "lfo" }) || id == "filterRouting";
             case Fx:       return id.startsWith ("fx_");
             case Arp:      return id.startsWith ("arp_") && id != "arp_on" && id != "arp_latch";
-            case Chords:   return id.startsWith ("chord_") && id != "chord_on" && id != "chord_trigger" && id != "chord_mode";
+            case Chords:   return id.startsWith ("chord_") && id != "chord_on" && id != "chord_trigger" && id != "chord_mode" && id != "chord_mood";
             case Matrix:   return id.startsWith ("mod") && id.endsWith ("_amt");
             case Chaos:    return any ({ "chaos_", "focus", "motion_" }) && id != "chaos_seed";
             case Analog:   return id.startsWith ("an_") || id == "drift" || id == "spread";
@@ -380,8 +381,17 @@ void randomize (PyraAudioProcessor& p, Page page, bool variation, uint32_t seed)
         case Settings: settings (r); break;
         case Chords:
         {
+            const int mood = (int) p.apvts.getRawParameterValue ("chord_mood")->load();
+            if (mood > 0)
+            {
+                // the emotion picks the scale too (the current one stays if it already fits)
+                const auto& style = chordMoodStyle (mood);
+                const int scale = (int) r.get ("chord_scale");
+                if (std::find (style.scales.begin(), style.scales.end(), scale) == style.scales.end())
+                    r.set ("chord_scale", (float) style.scales[(size_t) r.pick ((int) style.scales.size())]);
+            }
             const auto s = p.chords.readSettings();
-            p.chordPattern.randomize (s.count, s.scale, s.complexity, s.size, seed);
+            p.chordPattern.randomizeMood (mood, s.count, s.scale, s.complexity, seed);
             break;
         }
     }
@@ -535,20 +545,114 @@ void randomizeSection (PyraAudioProcessor& p, const juce::String& sec, bool vari
 void randomizeChordsAll (PyraAudioProcessor& p, uint32_t seed)
 {
     R r (p, seed);
+    const int mood = (int) p.apvts.getRawParameterValue ("chord_mood")->load();
     r.set ("chord_key", (float) r.pick (12));
-    r.set ("chord_scale", (float) r.oneOf ({ 1, 1, 2, 2, 2, 3, 5, 6, 8 }));
-    r.set ("chord_count", (float) r.oneOf ({ 4, 4, 4, 2, 3, 6, 8 }));
-    r.set ("chord_len", (float) r.oneOf ({ 2, 2, 2, 1, 3 }));
-    r.set ("chord_size", (float) r.oneOf ({ 0, 1, 5, 5, 2 }));
-    r.set ("chord_voicing", (float) r.pick (4));
-    r.set ("chord_inv", r.chance (0.75f) ? 0.0f : (float) (1 + r.pick (3)));
-    r.set ("chord_rhythm", (float) r.oneOf ({ 0, 0, 1, 2, 3, 4, 5, 6 }));
-    r.set ("chord_bass", r.chance (0.7f) ? 1.0f : 0.0f);
-    r.set ("chord_strum", r.chance (0.3f) ? r.range (0.05f, 0.5f) : 0.0f);
-    r.set ("chord_swing", r.chance (0.3f) ? r.range (0.1f, 0.5f) : 0.0f);
-    r.set ("chord_complex", r.range (0.1f, 0.8f));
+    if (mood > 0)
+    {
+        // everything follows the emotion: scale, rhythm, voicing, colours, length
+        const auto& st = chordMoodStyle (mood);
+        auto from = [&] (const std::vector<int>& v, int fallback) { return v.empty() ? fallback : v[(size_t) r.pick ((int) v.size())]; };
+        r.set ("chord_scale", (float) from (st.scales, 2));
+        r.set ("chord_count", (float) from (st.counts, 4));
+        r.set ("chord_len", (float) from (st.lengths, 2));
+        r.set ("chord_size", (float) from (st.sizes, 0));
+        r.set ("chord_voicing", (float) from (st.voicings, 1));
+        r.set ("chord_rhythm", (float) from (st.rhythms, 0));
+        r.set ("chord_inv", r.chance (0.8f) ? 0.0f : (float) (1 + r.pick (3)));
+        r.set ("chord_bass", r.chance (st.bassChance) ? 1.0f : 0.0f);
+        r.set ("chord_strum", r.chance (st.strumChance) ? r.range (0.08f, 0.45f) : 0.0f);
+        r.set ("chord_swing", r.chance (st.swingChance) ? r.range (0.15f, 0.45f) : 0.0f);
+        r.set ("chord_complex", r.range (st.complexityLo, st.complexityHi));
+        r.set ("chord_oct", (float) st.octave);
+    }
+    else
+    {
+        r.set ("chord_scale", (float) r.oneOf ({ 1, 1, 2, 2, 2, 3, 5, 6, 8 }));
+        r.set ("chord_count", (float) r.oneOf ({ 4, 4, 4, 2, 3, 6, 8 }));
+        r.set ("chord_len", (float) r.oneOf ({ 2, 2, 2, 1, 3 }));
+        r.set ("chord_size", (float) r.oneOf ({ 0, 1, 5, 5, 2 }));
+        r.set ("chord_voicing", (float) r.pick (4));
+        r.set ("chord_inv", r.chance (0.75f) ? 0.0f : (float) (1 + r.pick (3)));
+        r.set ("chord_rhythm", (float) r.oneOf ({ 0, 0, 1, 2, 3, 4, 5, 6 }));
+        r.set ("chord_bass", r.chance (0.7f) ? 1.0f : 0.0f);
+        r.set ("chord_strum", r.chance (0.3f) ? r.range (0.05f, 0.5f) : 0.0f);
+        r.set ("chord_swing", r.chance (0.3f) ? r.range (0.1f, 0.5f) : 0.0f);
+        r.set ("chord_complex", r.range (0.1f, 0.8f));
+    }
     const auto s = p.chords.readSettings();
-    p.chordPattern.randomize (s.count, s.scale, s.complexity, s.size, seed * 31u + 7u);
+    p.chordPattern.randomizeMood (mood, s.count, s.scale, s.complexity, seed * 31u + 7u);
+}
+
+namespace
+{
+    juce::String randomPresetOf (PresetManager& pm, const juce::String& category, juce::Random& rnd)
+    {
+        juce::StringArray ids;
+        for (auto& info : pm.getAll())
+            if (category.isEmpty() || info.category == category) ids.add (info.id);
+        if (ids.isEmpty()) for (auto& info : pm.getAll()) ids.add (info.id);
+        return ids.isEmpty() ? juce::String() : ids[rnd.nextInt (ids.size())];
+    }
+}
+
+void randomizeLayer (PyraAudioProcessor& master, int layer, bool variation, uint32_t seed)
+{
+    R r (master, seed);
+    if (variation)
+    {
+        const auto lv = layerParam (layer, "level"), pn = layerParam (layer, "pan");
+        r.set (lv, juce::jlimit (-24.0f, 3.0f, r.get (lv) + r.range (-2.5f, 2.5f)));
+        r.set (pn, juce::jlimit (-1.0f, 1.0f, r.get (pn) + r.range (-0.15f, 0.15f)));
+        return;
+    }
+    auto& snd = master.getOrCreateLayer (layer);
+    auto& pm = snd.getPresetManager();
+    juce::String cat;
+    if (auto* cur = pm.find (pm.getCurrentId())) cat = cur->category;
+    juce::Random rnd ((juce::int64) seed);
+    const auto id = randomPresetOf (pm, cat, rnd);
+    if (id.isNotEmpty()) pm.load (id);
+    r.set (layerParam (layer, "on"), 1.0f);
+}
+
+void randomizeLayers (PyraAudioProcessor& master, bool variation, uint32_t seed)
+{
+    R r (master, seed);
+    juce::Array<int> active;
+    for (int k = 0; k < kNumLayers; ++k)
+        if (r.get (layerParam (k, "on")) > 0.5f) active.add (k);
+
+    if (variation)
+    {
+        for (int k : active) randomizeLayer (master, k, true, seed + (uint32_t) k * 977u);
+        return;
+    }
+
+    // a fresh multi: 2 to 4 layers that play different roles
+    if (active.size() <= 1)
+    {
+        active.clearQuick();
+        const int n = 2 + r.pick (3);
+        for (int k = 0; k < n; ++k) active.add (k);
+        for (int k = 0; k < kNumLayers; ++k) r.set (layerParam (k, "on"), active.contains (k) ? 1.0f : 0.0f);
+    }
+    juce::StringArray roles { "Pad", "Bass", "Pluck", "Keys", "Lead", "Strings", "Arp", "Brass & Winds" };
+    juce::Random rnd ((juce::int64) seed);
+    for (int i = roles.size() - 1; i > 0; --i) roles.getReference (i).swapWith (roles.getReference (rnd.nextInt (i + 1)));
+    // the bass, if any, always goes first in the list of roles, so a multi has a bottom
+    if (roles.indexOf ("Bass") > 1) { roles.removeString ("Bass"); roles.insert (1, "Bass"); }
+
+    for (int i = 0; i < active.size(); ++i)
+    {
+        const int k = active[i];
+        auto& pm = master.getOrCreateLayer (k).getPresetManager();
+        const auto id = randomPresetOf (pm, roles[i % roles.size()], rnd);
+        if (id.isNotEmpty()) pm.load (id);
+        r.set (layerParam (k, "level"), i == 0 ? 0.0f : r.range (-9.0f, -2.0f));
+        r.set (layerParam (k, "pan"), i == 0 ? 0.0f : r.range (-0.35f, 0.35f));
+        r.set (layerParam (k, "mute"), 0.0f);
+        r.set (layerParam (k, "solo"), 0.0f);
+    }
 }
 
 void randomizeGlitch (PyraAudioProcessor& p, uint32_t seed)

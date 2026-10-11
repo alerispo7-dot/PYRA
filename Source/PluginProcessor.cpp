@@ -12,6 +12,19 @@ PyraAudioProcessor::PyraAudioProcessor()
     fx.init (apvts, glitchPattern);
     arp.init (apvts, arpPattern);
     chords.init (apvts, chordPattern);
+    for (auto& p : layerPtr) p.store (nullptr);
+    for (auto& p : layerPeak) p.store (0.0f);
+    for (int k = 0; k < pyra::kNumLayers; ++k)
+    {
+        auto raw = [&] (const char* n) { return apvts.getRawParameterValue (pyra::layerParam (k, n)); };
+        lp[(size_t) k] = { raw ("on"), raw ("level"), raw ("pan"), raw ("trans"), raw ("lo"), raw ("hi"), raw ("vlo"), raw ("vhi"),
+                           raw ("mute"), raw ("solo"), raw ("chan") };
+    }
+}
+
+PyraAudioProcessor::~PyraAudioProcessor()
+{
+    for (auto& p : layerPtr) p.store (nullptr);
 }
 
 void PyraAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
@@ -23,6 +36,7 @@ void PyraAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     outputGain.reset (sampleRate, 0.02);
     outputGain.setCurrentAndTargetValue (juce::Decibels::decibelsToGain (apvts.getRawParameterValue ("master")->load(), -48.0f));
     keyboardState.reset();
+    prepareLayers (sampleRate, samplesPerBlock);
 }
 
 bool PyraAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
@@ -37,6 +51,15 @@ void PyraAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
 
     // notes played on the on-screen keyboard
     keyboardState.processNextMidiBuffer (midi, 0, buffer.getNumSamples(), true);
+
+    // LAYERS: keep what came in for the other layers; layer A (this sound) gets its own key / velocity / channel zone
+    if (! isLayerChild)
+    {
+        layerInput.clear();
+        layerInput.addEvents (midi, 0, buffer.getNumSamples(), 0);
+        routeLayerMidi (0, layerInput, layerMidi);
+        midi.swapWith (layerMidi);
+    }
 
     refs.fill (settings);
 
@@ -70,6 +93,9 @@ void PyraAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
         buffer.applyGain (0.5f);
     }
 
+    if (! isLayerChild)
+        mixLayers (buffer, layerInput);
+
     outputGain.setTargetValue (masterGain);
     if (outputGain.isSmoothing() || std::abs (masterGain - 1.0f) > 1.0e-6f)
         for (int i = 0; i < buffer.getNumSamples(); ++i)
@@ -92,6 +118,11 @@ void PyraAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
             d[i] = x;
         }
     }
+
+    float peak = 0.0f;
+    for (int ch = 0; ch < buffer.getNumChannels(); ++ch)
+        peak = std::max (peak, buffer.getMagnitude (ch, 0, buffer.getNumSamples()));
+    if (peak > uiPeak.load()) uiPeak.store (peak);
 }
 
 juce::AudioProcessorEditor* PyraAudioProcessor::createEditor()
@@ -101,16 +132,7 @@ juce::AudioProcessorEditor* PyraAudioProcessor::createEditor()
 
 void PyraAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
-    auto state = apvts.copyState();
-    state.setProperty ("pyraVersion", JucePlugin_VersionString, nullptr);
-    for (auto* name : { "ARP_PATTERN", "CHORD_PATTERN", "GLITCH_PATTERN" })
-        state.removeChild (state.getChildWithName (name), nullptr);
-    state.appendChild (arpPattern.toTree(), nullptr);
-    state.appendChild (chordPattern.toTree(), nullptr);
-    state.appendChild (glitchPattern.toTree(), nullptr);
-    state.setProperty ("presetId", presetId, nullptr);
-    state.setProperty ("presetName", presetName, nullptr);
-    if (auto xml = state.createXml())
+    if (auto xml = captureState (true).createXml())
         copyXmlToBinary (*xml, destData);
 }
 
@@ -118,15 +140,7 @@ void PyraAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     if (auto xml = getXmlFromBinary (data, sizeInBytes))
         if (xml->hasTagName (apvts.state.getType()))
-        {
-            auto tree = juce::ValueTree::fromXml (*xml);
-            arpPattern.fromTree (tree.getChildWithName ("ARP_PATTERN"));
-            chordPattern.fromTree (tree.getChildWithName ("CHORD_PATTERN"));
-            glitchPattern.fromTree (tree.getChildWithName ("GLITCH_PATTERN"));
-            presetId = tree.getProperty ("presetId").toString();
-            presetName = tree.getProperty ("presetName", "Init").toString();
-            apvts.replaceState (tree);
-        }
+            restoreState (juce::ValueTree::fromXml (*xml));
 }
 
 pyra::PresetManager& PyraAudioProcessor::getPresetManager()

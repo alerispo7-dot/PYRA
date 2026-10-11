@@ -8,6 +8,13 @@ Metodo rapido
 2. Si apre il Terminale, copia PYRA nelle cartelle giuste e lo sblocca.
 3. Riapri la DAW e fai una nuova scansione dei plugin.
 
+Aggiornare a una nuova versione
+- Basta rifare il metodo rapido con il nuovo zip: lo script sostituisce da solo
+  la versione vecchia (plugin e app). Non serve cancellare niente a mano.
+- Se l'app in Applicazioni mostra ancora l'icona vecchia (o nessuna icona),
+  e' solo la cache di macOS: riavvia il Mac oppure trascina PYRA.app sulla
+  Scrivania e di nuovo in Applicazioni.
+
 Metodo manuale
 - PYRA.vst3      -> ~/Library/Audio/Plug-Ins/VST3/        (FL Studio, Ableton, ...)
 - PYRA.component -> ~/Library/Audio/Plug-Ins/Components/  (Logic Pro)
@@ -25,3 +32,4 @@ PYRA - INSTALLING ON MAC
 1. Right-click "install_mac.command" and choose "Open" (macOS warns because PYRA
    is free and not notarised by Apple - choose Open anyway).
 2. Restart your DAW and rescan plugins.
+To update, just run install_mac.command from the new zip: it replaces the old version.

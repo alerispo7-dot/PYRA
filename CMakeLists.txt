@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(PYRA VERSION 0.6.0 LANGUAGES C CXX)
+project(PYRA VERSION 0.7.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -38,6 +38,8 @@ juce_add_plugin(PYRA
     PLUGIN_CODE Pyr1
     FORMATS ${PYRA_FORMATS}
     PRODUCT_NAME "PYRA"
+    ICON_BIG "${CMAKE_CURRENT_SOURCE_DIR}/Resources/Art/icon.png"
+    ICON_SMALL "${CMAKE_CURRENT_SOURCE_DIR}/Resources/Art/icon_small.png"
     IS_SYNTH TRUE
     NEEDS_MIDI_INPUT TRUE
     NEEDS_MIDI_OUTPUT FALSE
@@ -53,6 +55,10 @@ set(PYRA_SOURCES
     Source/Params.cpp
     Source/ParamsExtra.cpp
     Source/ParamsPhase6.cpp
+    Source/ParamsPhase7.cpp
+    Source/dsp/ChordMoods.cpp
+    Source/Layers.cpp
+    Source/ui/PageLayers.cpp
     Source/History.cpp
     Source/Randomizer.cpp
     Source/dsp/Creative.cpp
@@ -79,7 +85,9 @@ set(PYRA_SOURCES
 juce_add_binary_data(PyraData SOURCES Resources/FactoryPresets.json.gz
     Resources/Fonts/Barlow-Medium.ttf Resources/Fonts/Barlow-SemiBold.ttf
     Resources/Fonts/BarlowCondensed-SemiBold.ttf Resources/Fonts/BarlowCondensed-Bold.ttf
-    Resources/Fonts/UnifrakturCook-Bold.ttf Resources/Fonts/NewRocker-Regular.ttf)
+    Resources/Fonts/UnifrakturCook-Bold.ttf Resources/Fonts/NewRocker-Regular.ttf
+    Resources/Art/logo.png Resources/Art/wordmark.png Resources/Art/ballroom.jpg
+    Resources/Art/stone.jpg Resources/Art/magma.jpg Resources/Art/bg.jpg)
 set_target_properties(PyraData PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
 target_sources(PYRA PRIVATE ${PYRA_SOURCES})
@@ -120,7 +128,7 @@ if(PYRA_BUILD_TESTS)
     target_include_directories(PyraRenderTest PRIVATE Source)
     target_compile_definitions(PyraRenderTest PRIVATE ${PYRA_DEFINITIONS}
         JucePlugin_Name="PYRA" JucePlugin_IsSynth=1 JucePlugin_WantsMidiInput=1
-        JucePlugin_ProducesMidiOutput=0 JucePlugin_IsMidiEffect=0 JucePlugin_VersionString="0.6.0"
+        JucePlugin_ProducesMidiOutput=0 JucePlugin_IsMidiEffect=0 JucePlugin_VersionString="0.7.0"
         JUCE_STANDALONE_APPLICATION=1)
     target_link_libraries(PyraRenderTest PRIVATE
         PyraData juce::juce_audio_utils juce::juce_dsp

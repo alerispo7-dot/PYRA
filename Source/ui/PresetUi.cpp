@@ -1,4 +1,5 @@
 #include "PresetUi.h"
+#include "HellArt.h"
 #include "PyraLookAndFeel.h"
 #include "../Lang.h"
 #include "../PluginProcessor.h"
@@ -60,9 +61,11 @@ namespace
 void ArrowButton::paintButton (juce::Graphics& g, bool highlighted, bool down)
 {
     auto r = getLocalBounds().toFloat().reduced (1.0f);
-    g.setColour (down ? colours::panelHi.brighter (0.15f) : (highlighted ? colours::panelHi.brighter (0.06f) : colours::knobBody));
-    g.fillRoundedRectangle (r, 4.0f);
-    g.setColour (colours::edge);
+    juce::Path shape; shape.addRoundedRectangle (r, 4.0f);
+    art::fillStone (g, shape, { -(float) getX() * 0.7f, 0.0f }, down ? 0.55f : 0.42f, 0.35f);
+    g.setColour (juce::Colours::black.withAlpha (0.8f));
+    g.drawRoundedRectangle (r.expanded (0.5f), 4.5f, 1.0f);
+    g.setColour (highlighted ? colours::accent.withAlpha (0.9f) : juce::Colour (0xff4e3e38));
     g.drawRoundedRectangle (r, 4.0f, 1.0f);
 
     const auto c = r.getCentre();
@@ -161,17 +164,16 @@ juce::Rectangle<int> PresetBar::nameArea() const
 void PresetBar::paint (juce::Graphics& g)
 {
     auto r = getLocalBounds().toFloat();
-    g.setColour (colours::panel);
-    g.fillRoundedRectangle (r, 6.0f);
-    g.setColour (colours::edge);
-    g.drawRoundedRectangle (r.reduced (0.5f), 6.0f, 1.0f);
+    art::drawStoneSlab (g, r.reduced (0.5f), 6.0f, 77u, 0.5f);
 
     const auto id = pm.getCurrentId();
     drawStar (g, starArea().toFloat().withSizeKeepingCentre (18.0f, 18.0f), pm.isFavourite (id));
 
     auto na = nameArea();
-    g.setColour (colours::knobBody);
+    g.setColour (juce::Colour (0xc0070505));
     g.fillRoundedRectangle (na.toFloat(), 4.0f);
+    g.setColour (juce::Colour (0xff3a2e2a));
+    g.drawRoundedRectangle (na.toFloat().reduced (0.5f), 4.0f, 1.0f);
     const auto* info = pm.find (id);
     auto textArea = na.reduced (10, 0);
     g.setColour (colours::text);
@@ -286,8 +288,7 @@ void SaveDialog::paint (juce::Graphics& g)
 {
     g.fillAll (juce::Colours::black.withAlpha (0.55f));
     auto box = getLocalBounds().withSizeKeepingCentre (520, 290).toFloat();
-    g.setColour (colours::panelHi);
-    g.fillRoundedRectangle (box, 10.0f);
+    art::drawStoneSlab (g, box, 10.0f, 99u, 0.45f);
     g.setColour (colours::accent);
     g.drawRoundedRectangle (box, 10.0f, 1.2f);
     g.setFont (PyraLookAndFeel::font (18.0f, true));
@@ -423,7 +424,7 @@ namespace
             addAndMakeVisible (list);
             list.setModel (this);
             list.setRowHeight (30);
-            list.setColour (juce::ListBox::backgroundColourId, colours::panel);
+            list.setColour (juce::ListBox::backgroundColourId, juce::Colours::transparentBlack);
             list.setColour (juce::ListBox::outlineColourId, colours::edge);
 
             for (auto* b : { &addTag, &rename, &remove, &saveBtn, &openFolder, &rescan }) addAndMakeVisible (b);
@@ -483,8 +484,8 @@ namespace
         void paint (juce::Graphics& g) override
         {
             auto side = sideArea();
-            g.setColour (colours::panel);
-            g.fillRoundedRectangle (side.toFloat(), 7.0f);
+            art::drawStoneSlab (g, side.toFloat(), 7.0f, 31u);
+            art::drawStoneSlab (g, list.getBounds().toFloat().expanded (2.0f), 6.0f, 57u, 0.62f);
             g.setColour (colours::edge);
             g.drawRoundedRectangle (side.toFloat().reduced (0.5f), 7.0f, 1.0f);
 
@@ -514,8 +515,7 @@ namespace
 
             // info panel for the selected preset
             auto info = infoArea();
-            g.setColour (colours::panel);
-            g.fillRoundedRectangle (info.toFloat(), 7.0f);
+            art::drawStoneSlab (g, info.toFloat(), 7.0f, 43u);
             g.setColour (colours::edge);
             g.drawRoundedRectangle (info.toFloat().reduced (0.5f), 7.0f, 1.0f);
             juce::Graphics::ScopedSaveState clip (g);

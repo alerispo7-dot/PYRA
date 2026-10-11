@@ -113,6 +113,48 @@ const std::map<juce::String, const char*>& italianExtra()
         { "Syncopated", "Sincopato" }, { "Charleston", "Charleston" }, { "Stabs", "Stab" },
         { "Dim", "Dim" }, { "Aug", "Aum" }, { "Dorian", "Dorica" }, { "Phrygian", "Frigia" }, { "Lydian", "Lidia" },
         { "Mixolydian", "Misolidia" }, { "Locrian", "Locria" },
+        // LAYERS (0.7)
+        { "LAYERS", "LAYER" }, { "LAYER", "LAYER" }, { "Layer", "Layer" }, { "KEY ZONE", "ZONA TASTI" }, { "Mute", "Muto" },
+        { "Up to 8 complete sounds in one PYRA. Each layer has its own preset, FX, ARP and CHORDS: EDIT opens it in every page.",
+          "Fino a 8 suoni completi in un solo PYRA. Ogni layer ha il suo preset, FX, ARP e ACCORDI: EDIT lo apre in tutte le pagine." },
+        { "Key zone: the layer plays only between these keys. Drag the ends or the middle. Double-click: whole keyboard.",
+          "Zona tasti: il layer suona solo tra questi tasti. Trascina gli estremi o il centro. Doppio clic: tutta la tastiera." },
+        { "Velocity zone: the layer plays only when you hit the keys this hard. Double-click: all velocities.",
+          "Zona velocity: il layer suona solo quando premi i tasti con questa forza. Doppio clic: tutte le velocity." },
+        { "Layer on / off", "Layer acceso / spento" },
+        { "Click to choose the preset of this layer", "Clicca per scegliere il preset di questo layer" },
+        { "Previous preset (same category)", "Preset precedente (stessa categoria)" },
+        { "Next preset (same category)", "Preset successivo (stessa categoria)" },
+        { "Edit this layer: every page (SYNTH, FX, ARP...) now shows this sound",
+          "Modifica questo layer: tutte le pagine (SYNTH, FX, ARP...) mostrano questo suono" },
+        { "Solo: hear only the soloed layers", "Solo: senti solo i layer in solo" },
+        { "More: INIT, copy the sound of another layer, reset the mix", "Altro: INIT, copia il suono di un altro layer, azzera il mix" },
+        { "Random preset for this layer (right-click: small change to its level and pan)",
+          "Preset casuale per questo layer (clic destro: piccola modifica a volume e pan)" },
+        { "MIDI channel this layer listens to (Omni = all)", "Canale MIDI che questo layer ascolta (Omni = tutti)" },
+        { "Transpose this layer in semitones (-12 = one octave down)", "Trasporta questo layer in semitoni (-12 = un'ottava sotto)" },
+        { "Empty - click to load a preset", "Vuoto - clicca per caricare un preset" },
+        { "INIT (empty sound)", "INIT (suono vuoto)" }, { "Copy the sound of", "Copia il suono di" },
+        { "Reset mix and zones", "Azzera mix e zone" }, { "Random preset", "Preset casuale" },
+
+        // MATRIX routing (0.7)
+        { "ROUTING", "COLLEGAMENTI" },
+        { "Nothing is modulated yet. Pick a source, an amount and a destination above.",
+          "Ancora niente \xc3\xa8 modulato. Scegli sopra una sorgente, una quantit\xc3\xa0 e una destinazione." },
+        { "violet = adds, red = subtracts, thicker = more", "viola = aggiunge, rosso = toglie, pi\xc3\xb9 spesso = di pi\xc3\xb9" },
+
+        // CHORDS emotions (0.7)
+        { "Emotion (for RANDOM)", "Emozione (per RANDOM)" },
+        { "Emotion for RANDOM: the progression, the scale, the rhythm and the voicing follow the mood you pick. Any = no preference.",
+          "Emozione per RANDOM: progressione, scala, ritmo e disposizione seguono lo stato d'animo che scegli. Qualsiasi = nessuna preferenza." },
+        { "New progression in the chosen key and scale (and emotion). Locked chords stay.",
+          "Nuova progressione nella tonalit\xc3\xa0 e scala scelte (e nell'emozione). Gli accordi bloccati restano." },
+        { "Any", "Qualsiasi" }, { "Happy", "Felice" }, { "Euphoric", "Euforico" }, { "Hopeful", "Speranzoso" }, { "Sad", "Triste" },
+        { "Melancholic", "Malinconico" }, { "Nostalgic", "Nostalgico" }, { "Lonely", "Solitario" }, { "Romantic", "Romantico" },
+        { "Sensual", "Sensuale" }, { "Dreamy", "Sognante" }, { "Ethereal", "Etereo" }, { "Peaceful", "Sereno" },
+        { "Chill / Lo-fi", "Chill / Lo-fi" }, { "Jazzy", "Jazz" }, { "Bluesy / Funky", "Blues / Funk" }, { "Epic", "Epico" },
+        { "Heroic", "Eroico" }, { "Angry / Aggressive", "Arrabbiato / Aggressivo" }, { "Dark", "Oscuro" }, { "Evil", "Malvagio" },
+        { "Spooky", "Spettrale" }, { "Mysterious", "Misterioso" }, { "Tense", "Teso" },
     };
     return m;
 }

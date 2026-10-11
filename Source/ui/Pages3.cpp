@@ -1,6 +1,7 @@
 // Phase 3 pages: FX, ANALOG, ARP
 #include "Pages.h"
 #include "PyraLookAndFeel.h"
+#include "HellArt.h"
 #include "../Lang.h"
 #include "../PluginProcessor.h"
 #include "../Randomizer.h"
@@ -522,6 +523,271 @@ namespace
     };
 
     //==========================================================================
+    /** Pictures carved into the stone of the ANALOG panels; they wake up (glow, crack, move) with the knobs. */
+    class AnalogArt : public juce::Component
+    {
+    public:
+        enum Kind { Age, Movement, Circuit, Noise, Converter };
+        AnalogArt (Kind k, juce::AudioProcessorValueTreeState& st) : kind (k)
+        {
+            setInterceptsMouseClicks (false, false);
+            auto p = [&st] (const char* id) { return st.getRawParameterValue (id); };
+            age = p ("an_age"); drift = p ("drift"); spread = p ("spread"); tolerance = p ("an_tolerance"); circuit = p ("an_circuit");
+            noiseAmt = p ("an_noise"); hum = p ("an_hum"); humFreq = p ("an_humfreq"); bits = p ("an_bits"); rate = p ("an_rate");
+        }
+
+        /** AGE: where the knob sits (cracks grow out of it). */
+        void setKnobCircle (juce::Point<float> c, float r) { centre = c; radius = r; buildCracks(); }
+
+        bool tick (float dt)
+        {
+            time += dt;
+            const float sig = age->load() + drift->load() * 3.1f + spread->load() * 5.3f + tolerance->load() * 7.7f + circuit->load() * 11.0f
+                              + noiseAmt->load() * 13.0f + hum->load() * 17.0f + humFreq->load() * 19.0f + bits->load() * 23.0f + rate->load() * 29.0f;
+            const bool animated = (kind == Movement && (drift->load() + spread->load()) > 0.01f)
+                                  || (kind == Noise && (noiseAmt->load() + hum->load()) > 0.01f)
+                                  || (kind == Circuit && circuit->load() > 0.01f);
+            if (std::abs (sig - lastSig) > 1.0e-4f || animated) { lastSig = sig; repaint(); return true; }
+            return false;
+        }
+
+        void resized() override { buildCracks(); }
+
+        void paint (juce::Graphics& g) override
+        {
+            switch (kind)
+            {
+                case Age:       paintAge (g); break;
+                case Movement:  paintMovement (g); break;
+                case Circuit:   paintCircuit (g); break;
+                case Noise:     paintNoise (g); break;
+                case Converter: paintConverter (g); break;
+            }
+        }
+
+    private:
+        juce::Rectangle<float> strip() const { return getLocalBounds().toFloat().withTrimmedTop (238.0f).reduced (16.0f, 10.0f); }
+
+        void buildCracks()
+        {
+            cracks.clear();
+            if (kind != Age || radius <= 0.0f) return;
+            Rng r; r.seed (1958u);
+            const int n = 34;
+            for (int i = 0; i < n; ++i)
+            {
+                Crack c;
+                float a = (float) i / (float) n * juce::MathConstants<float>::twoPi + r.bi() * 0.12f;
+                float rad = radius + 16.0f;
+                juce::Point<float> pt (centre.x + std::cos (a) * rad, centre.y + std::sin (a) * rad);
+                c.path.startNewSubPath (pt);
+                const float len = 40.0f + r.uni() * (i % 3 == 0 ? 220.0f : 110.0f);
+                float walked = 0.0f;
+                while (walked < len)
+                {
+                    a += r.bi() * 0.45f;
+                    const float stepLen = 6.0f + r.uni() * 9.0f;
+                    pt += juce::Point<float> (std::cos (a), std::sin (a)) * stepLen;
+                    c.path.lineTo (pt);
+                    walked += stepLen;
+                    if (r.uni() < 0.12f)
+                    {
+                        const float b = a + (r.uni() < 0.5f ? -1.0f : 1.0f) * (0.5f + r.uni() * 0.6f);
+                        auto e = pt + juce::Point<float> (std::cos (b), std::sin (b)) * (8.0f + r.uni() * 22.0f);
+                        c.path.lineTo (e);
+                        c.path.startNewSubPath (pt);
+                    }
+                }
+                c.threshold = r.uni() * 0.95f;
+                cracks.push_back (std::move (c));
+            }
+        }
+
+        void paintAge (juce::Graphics& g)
+        {
+            const float a = age->load();
+            // years carved around the knob: they catch fire one by one as AGE goes up
+            const int ticks = 40;
+            for (int i = 0; i < ticks; ++i)
+            {
+                const float ang = -juce::MathConstants<float>::halfPi + (float) i / (float) ticks * juce::MathConstants<float>::twoPi;
+                const float r0 = radius + 6.0f, r1 = radius + (i % 5 == 0 ? 15.0f : 10.0f);
+                juce::Path t;
+                t.startNewSubPath (centre.x + std::cos (ang) * r0, centre.y + std::sin (ang) * r0);
+                t.lineTo (centre.x + std::cos (ang) * r1, centre.y + std::sin (ang) * r1);
+                const bool lit = (float) i < a * (float) ticks;
+                if (lit) art::drawLavaVein (g, t, 1.6f, 0.9f, colours::hot);
+                else art::engrave (g, t, 1.6f, 0.9f);
+            }
+            // the older it gets, the more the stone cracks
+            for (const auto& c : cracks)
+            {
+                if (a <= c.threshold) continue;
+                const float heat = juce::jlimit (0.0f, 1.0f, (a - c.threshold) * 3.0f);
+                art::drawLavaVein (g, c.path, 0.6f + 0.6f * heat, 0.15f + 0.75f * heat, colours::hot);
+            }
+            // at the bottom: an old circuit carved in the stone, the lava runs further along it with AGE
+            auto s = getLocalBounds().toFloat().withTrimmedTop (getHeight() - 120.0f).reduced (24.0f, 18.0f);
+            juce::Path trace, parts;
+            const float y = s.getCentreY();
+            trace.startNewSubPath (s.getX(), y);
+            const int n = 6;
+            const float seg = s.getWidth() / (float) n;
+            for (int i = 0; i < n; ++i)
+            {
+                const float x0 = s.getX() + seg * (float) i, xm = x0 + seg * 0.5f;
+                trace.lineTo (xm - 14.0f, y);
+                switch (i % 3)
+                {
+                    case 0:   // resistor
+                        for (int k = 0; k < 6; ++k) trace.lineTo (xm - 14.0f + 4.7f * (float) (k + 1) - 2.3f, y + (k % 2 == 0 ? -6.0f : 6.0f));
+                        trace.lineTo (xm + 14.0f, y);
+                        break;
+                    case 1:   // capacitor
+                        trace.lineTo (xm - 3.0f, y); trace.startNewSubPath (xm + 3.0f, y); trace.lineTo (xm + 14.0f, y);
+                        parts.startNewSubPath (xm - 3.0f, y - 10.0f); parts.lineTo (xm - 3.0f, y + 10.0f);
+                        parts.startNewSubPath (xm + 3.0f, y - 10.0f); parts.lineTo (xm + 3.0f, y + 10.0f);
+                        break;
+                    default:  // a little tube
+                        parts.addEllipse (xm - 12.0f, y - 16.0f, 24.0f, 30.0f);
+                        trace.lineTo (xm - 6.0f, y); trace.lineTo (xm - 6.0f, y - 6.0f); trace.lineTo (xm + 6.0f, y - 6.0f);
+                        trace.lineTo (xm + 6.0f, y); trace.lineTo (xm + 14.0f, y);
+                        break;
+                }
+                trace.lineTo (x0 + seg, y);
+            }
+            art::engrave (g, trace, 2.0f);
+            art::engrave (g, parts, 2.0f);
+            if (a > 0.001f)
+            {
+                juce::Graphics::ScopedSaveState ss (g);
+                g.reduceClipRegion (s.withWidth (s.getWidth() * a).expanded (0.0f, 20.0f).toNearestInt());
+                art::drawLavaVein (g, trace, 1.0f, 0.4f + 0.6f * a, colours::hot);
+                art::drawLavaVein (g, parts, 1.0f, 0.3f + 0.5f * a, colours::hot);
+            }
+        }
+
+        void paintMovement (juce::Graphics& g)
+        {
+            auto s = strip();
+            const float d = drift->load(), sp = spread->load(), tol = tolerance->load();
+            // three voices carved as waves: drift makes them wander, spread pulls them apart, tolerance makes them uneven
+            for (int v = 0; v < 3; ++v)
+            {
+                juce::Path p;
+                const float yc = s.getCentreY() + ((float) v - 1.0f) * (6.0f + 14.0f * sp);
+                const float amp = s.getHeight() * 0.16f * (1.0f + tol * ((float) v - 1.0f) * 0.6f);
+                const float phase = (float) v * (0.3f + 1.4f * sp) + time * (0.6f + 0.3f * (float) v) * d;
+                for (int i = 0; i <= 80; ++i)
+                {
+                    const float t = (float) i / 80.0f;
+                    const float wander = d * 6.0f * std::sin (t * 3.1f + time * 0.7f * (float) (v + 1));
+                    const float y = yc + std::sin (t * juce::MathConstants<float>::twoPi * 3.0f + phase) * amp + wander;
+                    const float x = s.getX() + t * s.getWidth();
+                    if (i == 0) p.startNewSubPath (x, y); else p.lineTo (x, y);
+                }
+                art::engrave (g, p, 1.6f);
+                const float heat = juce::jlimit (0.0f, 1.0f, (d + sp + tol) * 0.6f);
+                if (heat > 0.01f) art::drawLavaVein (g, p, 0.7f, heat, colours::accent2);
+            }
+        }
+
+        void paintCircuit (juce::Graphics& g)
+        {
+            auto s = strip();
+            const float c = circuit->load();
+            // a vacuum tube carved in the stone: the filament burns with the saturation
+            auto bulb = juce::Rectangle<float> (s.getHeight() * 0.62f, s.getHeight()).withCentre (s.getCentre());
+            juce::Path glass, pins, filament;
+            glass.addRoundedRectangle (bulb.withTrimmedBottom (bulb.getHeight() * 0.18f), bulb.getWidth() * 0.45f);
+            const float by = bulb.getBottom() - bulb.getHeight() * 0.18f;
+            glass.addRectangle (bulb.getX() + 4.0f, by, bulb.getWidth() - 8.0f, bulb.getHeight() * 0.12f);
+            for (int k = 0; k < 4; ++k)
+            {
+                const float px = bulb.getX() + bulb.getWidth() * (0.2f + 0.2f * (float) k);
+                pins.startNewSubPath (px, by + bulb.getHeight() * 0.12f);
+                pins.lineTo (px, bulb.getBottom());
+            }
+            const float fx = bulb.getCentreX(), ft = bulb.getY() + bulb.getHeight() * 0.25f, fb = by - 6.0f;
+            filament.startNewSubPath (fx - 9.0f, fb);
+            filament.lineTo (fx - 9.0f, ft + 10.0f);
+            for (int k = 0; k < 4; ++k) filament.lineTo (fx - 9.0f + 4.5f * (float) (k + 1), ft + (k % 2 == 0 ? 0.0f : 10.0f));
+            filament.lineTo (fx + 9.0f, fb);
+            art::engrave (g, glass, 2.0f);
+            art::engrave (g, pins, 2.0f);
+            if (c > 0.005f)
+            {
+                const float flick = 0.92f + 0.08f * std::sin (time * 9.0f) * std::sin (time * 3.7f);
+                g.setColour (colours::accent.withAlpha (0.12f * c * flick));
+                g.fillEllipse (bulb.reduced (bulb.getWidth() * 0.1f, bulb.getHeight() * 0.2f));
+                art::drawLavaVein (g, filament, 1.2f, c * flick, colours::accent);
+            }
+            else art::engrave (g, filament, 1.4f);
+            // wires out to the sides
+            juce::Path wires;
+            wires.startNewSubPath (s.getX(), bulb.getBottom() - 4.0f); wires.lineTo (bulb.getX() + bulb.getWidth() * 0.2f, bulb.getBottom() - 4.0f);
+            wires.startNewSubPath (bulb.getX() + bulb.getWidth() * 0.8f, bulb.getBottom() - 4.0f); wires.lineTo (s.getRight(), bulb.getBottom() - 4.0f);
+            art::engrave (g, wires, 1.6f);
+            if (c > 0.005f) art::drawLavaVein (g, wires, 0.6f, c * 0.7f, colours::accent);
+        }
+
+        void paintNoise (juce::Graphics& g)
+        {
+            auto s = strip();
+            const float n = noiseAmt->load(), h = hum->load();
+            const float cycles = humFreq->load() > 0.5f ? 6.0f : 5.0f;   // 60 Hz vs 50 Hz
+            juce::Path p;
+            Rng r; r.seed ((uint32_t) (time * 12.0f) * 7u + 3u);
+            for (int i = 0; i <= 160; ++i)
+            {
+                const float t = (float) i / 160.0f;
+                const float y = s.getCentreY() + std::sin (t * juce::MathConstants<float>::twoPi * cycles + time * 2.0f) * s.getHeight() * 0.3f * (0.15f + h)
+                                + r.bi() * s.getHeight() * 0.25f * n;
+                const float x = s.getX() + t * s.getWidth();
+                if (i == 0) p.startNewSubPath (x, y); else p.lineTo (x, y);
+            }
+            art::engrave (g, p, 1.5f);
+            if (n + h > 0.01f) art::drawLavaVein (g, p, 0.6f, juce::jlimit (0.0f, 1.0f, (n + h) * 0.8f), colours::accent);
+        }
+
+        void paintConverter (juce::Graphics& g)
+        {
+            auto s = strip();
+            const float b = bits->load(), rt = rate->load();
+            // a smooth wave and the stair steps the old converter makes of it
+            const float levels = juce::jmap (b, 0.0f, 1.0f, 24.0f, 3.0f);
+            const int holds = (int) juce::jmap (rt, 0.0f, 1.0f, 120.0f, 10.0f);
+            juce::Path smooth, steps;
+            float prevY = 0.0f;
+            for (int i = 0; i <= 120; ++i)
+            {
+                const float t = (float) i / 120.0f;
+                const float v = std::sin (t * juce::MathConstants<float>::twoPi * 1.5f);
+                const float x = s.getX() + t * s.getWidth();
+                const float y = s.getCentreY() - v * s.getHeight() * 0.38f;
+                if (i == 0) smooth.startNewSubPath (x, y); else smooth.lineTo (x, y);
+                const float th = std::floor (t * (float) holds) / (float) holds;
+                const float vq = std::round (std::sin (th * juce::MathConstants<float>::twoPi * 1.5f) * levels * 0.5f) / (levels * 0.5f);
+                const float yq = s.getCentreY() - vq * s.getHeight() * 0.38f;
+                if (i == 0) steps.startNewSubPath (x, yq);
+                else { steps.lineTo (x, prevY); steps.lineTo (x, yq); }
+                prevY = yq;
+            }
+            art::engrave (g, smooth, 1.2f, 0.6f);
+            art::engrave (g, steps, 1.8f);
+            const float heat = juce::jlimit (0.0f, 1.0f, (b + rt) * 0.8f);
+            if (heat > 0.01f) art::drawLavaVein (g, steps, 0.8f, heat, colours::accent2);
+        }
+
+        struct Crack { juce::Path path; float threshold = 0.0f; };
+        Kind kind;
+        std::atomic<float>* age {}, *drift {}, *spread {}, *tolerance {}, *circuit {}, *noiseAmt {}, *hum {}, *humFreq {}, *bits {}, *rate {};
+        juce::Point<float> centre;
+        float radius = 0.0f, time = 0.0f, lastSig = -1.0f;
+        std::vector<Crack> cracks;
+    };
+
+    //==========================================================================
     class AnalogPage : public Page
     {
     public:
@@ -530,9 +796,16 @@ namespace
               converter (tr ("VINTAGE CONVERTER"))
         {
             for (auto* p : { &agePanel, &movement, &character, &noise, &converter }) addAndMakeVisible (p);
+            // the carved pictures sit behind the knobs
+            const std::pair<Panel*, AnalogArt::Kind> arts[] = { { &agePanel, AnalogArt::Age }, { &movement, AnalogArt::Movement },
+                                                                { &character, AnalogArt::Circuit }, { &noise, AnalogArt::Noise },
+                                                                { &converter, AnalogArt::Converter } };
+            for (auto& [panel, kind] : arts)
+                panel->addAndMakeVisible (artworks.add (new AnalogArt (kind, ui.st)));
             agePanel.tint = colours::hot; movement.tint = colours::accent2; character.tint = colours::accent;
             noise.tint = colours::accent; converter.tint = colours::accent2;
             Builder ba { ui, agePanel, owned };   age = ba.knob ("an_age", "AGE");
+            age->slider.getProperties().set ("lava", true);   // the heart of the page: a molten core like the CHAOS knobs
             Builder bm { ui, movement, owned };   drift = bm.knob ("drift", "Drift"); spread = bm.knob ("spread", "Voice Spread");
                                                   tolerance = bm.knob ("an_tolerance", "Tolerance");
             Builder bc { ui, character, owned };  circuit = bc.knob ("an_circuit", "Saturation");
@@ -583,9 +856,19 @@ namespace
             layoutGrid ({ noiseK, hum }, { 10, 40, noise.getWidth() - 140, 130 }, 2, 130);
             humFreq->setBounds (noise.getWidth() - 120, 90, 100, 24);
             layoutGrid ({ bits, rate }, { 10, 40, converter.getWidth() - 20, 130 }, 2, 130);
+
+            for (auto* a : artworks) a->setBounds (a->getParentComponent()->getLocalBounds().withTrimmedTop (Panel::headerH));
+            const auto kb = age->slider.getBounds().toFloat() + age->getPosition().toFloat() - artworks[0]->getPosition().toFloat();
+            artworks[0]->setKnobCircle (kb.getCentre(), std::min (kb.getWidth(), kb.getHeight()) * 0.5f);
+        }
+
+        void tick() override
+        {
+            for (auto* a : artworks) a->tick (1.0f / 30.0f);
         }
 
         Panel agePanel, movement, character, noise, converter;
+        juce::OwnedArray<AnalogArt> artworks;
         juce::OwnedArray<juce::Component> owned;
         Knob* age, *drift, *spread, *tolerance, *circuit, *noiseK, *hum, *bits, *rate;
         ParamCombo* humFreq;
@@ -683,11 +966,20 @@ namespace
                 {
                     auto bb = cell (rr, c);
                     const float v = rr == RVel ? s.velocity.load() : s.gate.load();
-                    g.setColour (colours::knobBody);
+                    g.setColour (juce::Colour (0xff0c0908));
                     g.fillRect (bb);
-                    g.setColour ((rr == RVel ? colours::accent2.withAlpha (0.8f) : colours::mod.withAlpha (0.6f))
-                                     .withMultipliedAlpha (alpha * (s.on.load() ? 1.0f : 0.4f)));
-                    g.fillRect (bb.withTop (bb.getBottom() - bb.getHeight() * v));
+                    // velocity = a column of lava, gate = a column of pale stone
+                    const float a = alpha * (s.on.load() ? 1.0f : 0.4f);
+                    auto bar = bb.withTop (bb.getBottom() - bb.getHeight() * v);
+                    if (rr == RVel)
+                        g.setGradientFill (juce::ColourGradient (juce::Colour (0xffff9a5a).withMultipliedAlpha (a), 0.0f, bb.getY(),
+                                                                 juce::Colour (0xff8a0c06).withMultipliedAlpha (a), 0.0f, bb.getBottom(), false));
+                    else
+                        g.setGradientFill (juce::ColourGradient (juce::Colour (0xffcdbfb7).withMultipliedAlpha (a * 0.9f), 0.0f, bb.getY(),
+                                                                 juce::Colour (0xff3e322e).withMultipliedAlpha (a), 0.0f, bb.getBottom(), false));
+                    g.fillRect (bar);
+                    g.setColour ((rr == RVel ? juce::Colour (0xffffd0b0) : juce::Colour (0xfff0e6df)).withMultipliedAlpha (a * 0.9f));
+                    g.fillRect (bar.withHeight (1.5f));
                 }
 
                 // on / tie
@@ -695,7 +987,7 @@ namespace
                 {
                     auto bb = cell (rr, c).reduced (2.0f, 4.0f);
                     const bool v = rr == ROn ? s.on.load() : s.tie.load();
-                    g.setColour ((v ? (rr == ROn ? colours::accent : colours::mod) : colours::knobBody).withMultipliedAlpha (alpha));
+                    g.setColour ((v ? (rr == ROn ? colours::accent : colours::accent2) : colours::knobBody).withMultipliedAlpha (alpha));
                     g.fillRoundedRectangle (bb, 3.0f);
                 }
 

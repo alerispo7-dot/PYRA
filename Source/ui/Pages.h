@@ -29,6 +29,8 @@ std::unique_ptr<Page> createAnalogPage (UiContext&);
 std::unique_ptr<Page> createArpPage (UiContext&);
 std::unique_ptr<Page> createChaosPage (UiContext&);
 std::unique_ptr<Page> createChordsPage (UiContext&);
+/** LAYERS: always shows the main PYRA (the layers live inside it). onEdit(k) = open layer k in the other pages. */
+std::unique_ptr<Page> createLayersPage (PyraAudioProcessor& master, std::function<void (int)> onEdit, std::function<int()> editingLayer);
 std::unique_ptr<Page> createComingSoonPage (const juce::String& title, const juce::StringArray& lines);
 
 } // namespace pyra

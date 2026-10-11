@@ -162,7 +162,7 @@ namespace
                 if (juce::MidiMessage::isMidiNoteBlack (n)) { blackKeys[n] = { x - ww * 0.32f, ka.getY(), ww * 0.64f, ka.getHeight() * 0.6f }; continue; }
                 auto r = juce::Rectangle<float> (x, ka.getY(), ww - 1.0f, ka.getHeight());
                 const bool lit = std::find (shown.begin(), shown.end(), n) != shown.end();
-                g.setColour (lit ? colours::accent2 : juce::Colour (0xffd9d6d0));
+                g.setColour (lit ? colours::accent : juce::Colour (0xffd2c7c0));
                 g.fillRoundedRectangle (r, 2.0f);
                 if (n % 12 == 0)
                     text (g, "C" + juce::String (n / 12 - 1), r.toNearestInt().removeFromBottom (16), 9.5f, juce::Colours::black.withAlpha (0.5f),
@@ -172,7 +172,7 @@ namespace
             for (auto& [n, r] : blackKeys)
             {
                 const bool lit = std::find (shown.begin(), shown.end(), n) != shown.end();
-                g.setColour (lit ? colours::accent : juce::Colour (0xff1a1a1f));
+                g.setColour (lit ? colours::accent.brighter (0.2f) : juce::Colour (0xff110c0b));
                 g.fillRoundedRectangle (r, 2.0f);
             }
         }
@@ -363,6 +363,8 @@ namespace
             mode = combo ("chord_mode"); trigger = combo ("chord_trigger"); key = combo ("chord_key", false); scale = combo ("chord_scale");
             length = combo ("chord_len", false); rhythm = combo ("chord_rhythm"); size = combo ("chord_size"); voicing = combo ("chord_voicing");
             inversion = combo ("chord_inv");
+            mood = combo ("chord_mood");
+            mood->setTooltip (tr ("Emotion for RANDOM: the progression, the scale, the rhythm and the voicing follow the mood you pick. Any = no preference."));
             count = knob ("chord_count", "Chords"); octave = knob ("chord_oct", "Octave"); gate = knob ("chord_gate", "Gate");
             strum = knob ("chord_strum", "Strum"); human = knob ("chord_human", "Humanize"); vel = knob ("chord_vel", "Velocity");
             swing = knob ("chord_swing", "Swing"); complexity = knob ("chord_complex", "Complexity");
@@ -385,7 +387,7 @@ namespace
             unlockBtn.setButtonText (tr ("UNLOCK ALL"));
             randomBtn.setColour (juce::TextButton::buttonColourId, colours::accent.darker (0.3f));
             randomAllBtn.setColour (juce::TextButton::buttonColourId, colours::hot.darker (0.4f));
-            randomBtn.setTooltip (tr ("New progression in the chosen key and scale. Locked chords stay."));
+            randomBtn.setTooltip (tr ("New progression in the chosen key and scale (and emotion). Locked chords stay."));
             randomAllBtn.setTooltip (tr ("Also picks a new key, scale, rhythm, voicing and length"));
             auto* pr = &ui.proc;
             randomBtn.onClick = [pr]
@@ -412,6 +414,7 @@ namespace
             lab (tr ("Mode"), mode); lab (tr ("Play"), trigger); lab (tr ("Key"), key); lab (tr ("Scale"), scale);
             lab (tr ("Chord length"), length); lab (tr ("Rhythm"), rhythm); lab (tr ("Chord type"), size); lab (tr ("Voicing"), voicing);
             lab (tr ("Inversion"), inversion);
+            lab (tr ("Emotion (for RANDOM)"), mood);
 
             const auto s = ui.proc.chords.readSettings();
             juce::String hint = s.mode == 1
@@ -443,11 +446,12 @@ namespace
             for (auto* k : { count, octave, gate, strum, human, vel, swing, complexity }) { k->setBounds (kx, ky, kw, kh); kx += kw; }
             bass->setBounds (kx + 8, ky + 34, 120, 26);
 
-            const int bx = top.getWidth() - 12 - 440;
-            randomBtn.setBounds (bx, 86, 130, 36);
-            randomAllBtn.setBounds (bx + 138, 86, 160, 36);
-            unlockBtn.setBounds (bx + 306, 86, 134, 36);
-            midiDrag.setBounds (bx, 130, 440, 34);
+            const int bx = top.getWidth() - 12 - 452;
+            mood->setBounds (bx, 90, 168, 30);
+            randomBtn.setBounds (bx + 176, 86, 118, 36);
+            randomAllBtn.setBounds (bx + 300, 86, 152, 36);
+            midiDrag.setBounds (bx, 130, 310, 34);
+            unlockBtn.setBounds (bx + 318, 130, 134, 34);
         }
 
         void tick() override
@@ -467,7 +471,7 @@ namespace
         ChordMidiButton midiDrag;
         juce::OwnedArray<juce::Component> owned;
         std::unique_ptr<ParamToggle> on, bass;
-        ParamCombo* mode, *trigger, *key, *scale, *length, *rhythm, *size, *voicing, *inversion;
+        ParamCombo* mode, *trigger, *key, *scale, *length, *rhythm, *size, *voicing, *inversion, *mood;
         Knob* count, *octave, *gate, *strum, *human, *vel, *swing, *complexity;
         juce::TextButton randomBtn, randomAllBtn, unlockBtn;
         bool lastOn = false; int lastMode = -1;

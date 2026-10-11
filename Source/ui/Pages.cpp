@@ -306,7 +306,9 @@ namespace
             fill.lineTo (area.getRight(), area.getBottom()); fill.lineTo (area.getX(), area.getBottom()); fill.closeSubPath();
             g.setColour ((isOn ? colours::accent : colours::textDim).withAlpha (0.15f));
             g.fillPath (fill);
-            g.setColour (isOn ? colours::accent2 : colours::textDim);
+            g.setColour ((isOn ? colours::accent : colours::textDim).withAlpha (0.3f));
+            g.strokePath (p, juce::PathStrokeType (4.0f));
+            g.setColour (isOn ? colours::lavaCore : colours::textDim);
             g.strokePath (p, juce::PathStrokeType (1.8f));
         }
 
@@ -692,8 +694,12 @@ namespace
     class MatrixPage : public Page
     {
     public:
-        explicit MatrixPage (UiContext& ui) : matrix (ui.matrix)
+        explicit MatrixPage (UiContext& ui) : matrix (ui.matrix), st (ui.st), frame (tr ("MODULATION MATRIX")), backdrop (*this)
         {
+            frame.tint = colours::mod;
+            addAndMakeVisible (frame);
+            addAndMakeVisible (backdrop);
+            backdrop.setInterceptsMouseClicks (false, false);
             for (int s = 0; s < kNumModSlots; ++s)
             {
                 Row r;
@@ -724,11 +730,23 @@ namespace
             }
         }
 
-        void paint (juce::Graphics& g) override
+        /** Drawn between the stone frame and the controls: column titles, the slabs of the rows, and the routing map. */
+        struct Backdrop : public juce::Component
         {
-            g.setColour (colours::accent);
-            g.setFont (PyraLookAndFeel::font (16.0f, true));
-            g.drawText (tr ("MODULATION MATRIX"), 16, 8, 400, 26, juce::Justification::centredLeft);
+            explicit Backdrop (MatrixPage& p) : page (p) {}
+            void paint (juce::Graphics& g) override { page.paintBackdrop (g); }
+            MatrixPage& page;
+        };
+
+        juce::Rectangle<float> mapArea() const
+        {
+            const auto last = rowBounds (7);
+            return juce::Rectangle<float> (16.0f, (float) last.getBottom() + 12.0f, (float) getWidth() - 32.0f,
+                                           (float) getHeight() - (float) last.getBottom() - 30.0f);
+        }
+
+        void paintBackdrop (juce::Graphics& g)
+        {
             g.setColour (colours::textDim);
             g.setFont (PyraLookAndFeel::font (12.5f));
             g.drawText (tr ("Tip: on the SYNTH page you can drag ENV, LFO, MACRO or any source badge straight onto a knob."),
@@ -738,20 +756,99 @@ namespace
             for (int c = 0; c < 2; ++c)
             {
                 const int x = 16 + c * (colW + 16);
-                g.setFont (PyraLookAndFeel::font (11.0f, true));
+                g.setFont (PyraLookAndFeel::titleFont (12.0f));
                 g.drawText (tr ("SOURCE"), x + 34, 64, 150, 18, juce::Justification::centredLeft);
                 g.drawText (tr ("AMOUNT"), x + 194, 64, 150, 18, juce::Justification::centredLeft);
                 g.drawText (tr ("DESTINATION"), x + colW - 236, 64, 180, 18, juce::Justification::centredLeft);
             }
             for (int s = 0; s < kNumModSlots; ++s)
             {
-                const auto b = rowBounds (s);
-                g.setColour (colours::panel);
-                g.fillRoundedRectangle (b.toFloat(), 6.0f);
-                g.setColour (colours::textDim);
+                const auto b = rowBounds (s).toFloat();
+                const bool used = std::abs (st.getRawParameterValue (pid::mod (s, "amt"))->load()) > 0.001f
+                                  && st.getRawParameterValue (pid::mod (s, "src"))->load() > 0.5f;
+                art::drawStoneSlab (g, b, 6.0f, (uint32_t) s * 131u + 7u, used ? 0.42f : 0.6f);
+                if (used)
+                {
+                    g.setColour (colours::mod.withAlpha (0.7f));
+                    g.fillRoundedRectangle (b.getX() + 2.0f, b.getY() + 8.0f, 2.0f, b.getHeight() - 16.0f, 1.0f);
+                }
+                g.setColour (used ? colours::text : colours::textDim);
                 g.setFont (PyraLookAndFeel::font (12.0f, true));
-                g.drawText (juce::String (s + 1), b.withWidth (30), juce::Justification::centred);
+                g.drawText (juce::String (s + 1), b.withWidth (30.0f), juce::Justification::centred);
             }
+
+            // ROUTING: every active slot as a vein from its source to its destination
+            auto a = mapArea();
+            if (a.getHeight() < 60.0f) return;
+            g.setColour (colours::textDim);
+            g.setFont (PyraLookAndFeel::titleFont (12.0f));
+            g.drawText (tr ("ROUTING"), a.removeFromTop (18.0f), juce::Justification::centredLeft);
+            juce::Path well; well.addRoundedRectangle (a, 6.0f);
+            g.setColour (juce::Colour (0xb0060404));
+            g.fillPath (well);
+            art::drawCarvedFrame (g, a, 6.0f);
+
+            struct Link { juce::String src, dst; float amt; };
+            std::vector<Link> links;
+            juce::StringArray srcs, dsts;
+            for (int s = 0; s < kNumModSlots; ++s)
+            {
+                auto* sp = dynamic_cast<juce::AudioParameterChoice*> (st.getParameter (pid::mod (s, "src")));
+                auto* dp = dynamic_cast<juce::AudioParameterChoice*> (st.getParameter (pid::mod (s, "dst")));
+                const float amt = st.getRawParameterValue (pid::mod (s, "amt"))->load();
+                if (sp == nullptr || dp == nullptr || sp->getIndex() == 0 || dp->getIndex() == 0 || std::abs (amt) < 0.001f) continue;
+                links.push_back ({ tr (sp->getCurrentChoiceName()), dp->getCurrentChoiceName(), amt });
+                srcs.addIfNotAlreadyThere (links.back().src);
+                dsts.addIfNotAlreadyThere (links.back().dst);
+            }
+            auto inner = a.reduced (18.0f, 12.0f);
+            if (links.empty())
+            {
+                g.setColour (colours::textDim.withAlpha (0.7f));
+                g.setFont (PyraLookAndFeel::font (13.0f));
+                g.drawText (tr ("Nothing is modulated yet. Pick a source, an amount and a destination above."), inner, juce::Justification::centred);
+                return;
+            }
+            const float nameW = 190.0f;
+            auto yOf = [&] (int i, int n) { return inner.getY() + inner.getHeight() * ((float) i + 0.5f) / (float) n; };
+            for (const auto& l : links)
+            {
+                const float y0 = yOf (srcs.indexOf (l.src), srcs.size()), y1 = yOf (dsts.indexOf (l.dst), dsts.size());
+                const float x0 = inner.getX() + nameW + 8.0f, x1 = inner.getRight() - nameW - 8.0f;
+                juce::Path p;
+                p.startNewSubPath (x0, y0);
+                p.cubicTo (x0 + (x1 - x0) * 0.45f, y0, x1 - (x1 - x0) * 0.45f, y1, x1, y1);
+                art::drawLavaVein (g, p, 0.8f + 2.2f * std::abs (l.amt), 0.5f + 0.5f * std::abs (l.amt), l.amt >= 0.0f ? colours::mod : colours::accent);
+            }
+            g.setFont (PyraLookAndFeel::font (13.0f, true));
+            for (int i = 0; i < srcs.size(); ++i)
+            {
+                auto r = juce::Rectangle<float> (inner.getX(), yOf (i, srcs.size()) - 11.0f, nameW, 22.0f);
+                art::drawStoneSlab (g, r, 4.0f, (uint32_t) i * 17u, 0.5f);
+                g.setColour (colours::text);
+                g.drawText (srcs[i], r.reduced (8.0f, 0.0f), juce::Justification::centredRight, true);
+            }
+            for (int i = 0; i < dsts.size(); ++i)
+            {
+                auto r = juce::Rectangle<float> (inner.getRight() - nameW, yOf (i, dsts.size()) - 11.0f, nameW, 22.0f);
+                art::drawStoneSlab (g, r, 4.0f, (uint32_t) i * 29u + 3u, 0.5f);
+                g.setColour (colours::text);
+                g.drawText (dsts[i], r.reduced (8.0f, 0.0f), juce::Justification::centredLeft, true);
+            }
+            g.setColour (colours::textDim);
+            g.setFont (PyraLookAndFeel::font (11.0f));
+            g.drawText (tr ("violet = adds, red = subtracts, thicker = more"), a.reduced (10.0f, 4.0f).removeFromBottom (14.0f),
+                        juce::Justification::centredRight);
+        }
+
+        void tick() override
+        {
+            int sig = 0;
+            for (int s = 0; s < kNumModSlots; ++s)
+                sig = sig * 31 + (int) st.getRawParameterValue (pid::mod (s, "src"))->load() * 7
+                      + (int) st.getRawParameterValue (pid::mod (s, "dst"))->load() * 13
+                      + (int) std::lround (st.getRawParameterValue (pid::mod (s, "amt"))->load() * 50.0f);
+            if (sig != lastSig) { lastSig = sig; backdrop.repaint(); }
         }
 
         juce::Rectangle<int> rowBounds (int s) const
@@ -763,6 +860,8 @@ namespace
 
         void resized() override
         {
+            frame.setBounds (getLocalBounds().reduced (8, 6));
+            backdrop.setBounds (getLocalBounds());
             for (int s = 0; s < kNumModSlots; ++s)
             {
                 auto b = rowBounds (s).reduced (6, 10);
@@ -789,6 +888,10 @@ namespace
             std::unique_ptr<DiceButton> dice;
         };
         ModMatrixAccess& matrix;
+        juce::AudioProcessorValueTreeState& st;
+        Panel frame;
+        Backdrop backdrop;
+        int lastSig = -1;
         std::vector<Row> rows;
     };
 
@@ -853,11 +956,42 @@ namespace
             juce::MessageManager::callAsync ([cb = onLanguageChanged] { if (cb) cb(); });
         }
 
+        juce::Rectangle<float> sceneArea() const { return { 8.0f, 414.0f, 820.0f, (float) getHeight() - 422.0f }; }
+
         void paint (juce::Graphics& g) override
         {
-            // the empty corner becomes a window on hell
-            art::drawHellScene (g, { 8.0f, 414.0f, 820.0f, (float) getHeight() - 422.0f });
+            // the empty corner becomes a window on the infernal ballroom (it drifts slowly up and down the picture)
+            const auto a = sceneArea();
+            const auto& img = art::ballroom();
+            if (img.isValid() && a.getHeight() > 20.0f)
+            {
+                juce::Graphics::ScopedSaveState ss (g);
+                juce::Path win; win.addRoundedRectangle (a, 7.0f);
+                g.reduceClipRegion (win);
+                const float sc = a.getWidth() / (float) img.getWidth();
+                const float visible = a.getHeight() / sc;
+                const float range = std::max (0.0f, (float) img.getHeight() - visible);
+                const float y = range * (0.62f + 0.38f * std::sin (scenePhase));
+                g.setImageResamplingQuality (juce::Graphics::mediumResamplingQuality);   // light on the CPU while it drifts
+                g.drawImageTransformed (img, juce::AffineTransform::translation (0.0f, -y).scaled (sc).translated (a.getX(), a.getY()));
+                // depth: dark edges, like looking in through a window cut in the rock
+                juce::ColourGradient vig (juce::Colours::transparentBlack, a.getCentreX(), a.getCentreY(), juce::Colours::black.withAlpha (0.55f),
+                                          a.getX(), a.getY(), true);
+                vig.addColour (0.6, juce::Colours::transparentBlack);
+                g.setGradientFill (vig);
+                g.fillRect (a);
+            }
+            art::drawCarvedFrame (g, a, 7.0f);
         }
+
+        void tick() override
+        {
+            scenePhase += 0.0016f;   // about one minute up and down
+            if (++sceneCounter >= 2) { sceneCounter = 0; repaint (sceneArea().toNearestInt()); }
+        }
+
+        float scenePhase = 0.0f;
+        int sceneCounter = 0;
 
         void paintOverChildren (juce::Graphics& g) override
         {

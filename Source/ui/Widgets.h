@@ -157,7 +157,7 @@ public:
     juce::String title;
     int titleX = 10;
     static constexpr int headerH = 26;
-    juce::Colour tint { 0xffff5a1a };   // header colour: sets sections apart (lava, blood, violet, gold)
+    juce::Colour tint { 0xffff3a1c };   // header colour: sets sections apart (lava, blood, violet, molten orange)
 
     /** The section's on/off switch: the header lights up when it is on, dims when off. */
     void setPowerButton (juce::Button* b)
@@ -180,6 +180,8 @@ private:
     std::unique_ptr<DiceButton> dice;
     juce::Button* power = nullptr;
     bool lastPower = false;
+    juce::Path headerCrack;
+    int headerCrackWidth = -1;
 };
 
 //==============================================================================

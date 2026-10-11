@@ -21,6 +21,9 @@ struct PresetInfo
 /** Reads/writes the sound of the plugin as a small JSON object:
     { "params": { "paramID": value, ... }, "arp": [[degree, vel, gate, on, tie], ...] }
     Only values that differ from the default are stored. */
+/** True for the LAYERS mix parameters: they are never part of a preset. */
+bool isLayerParam (const juce::String& paramId);
+
 namespace presetdata
 {
     juce::var capture (PyraAudioProcessor&);
@@ -70,6 +73,8 @@ private:
     PyraAudioProcessor& proc;
     juce::Array<PresetInfo> presets;
     juce::var factoryBank;   // array of preset objects
+    struct SharedBank { juce::var bank; };
+    juce::SharedResourcePointer<SharedBank> sharedBank;
     juce::StringArray favourites;
     std::map<juce::String, juce::StringArray> personalTags;
     std::vector<float> loadedSnapshot;

@@ -8,11 +8,11 @@ namespace colours = pyra::colours;
 
 namespace
 {
-    enum PageIndex { PageSynth, PagePresets, PageFx, PageArp, PageChords, PageMatrix, PageChaos, PageAnalog, PageSettings, PageCount };
+    enum PageIndex { PageSynth, PagePresets, PageLayers, PageFx, PageArp, PageChords, PageMatrix, PageChaos, PageAnalog, PageSettings, PageCount };
 }
 
 PyraAudioProcessorEditor::PyraAudioProcessorEditor (PyraAudioProcessor& p)
-    : AudioProcessorEditor (&p), proc (p), matrix (p.apvts),
+    : AudioProcessorEditor (&p), proc (p),
       keyboard (p.keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard)
 {
     setLookAndFeel (&lnf);
@@ -32,7 +32,6 @@ PyraAudioProcessorEditor::PyraAudioProcessorEditor (PyraAudioProcessor& p)
     setSize (w, juce::roundToInt ((float) w * (float) baseH / (float) baseW));
 
     root.addMouseListener (this, true);
-    pyra::userActivityHook() = [&p] { p.history.noteUserActivity(); };
     startTimerHz (30);
 }
 
@@ -52,9 +51,13 @@ void PyraAudioProcessorEditor::buildUi()
     tabs.clear();
     masterKnob.reset();
 
-    ui.reset (new pyra::UiContext { proc, proc.apvts, matrix, {} });
+    auto& tgt = target();
+    matrix = std::make_unique<pyra::ModMatrixAccess> (tgt.apvts);
+    ui.reset (new pyra::UiContext { tgt, tgt.apvts, *matrix, {} });
+    juce::Component::SafePointer<PyraAudioProcessorEditor> safeEditor (this);
+    pyra::userActivityHook() = [safeEditor] { if (safeEditor != nullptr) safeEditor->target().history.noteUserActivity(); };
 
-    const juce::StringArray names { "SYNTH", tr ("PRESETS"), "FX", "ARP", tr ("CHORDS"), tr ("MATRIX"), "CHAOS", "ANALOG", tr ("SETTINGS") };
+    const juce::StringArray names { "SYNTH", tr ("PRESETS"), tr ("LAYERS"), "FX", "ARP", tr ("CHORDS"), tr ("MATRIX"), "CHAOS", "ANALOG", tr ("SETTINGS") };
     tabNames = names;
     for (int i = 0; i < names.size(); ++i)
     {
@@ -66,6 +69,7 @@ void PyraAudioProcessorEditor::buildUi()
 
     pages.push_back (pyra::createSynthPage (*ui));
     pages.push_back (pyra::createPresetPage (*ui, presetFilter, [this] { openSaveDialog(); }));
+    pages.push_back (pyra::createLayersPage (proc, [this] (int k) { editLayerSound (k); }, [this] { return editLayer; }));
     pages.push_back (pyra::createFxPage (*ui));
     pages.push_back (pyra::createArpPage (*ui));
     pages.push_back (pyra::createChordsPage (*ui));
@@ -79,7 +83,7 @@ void PyraAudioProcessorEditor::buildUi()
     masterKnob = std::make_unique<pyra::Knob> (proc.apvts, "master", "Volume", nullptr);
     root.addAndMakeVisible (*masterKnob);
 
-    presetBar = std::make_unique<pyra::PresetBar> (proc, presetFilter);
+    presetBar = std::make_unique<pyra::PresetBar> (tgt, presetFilter);
     presetBar->onOpenBrowser = [this] { showPage (PagePresets); };
     presetBar->onSave = [this] { openSaveDialog(); };
     presetBar->onRandom = [this] (bool variation) { randomizeCurrentPage (variation); };
@@ -107,7 +111,7 @@ void PyraAudioProcessorEditor::buildUi()
 void PyraAudioProcessorEditor::openSaveDialog()
 {
     juce::Component::SafePointer<PyraAudioProcessorEditor> safeThis (this);
-    saveDialog = std::make_unique<pyra::SaveDialog> (proc, [safeThis]
+    saveDialog = std::make_unique<pyra::SaveDialog> (target(), [safeThis]
     {
         juce::MessageManager::callAsync ([safe = safeThis]
         {
@@ -119,14 +123,36 @@ void PyraAudioProcessorEditor::openSaveDialog()
     saveDialog->toFront (true);
 }
 
+PyraAudioProcessor& PyraAudioProcessorEditor::target()
+{
+    return editLayer == 0 ? proc : proc.getOrCreateLayer (editLayer);
+}
+
+void PyraAudioProcessorEditor::editLayerSound (int layer)
+{
+    layer = juce::jlimit (0, pyra::kNumLayers - 1, layer);
+    const bool same = layer == editLayer;
+    editLayer = layer;
+    juce::Component::SafePointer<PyraAudioProcessorEditor> safeThis (this);
+    juce::MessageManager::callAsync ([safeThis, same]
+    {
+        if (safeThis == nullptr) return;
+        if (! same) { safeThis->buildUi(); safeThis->resized(); }
+        safeThis->showPage (PageSynth);
+        safeThis->root.repaint();
+    });
+}
+
 void PyraAudioProcessorEditor::randomizeCurrentPage (bool variation)
 {
+    auto& proc = target();
     proc.history.noteUserActivity();
     const auto seed = (uint32_t) juce::Random::getSystemRandom().nextInt();
     using namespace pyra::randomizer;
     switch (currentPage)
     {
         case PagePresets:  if (presetBar != nullptr) presetBar->loadRandomPreset(); break;
+        case PageLayers:   randomizeLayers (this->proc, variation, seed); break;
         case PageFx:       randomize (proc, Fx, variation, seed); break;
         case PageArp:      randomize (proc, Arp, variation, seed); break;
         case PageChords:   randomize (proc, Chords, variation, seed); break;
@@ -138,10 +164,10 @@ void PyraAudioProcessorEditor::randomizeCurrentPage (bool variation)
     }
 }
 
-void PyraAudioProcessorEditor::mouseDown (const juce::MouseEvent&)       { proc.history.noteUserActivity(); }
-void PyraAudioProcessorEditor::mouseUp (const juce::MouseEvent&)         { proc.history.noteUserActivity(); }
-void PyraAudioProcessorEditor::mouseDrag (const juce::MouseEvent&)       { proc.history.noteUserActivity(); }
-void PyraAudioProcessorEditor::mouseWheelMove (const juce::MouseEvent&, const juce::MouseWheelDetails&) { proc.history.noteUserActivity(); }
+void PyraAudioProcessorEditor::mouseDown (const juce::MouseEvent&)       { target().history.noteUserActivity(); }
+void PyraAudioProcessorEditor::mouseUp (const juce::MouseEvent&)         { target().history.noteUserActivity(); }
+void PyraAudioProcessorEditor::mouseDrag (const juce::MouseEvent&)       { target().history.noteUserActivity(); }
+void PyraAudioProcessorEditor::mouseWheelMove (const juce::MouseEvent&, const juce::MouseWheelDetails&) { target().history.noteUserActivity(); }
 
 void PyraAudioProcessorEditor::showPage (int index)
 {
@@ -175,22 +201,23 @@ void PyraAudioProcessorEditor::timerCallback()
 
     for (auto* k : ui->knobs) k->refreshModulation();
 
-    const int v = proc.engine.uiVoices.load();
+    const int v = proc.totalVoices();
     if (v != lastVoices) { lastVoices = v; root.repaint (baseW - 330, 0, 140, topH); }
 
-    // flickering flames in the logo and the lava pit (only the top bar is redrawn)
-    if (++animCounter >= 2)
+    // the breathing glow behind the logo and the scope (only those corners of the top bar are redrawn)
     {
-        animCounter = 0;
-        animTime += 0.066f;
-        root.repaint (0, 0, 184, 45);
-        root.repaint (896, 0, 104, 46);
+        const float peak = proc.uiPeak.exchange (0.0f);
+        const float target = juce::jlimit (0.0f, 1.0f, std::sqrt (peak) * 1.2f);
+        scopeLevel = target > scopeLevel ? target : scopeLevel * 0.85f;
+        animTime += 0.033f;
+        root.repaint (898, 5, 100, 36);
+        if (++animCounter >= 3) { animCounter = 0; root.repaint (0, 0, 46, 45); }
     }
 
     if (++historyCounter >= 3)
     {
         historyCounter = 0;
-        proc.history.tick();
+        target().history.tick();
         if (presetBar != nullptr) presetBar->updateUndoButtons();
     }
 }
@@ -198,60 +225,94 @@ void PyraAudioProcessorEditor::timerCallback()
 //==============================================================================
 void PyraAudioProcessorEditor::Root::paint (juce::Graphics& g)
 {
-    // hell behind everything
-    g.drawImageAt (pyra::art::background (getWidth(), getHeight()), 0, 0);
+    // cracked basalt with lava behind everything
+    pyra::art::drawBackground (g, getLocalBounds().toFloat());
 
-    // top bar: smoke above a line of lava
+    // top bar: a band of dark stone, closed by a crack of lava
     auto bar = getLocalBounds().removeFromTop (46).toFloat();
-    g.setGradientFill (juce::ColourGradient (juce::Colour (0xf0080303), 0, 0, juce::Colour (0xd0180605), 0, 46, false));
-    g.fillRect (bar);
-
-    // the damned, reaching out of the lava in the free corner of the bar
     {
-        juce::Graphics::ScopedSaveState ss (g);
-        g.reduceClipRegion (juce::Rectangle<int> (896, 0, 104, 46));
-        juce::ColourGradient pit (juce::Colour (0x00ff6020), 948, 20, juce::Colour (0x90ff5a1a), 948, 46, false);
-        g.setGradientFill (pit);
-        g.fillRect (896, 20, 104, 26);
-        pyra::art::drawSkeleton (g, 914.0f, 46.0f, 34.0f, -0.4f, 0.55f, 3u);
-        pyra::art::drawSkeleton (g, 948.0f, 48.0f, 42.0f, 0.1f, 0.6f, 5u);
-        pyra::art::drawSkeleton (g, 982.0f, 46.0f, 30.0f, 0.5f, 0.5f, 9u);
-        pyra::art::drawLavaStrip (g, { 896.0f, 41.0f, 104.0f, 5.0f }, owner.animTime * 3.0f);
+        juce::Path band; band.addRectangle (bar);
+        pyra::art::fillStone (g, band, { -40.0f, -300.0f }, 0.62f, 0.5f);
+        g.setGradientFill (juce::ColourGradient (juce::Colours::black.withAlpha (0.45f), 0, 0, juce::Colours::transparentBlack, 0, 46, false));
+        g.fillRect (bar);
     }
-    g.setGradientFill (juce::ColourGradient (colours::accent2, 0, 45, colours::hot, (float) getWidth(), 45, false));
-    g.fillRect (0.0f, 44.5f, (float) getWidth(), 1.5f);
-    g.setColour (colours::accent.withAlpha (0.18f));
-    g.fillRect (0.0f, 46.0f, (float) getWidth(), 3.0f);
+    if (headerCrack.isEmpty() || headerCrackWidth != getWidth())
+    {
+        headerCrackWidth = getWidth();
+        headerCrack = pyra::art::crackLine ({ 0.0f, 45.0f }, { (float) getWidth(), 45.5f }, 666u, 1.3f, true);
+    }
+    pyra::art::drawLavaVein (g, headerCrack, 1.2f, 0.85f);
 
-    // logo: the treble clef on fire + the name in molten letters
-    pyra::art::drawLogo (g, { 8.0f, 4.0f, 36.0f, 38.0f }, owner.animTime);
-    const auto logoFont = pyra::PyraLookAndFeel::logoFont (31.0f);
-    pyra::art::drawChromeText (g, "PYRA", logoFont, 47.0f, 33.0f, owner.animTime);
-    juce::GlyphArrangement ga;
-    ga.addLineOfText (logoFont, "PYRA", 47.0f, 33.0f);
-    juce::Path letters;
-    ga.createPath (letters);
-    g.setColour (colours::textDim);
+    // the scope: the spiky waveform of the logo, beating with the sound
+    {
+        auto pit = juce::Rectangle<float> (900.0f, 7.0f, 96.0f, 32.0f);
+        juce::Path well; well.addRoundedRectangle (pit, 5.0f);
+        g.setColour (juce::Colour (0xe0060404));
+        g.fillPath (well);
+        pyra::art::drawCarvedFrame (g, pit, 5.0f);
+        juce::Graphics::ScopedSaveState ss (g);
+        g.reduceClipRegion (well);
+        pyra::art::drawSpikeWave (g, pit.reduced (4.0f, 3.0f), owner.scopeLevel, owner.animTime);
+    }
+
+    // logo + wordmark, exactly as drawn (a soft red breath behind the headphones)
+    {
+        const float breath = 0.5f + 0.5f * std::sin (owner.animTime * 1.7f);
+        juce::ColourGradient glow (pyra::colours::accent.withAlpha (0.10f + 0.10f * breath), 25.0f, 23.0f, juce::Colours::transparentBlack, 25.0f + 30.0f, 23.0f, true);
+        g.setGradientFill (glow);
+        g.fillEllipse (-5.0f, -7.0f, 60.0f, 60.0f);
+        g.setImageResamplingQuality (juce::Graphics::highResamplingQuality);
+        g.drawImage (pyra::art::logo(), { 6.0f, 1.0f, 38.0f, 44.0f }, juce::RectanglePlacement::centred);
+        g.drawImage (pyra::art::wordmark(), { 44.0f, 2.0f, 76.0f, 42.0f }, juce::RectanglePlacement::centred);
+    }
+    g.setColour (pyra::colours::textDim);
     g.setFont (pyra::PyraLookAndFeel::font (10.0f));
-    g.drawText ("v" JucePlugin_VersionString, (int) letters.getBounds().getRight() + 4, 24, 60, 14, juce::Justification::centredLeft);
+    g.drawText ("v" JucePlugin_VersionString, 121, 26, 60, 14, juce::Justification::centredLeft);
+
+    // what the window is editing (the main sound or one of the layers)
+    if (owner.editLayer > 0)
+    {
+        g.setColour (pyra::colours::accent2);
+        g.setFont (pyra::PyraLookAndFeel::titleFont (11.0f));
+        g.drawText (tr ("LAYER") + " " + juce::String::charToString ((juce::juce_wchar) ('A' + owner.editLayer)), 121, 8, 62, 14, juce::Justification::centredLeft);
+    }
 
     // voice meter
-    const int v = owner.proc.engine.uiVoices.load();
-    g.setColour (v > 0 ? colours::accent2 : colours::textDim);
+    const int v = owner.lastVoices;
+    g.setColour (v > 0 ? pyra::colours::accent2 : pyra::colours::textDim);
     g.setFont (pyra::PyraLookAndFeel::font (12.0f, true));
-    g.drawText (tr ("Voices") + ": " + juce::String (v), getWidth() - 330, 0, 130, 46, juce::Justification::centredRight);
+    g.drawText (tr ("Voices") + ": " + juce::String (juce::jmax (0, v)), getWidth() - 330, 0, 130, 46, juce::Justification::centredRight);
+}
+
+void PyraAudioProcessorEditor::layoutTabs()
+{
+    // as wide as their names, squeezed evenly if they do not fit between the logo and the scope
+    const int x0 = 186, x1 = 894, gap = 4;
+    std::vector<int> widths;
+    int total = 0;
+    for (auto* t : tabs)
+    {
+        juce::GlyphArrangement ga;
+        ga.addLineOfText (lnf.getTextButtonFont (*t, 28), t->getButtonText(), 0.0f, 0.0f);
+        const int w = std::max (48, (int) std::ceil (ga.getBoundingBox (0, -1, true).getWidth()) + 24);
+        widths.push_back (w);
+        total += w;
+    }
+    const int avail = x1 - x0 - gap * (tabs.size() - 1);
+    const float squeeze = total > avail ? (float) avail / (float) total : 1.0f;
+    int x = x0;
+    for (int i = 0; i < tabs.size(); ++i)
+    {
+        const int w = (int) std::floor ((float) widths[(size_t) i] * squeeze);
+        tabs[i]->setBounds (x, 9, w, 28);
+        x += w + gap;
+    }
 }
 
 void PyraAudioProcessorEditor::Root::resized()
 {
     auto& e = owner;
-    int x = 186;
-    for (auto* t : e.tabs)
-    {
-        const int w = t->getButtonText().length() > 7 ? 96 : (t->getButtonText().length() > 6 ? 86 : 70);
-        t->setBounds (x, 9, w, 28);
-        x += w + 4;
-    }
+    e.layoutTabs();
     e.langButton.setBounds (getWidth() - 56, 10, 44, 26);
     if (e.masterKnob != nullptr) e.masterKnob->setBounds (getWidth() - 186, 0, 120, 46);
 

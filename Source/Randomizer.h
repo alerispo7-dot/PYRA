@@ -23,6 +23,11 @@ namespace randomizer
         chaos, focus, motion, age, movement, circuit, noise, converter, mod<1..16>, mpe. */
     void randomizeSection (PyraAudioProcessor&, const juce::String& section, bool variation, uint32_t seed);
 
+    /** LAYERS: a random multi (presets that go well together in the layers, levels, pans). variation = small mix changes. */
+    void randomizeLayers (PyraAudioProcessor& master, bool variation, uint32_t seed);
+    /** One layer only: a random preset (of the same category as now when possible). */
+    void randomizeLayer (PyraAudioProcessor& master, int layer, bool variation, uint32_t seed);
+
     /** GLITCH pattern only. */
     void randomizeGlitch (PyraAudioProcessor&, uint32_t seed);
 }

@@ -437,11 +437,18 @@ void DiceButton::paintButton (juce::Graphics& g, bool highlighted, bool down)
 {
     auto r = getLocalBounds().toFloat().withSizeKeepingCentre (16.0f, 16.0f);
     if (down) r = r.reduced (0.8f);
-    g.setColour (highlighted ? colours::accent : colours::knobBody.brighter (0.15f));
+    // a little die carved from bone-grey stone; it catches fire under the mouse
+    if (highlighted)
+    {
+        g.setColour (colours::accent.withAlpha (0.3f));
+        g.fillRoundedRectangle (r.expanded (2.0f), 5.0f);
+    }
+    g.setGradientFill (juce::ColourGradient (highlighted ? juce::Colour (0xffff5a30) : juce::Colour (0xff3a302c), r.getX(), r.getY(),
+                                             highlighted ? juce::Colour (0xff9a0c08) : juce::Colour (0xff181210), r.getX(), r.getBottom(), false));
     g.fillRoundedRectangle (r, 3.5f);
-    g.setColour (highlighted ? colours::accent2 : colours::edge.brighter (0.4f));
+    g.setColour (highlighted ? juce::Colour (0xffffb090) : juce::Colour (0xff6a5850));
     g.drawRoundedRectangle (r, 3.5f, 1.0f);
-    g.setColour (highlighted ? juce::Colours::black : colours::text);
+    g.setColour (highlighted ? juce::Colours::white : colours::text.withAlpha (0.85f));
     const float d = 2.6f;
     auto pip = [&] (float fx, float fy) { g.fillEllipse (r.getX() + r.getWidth() * fx - d * 0.5f, r.getY() + r.getHeight() * fy - d * 0.5f, d, d); };
     pip (0.28f, 0.28f); pip (0.72f, 0.28f); pip (0.5f, 0.5f); pip (0.28f, 0.72f); pip (0.72f, 0.72f);
@@ -463,63 +470,84 @@ void Panel::enableDice (std::function<void (bool)> roll)
 void Panel::paint (juce::Graphics& g)
 {
     auto r = getLocalBounds().toFloat().reduced (0.5f);
-    // body: soot, slightly see-through so the hell glow behind shows a little
-    g.setGradientFill (juce::ColourGradient (juce::Colour (0xf0201010), 0.0f, r.getY(), juce::Colour (0xf2100706), 0.0f, r.getBottom(), false));
-    g.fillRoundedRectangle (r, 7.0f);
-    // scorched stone grain
-    {
-        juce::Graphics::ScopedSaveState ss (g);
-        g.setTiledImageFill (art::stone(), 0, 0, 0.09f);
-        g.fillRoundedRectangle (r, 7.0f);
-    }
-    // a few cracks in the bottom corner
-    g.setColour (juce::Colours::black.withAlpha (0.5f));
-    g.strokePath (art::cracks ({ r.getRight() - 46.0f, r.getBottom() - 30.0f, 42.0f, 28.0f }, (uint32_t) title.hashCode()), juce::PathStrokeType (1.0f));
-
+    const auto seed = (uint32_t) title.hashCode();
     const bool powered = power == nullptr || power->getToggleState();
-    // header band in the section colour (bright when the section is on)
+    juce::Path slab;
+    slab.addRoundedRectangle (r, 7.0f);
+
+    // body: a slab of dark cracked stone (each panel shows a different part of the rock)
+    art::fillStone (g, slab, { -(float) (seed % 509u), -(float) ((seed >> 9) % 509u) }, 0.0f, 0.62f);
+    g.setGradientFill (juce::ColourGradient (juce::Colours::black.withAlpha (0.50f), 0.0f, r.getY(), juce::Colours::black.withAlpha (0.70f), 0.0f, r.getBottom(), false));
+    g.fillPath (slab);
+
+    // a lava vein seeping out of one corner (the section colour, brighter when the section is on)
     {
         juce::Graphics::ScopedSaveState ss (g);
-        juce::Path clip; clip.addRoundedRectangle (r, 7.0f);
-        g.reduceClipRegion (clip);
-        auto head = r.withHeight ((float) headerH);
-        g.setGradientFill (juce::ColourGradient (tint.withAlpha (powered ? 0.36f : 0.10f), head.getX(), 0.0f, tint.withAlpha (0.0f),
-                                                 head.getRight() * 0.85f, 0.0f, false));
-        g.fillRect (head);
-        g.setColour (tint.withAlpha (0.35f));
-        g.fillRect (head.getX() + 8.0f, head.getBottom() - 1.0f, head.getWidth() - 16.0f, 1.0f);
+        g.reduceClipRegion (slab);
+        const bool right = (seed & 1u) != 0;
+        const float cx = right ? r.getRight() : r.getX();
+        const float len = std::min (90.0f, r.getWidth() * 0.3f);
+        auto vein = art::crackLine ({ cx, r.getBottom() - 4.0f - (float) (seed % 17u) },
+                                    { cx + (right ? -len : len), r.getBottom() - 2.0f - (float) ((seed >> 5) % 30u) }, seed, 2.2f, true);
+        art::drawLavaVein (g, vein, 1.0f, powered ? 0.5f : 0.12f, tint);
     }
 
-    // rim: dark outer line + a glowing top edge in the section colour
-    g.setColour (juce::Colours::black.withAlpha (0.7f));
-    g.drawRoundedRectangle (r.expanded (0.5f), 7.5f, 1.2f);
-    g.setColour (colours::edge);
+    // header: darker band, the section colour glowing from the left, closed by a crack of lava
+    {
+        juce::Graphics::ScopedSaveState ss (g);
+        g.reduceClipRegion (slab);
+        auto head = r.withHeight ((float) headerH);
+        g.setColour (juce::Colours::black.withAlpha (0.35f));
+        g.fillRect (head);
+        g.setGradientFill (juce::ColourGradient (tint.withAlpha (powered ? 0.30f : 0.08f), head.getX(), 0.0f, tint.withAlpha (0.0f),
+                                                 head.getX() + head.getWidth() * 0.75f, 0.0f, false));
+        g.fillRect (head);
+        if (headerCrack.isEmpty() || headerCrackWidth != getWidth())
+        {
+            headerCrackWidth = getWidth();
+            headerCrack = art::crackLine ({ head.getX() + 4.0f, head.getBottom() }, { head.getRight() - 4.0f, head.getBottom() }, seed, 1.1f, true);
+        }
+        art::drawLavaVein (g, headerCrack, 0.9f, powered ? 0.75f : 0.15f, tint);
+    }
+
+    // chiselled rim: black outside, pale lip on top, section colour along the top edge
+    g.setColour (juce::Colours::black.withAlpha (0.85f));
+    g.drawRoundedRectangle (r.expanded (0.5f), 7.5f, 1.4f);
+    g.setColour (juce::Colour (0xff3e322e));
     g.drawRoundedRectangle (r, 7.0f, 1.0f);
-    g.setGradientFill (juce::ColourGradient (tint.withAlpha (powered ? 0.95f : 0.3f), r.getX(), 0.0f, tint.withAlpha (0.0f), r.getRight(), 0.0f, false));
-    g.fillRoundedRectangle (r.getX() + 6.0f, r.getY(), r.getWidth() * 0.6f, 1.6f, 0.8f);
+    g.setColour (juce::Colours::white.withAlpha (0.06f));
+    g.drawRoundedRectangle (r.reduced (1.5f), 5.5f, 1.0f);
+    g.setGradientFill (juce::ColourGradient (tint.withAlpha (powered ? 0.9f : 0.25f), r.getX(), 0.0f, tint.withAlpha (0.0f), r.getRight() * 0.8f, 0.0f, false));
+    g.fillRoundedRectangle (r.getX() + 6.0f, r.getY(), r.getWidth() * 0.6f, 1.4f, 0.7f);
 
     if (title.isNotEmpty())
     {
         auto tr = getLocalBounds().removeFromTop (headerH).withTrimmedLeft (titleX).withTrimmedRight (10);
-        g.setFont (PyraLookAndFeel::titleFont (16.0f));
+        g.setFont (PyraLookAndFeel::displayFont (15.5f));
+        const auto t = title.toUpperCase();
+        g.setColour (juce::Colours::black.withAlpha (0.8f));
+        g.drawText (t, tr.translated (1, 1), juce::Justification::centredLeft);
         if (powered && power != nullptr)
-        {   // switched on: the title burns
-            g.setColour (tint.withAlpha (0.45f));
-            g.drawText (title.toUpperCase(), tr.translated (0, 1), juce::Justification::centredLeft);
+        {   // switched on: the letters burn
+            g.setColour (tint.withAlpha (0.5f));
+            g.drawText (t, tr.translated (0, 1).expanded (0, 1), juce::Justification::centredLeft);
         }
-        g.setColour (powered ? tint.interpolatedWith (colours::text, 0.3f) : colours::textDim.withAlpha (0.8f));
-        g.drawText (title.toUpperCase(), tr, juce::Justification::centredLeft);
+        g.setColour (powered ? tint.interpolatedWith (colours::text, 0.45f) : colours::textDim.withAlpha (0.8f));
+        g.drawText (t, tr, juce::Justification::centredLeft);
     }
 }
 
 void Panel::drawInset (juce::Graphics& g, juce::Rectangle<float> r)
 {
-    g.setColour (juce::Colours::black.withAlpha (0.4f));
+    // a polished obsidian window set into the stone
+    g.setColour (juce::Colour (0xd0070404));
     g.fillRoundedRectangle (r, 6.0f);
-    g.setColour (juce::Colours::black.withAlpha (0.45f));
-    g.drawHorizontalLine ((int) r.getY(), r.getX() + 4.0f, r.getRight() - 4.0f);
-    g.setColour (juce::Colours::white.withAlpha (0.035f));
-    g.drawRoundedRectangle (r, 6.0f, 1.0f);
+    g.setGradientFill (juce::ColourGradient (juce::Colours::black.withAlpha (0.6f), 0.0f, r.getY(), juce::Colours::transparentBlack, 0.0f, r.getY() + 10.0f, false));
+    g.fillRoundedRectangle (r, 6.0f);
+    g.setColour (juce::Colours::black.withAlpha (0.8f));
+    g.drawRoundedRectangle (r.expanded (0.5f), 6.5f, 1.0f);
+    g.setColour (juce::Colour (0xff4a3a35).withAlpha (0.8f));
+    g.drawRoundedRectangle (r.reduced (0.5f), 6.0f, 1.0f);
 }
 
 //==============================================================================
@@ -597,7 +625,7 @@ void WavetableView::paint (juce::Graphics& g)
     auto cur = pathFor (0, k * depth, -k * depth * 0.5f, true);
     g.setColour (wave.withAlpha (0.25f));
     g.strokePath (cur, juce::PathStrokeType (4.0f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
-    g.setColour (lastOn ? colours::accent2 : colours::textDim);
+    g.setColour (lastOn ? colours::lavaCore : colours::textDim);
     g.strokePath (cur, juce::PathStrokeType (1.8f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
 
     g.setColour (colours::textDim);
@@ -662,7 +690,7 @@ void EnvelopeView::paint (juce::Graphics& g)
     g.setGradientFill (juce::ColourGradient (colours::accent.withAlpha (0.35f), 0, area.getY(),
                                              colours::accent.withAlpha (0.02f), 0, area.getBottom(), false));
     g.fillPath (fill);
-    g.setColour (colours::accent2);
+    g.setColour (colours::lavaCore);
     g.strokePath (p, juce::PathStrokeType (1.8f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
 
     if (live > 0.001f)

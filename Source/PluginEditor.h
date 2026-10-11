@@ -33,6 +33,8 @@ private:
         void paint (juce::Graphics&) override;
         void resized() override;
         PyraAudioProcessorEditor& owner;
+        juce::Path headerCrack;
+        int headerCrackWidth = -1;
     };
 
     void timerCallback() override;
@@ -40,10 +42,14 @@ private:
     void showPage (int index);
     void openSaveDialog();
     void randomizeCurrentPage (bool variation);
+    void editLayerSound (int layer);
+    void layoutTabs();
+    /** The sound the pages are editing: this PYRA (layer A) or one of its layers. */
+    PyraAudioProcessor& target();
 
     PyraAudioProcessor& proc;
     pyra::PyraLookAndFeel lnf;
-    pyra::ModMatrixAccess matrix;
+    std::unique_ptr<pyra::ModMatrixAccess> matrix;
     std::unique_ptr<pyra::UiContext> ui;
 
     Root root { *this };
@@ -59,7 +65,8 @@ private:
     juce::MidiKeyboardComponent keyboard;
     juce::TooltipWindow tooltips { this, 600 };
     int lastVoices = -1, historyCounter = 0, animCounter = 0;
-    float animTime = 0.0f;
+    float animTime = 0.0f, scopeLevel = 0.0f;
+    int editLayer = 0;   // 0 = the main sound (layer A), 1..7 = layers B..H
     juce::StringArray tabNames;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PyraAudioProcessorEditor)

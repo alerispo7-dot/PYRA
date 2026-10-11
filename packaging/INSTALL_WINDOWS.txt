@@ -11,6 +11,9 @@ MODO FACILE (consigliato)
    Cerca PYRA nella lista e clicca la stellina: ora lo trovi nel browser dei plugin.
    (Ableton: Impostazioni > Plug-in > "Usa cartella VST3 di sistema" > Rescan.)
 
+AGGIORNARE: rifai il MODO FACILE con il nuovo zip, sostituisce da solo la versione
+vecchia (plugin, app e icona sul desktop). Non serve cancellare niente a mano.
+
 MODO MANUALE
 Copia la cartella intera "PYRA.vst3" dentro  C:\Program Files\Common Files\VST3
 Il percorso finale deve essere esattamente:

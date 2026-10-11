@@ -12,7 +12,8 @@ namespace lang
         const char* aboutEn =
             "PYRA - wavetable synthesizer\n\n"
             "Wavetable oscillators, filters, envelopes, LFOs, mod matrix, MPE, 14 effects (including GLITCH, GRANULAR and SHIFTER), "
-            "ANALOG section, ARP, CHORDS generator, CHAOS / FOCUS / MOTION, sampled instruments and 540 presets.\n\n"
+            "ANALOG section, ARP, CHORDS generator with emotions, LAYERS (up to 8 sounds in one PYRA), CHAOS / FOCUS / MOTION, "
+            "sampled instruments and 540 presets.\n\n"
             "Quick tips\n"
             "- Click the number under a knob to type an exact value. Double-click a knob to reset it, right-click for options.\n"
             "- The arrows next to the preset name undo / redo your changes.\n"
@@ -23,7 +24,8 @@ namespace lang
         const char* aboutIt =
             "PYRA - sintetizzatore wavetable\n\n"
             "Oscillatori wavetable, filtri, inviluppi, LFO, matrice di modulazione, MPE, 14 effetti (compresi GLITCH, GRANULARE e SHIFTER), "
-            "sezione ANALOG, ARP, generatore di ACCORDI, CHAOS / FOCUS / MOTION, strumenti campionati e 540 preset.\n\n"
+            "sezione ANALOG, ARP, generatore di ACCORDI con le emozioni, LAYER (fino a 8 suoni in un solo PYRA), CHAOS / FOCUS / MOTION, "
+            "strumenti campionati e 540 preset.\n\n"
             "Consigli rapidi\n"
             "- Clicca il numero sotto una manopola per scrivere un valore preciso. Doppio clic per azzerarla, clic destro per le opzioni.\n"
             "- Le frecce accanto al nome del preset annullano / ripetono le modifiche.\n"

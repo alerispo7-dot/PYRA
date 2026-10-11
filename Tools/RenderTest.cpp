@@ -179,6 +179,30 @@ static void snapshots (pyra::lang::Language language, const juce::String& suffix
             juce::PNGImageFormat().writeImageToStream (img2, os2);
         }
     }
+    // ANALOG with the knobs up (the carved pictures wake up) and LAYERS with a few layers in use
+    auto snap = [&] (const juce::String& tabText, const juce::String& name)
+    {
+        for (auto* t : tabs)
+            if (t->getButtonText() == tabText && t->onClick) t->onClick();
+        auto img = ed->createComponentSnapshot (ed->getLocalBounds(), true, 1.0f);
+        auto f = juce::File::getCurrentWorkingDirectory().getChildFile ("ui").getChildFile (name + suffix + ".png");
+        f.deleteFile();
+        juce::FileOutputStream os (f);
+        juce::PNGImageFormat().writeImageToStream (img, os);
+    };
+    set (p, "an_age", 0.7f); set (p, "drift", 0.5f); set (p, "spread", 0.4f); set (p, "an_tolerance", 0.3f); set (p, "an_circuit", 0.6f);
+    set (p, "an_noise", 0.35f); set (p, "an_hum", 0.3f); set (p, "an_bits", 0.55f); set (p, "an_rate", 0.4f);
+    snap ("ANALOG", "x_analog_active");
+    for (int k = 1; k < 4; ++k)
+    {
+        auto& l = p.getOrCreateLayer (k);
+        l.getPresetManager().load (l.getPresetManager().getAll()[k * 37].id);
+        set (p, pyra::layerParam (k, "on"), 1);
+    }
+    set (p, pyra::layerParam (1, "level"), -6.0f); set (p, pyra::layerParam (1, "pan"), -0.4f);
+    set (p, pyra::layerParam (2, "lo"), 36); set (p, pyra::layerParam (2, "hi"), 59); set (p, pyra::layerParam (2, "trans"), -12);
+    set (p, pyra::layerParam (3, "vlo"), 90); set (p, pyra::layerParam (3, "mute"), 1);
+    snap (pyra::lang::tr ("LAYERS"), "x_layers_active");
     std::printf ("UI snapshots written (%s)\n", suffix.toRawUTF8());
 }
 
@@ -969,6 +993,151 @@ int main (int argc, char** argv)
             if (! ok) ++failures;
             std::printf ("  %-26s %s\n", "72_patterns_saved", ok ? "ok" : "FAIL");
             p.chordPattern.clear(); p.glitchPattern.clear();
+        }
+
+        // CHORDS emotions: every mood makes valid chords in each of its scales; RANDOM moves the scale into the mood
+        {
+            resetAll (p);
+            bool ok = true;
+            juce::String sample;
+            for (int mood = 1; mood < chordMoodNames().size(); ++mood)
+            {
+                const auto& st = chordMoodStyle (mood);
+                if (st.progressions.empty() || st.scales.empty()) { ok = false; std::printf ("    mood %d has no style\n", mood); continue; }
+                for (int scale : st.scales)
+                    for (uint32_t seed = 1; seed < 12; ++seed)
+                    {
+                        ChordPattern pat;
+                        pat.randomizeMood (mood, seed % 2 ? 4 : 8, scale, 0.4f, seed * 77u);
+                        ChordSettings cs; cs.scale = scale; cs.key = 0; cs.count = seed % 2 ? 4 : 8;
+                        std::vector<int> prev;
+                        for (int k = 0; k < cs.count; ++k)
+                        {
+                            auto notes = chordNotes (pat, k, cs, prev);
+                            if (notes.size() < 2) { ok = false; std::printf ("    mood %d scale %d slot %d: %d notes\n", mood, scale, k, (int) notes.size()); }
+                            prev = notes;
+                        }
+                    }
+                ChordPattern pat;
+                pat.randomizeMood (mood, 4, st.scales[0], 0.0f, 5u);
+                ChordSettings cs; cs.scale = st.scales[0]; cs.key = 9;
+                sample << "    " << chordMoodNames()[mood] << ": ";
+                for (int k = 0; k < 4; ++k) sample << chordName (pat, k, cs) << " ";
+                sample << "\n";
+            }
+            // angry = power chords somewhere; RANDOM puts the scale inside the mood
+            {
+                ChordPattern pat; int power = 0;
+                for (uint32_t seed = 1; seed < 20; ++seed)
+                {
+                    pat.randomizeMood (18, 4, 6, 0.1f, seed);
+                    for (int k = 0; k < 4; ++k) power += pat.slots[(size_t) k].quality.load() == QPower ? 1 : 0;
+                }
+                ok = ok && power > 0;
+            }
+            set (p, "chord_mood", 4.0f); set (p, "chord_scale", 1.0f);   // Sad in Major -> RANDOM picks a minor-ish scale
+            randomizer::randomize (p, randomizer::Chords, false, 99u);
+            const int sc = (int) p.apvts.getRawParameterValue ("chord_scale")->load();
+            const auto& sadScales = chordMoodStyle (4).scales;
+            ok = ok && std::find (sadScales.begin(), sadScales.end(), sc) != sadScales.end();
+            randomizer::randomizeChordsAll (p, 1234u);
+            if (! ok) ++failures;
+            std::printf ("  %-26s %s\n%s", "73_chord_emotions", ok ? "ok" : "FAIL", sample.toRawUTF8());
+            p.chordPattern.clear();
+        }
+
+        // LAYERS: extra sounds play, zones split the keyboard, mute / solo, transpose with clean note-offs, state and presets
+        {
+            PyraAudioProcessor m;
+            resetAll (m);
+            auto& b = m.getOrCreateLayer (1);
+            resetAll (b);
+            set (b, pid::osc (0, "wt"), 1);
+            auto peaks = [&] (std::initializer_list<int> notes, double secs = 0.6)
+            {
+                for (auto& pk : m.layerPeak) pk.store (0.0f);
+                std::vector<Note> v;
+                for (int n : notes) v.push_back ({ 0.0, secs * 0.6, n, 0.8f });
+                auto r = render (m, "74_layers_tmp", secs, v);
+                return std::make_tuple (m.layerPeak[0].load(), m.layerPeak[1].load(), r.rms);
+            };
+            auto [a0, b0, r0] = peaks ({ 60 });
+            set (m, layerParam (1, "on"), 1);
+            auto [a1, b1, r1] = peaks ({ 60 });
+            bool ok = b0 == 0.0f && b1 > 0.01f && a1 > 0.01f && a0 > 0.01f;
+            // split: A below C4, B from C4 up
+            set (m, layerParam (0, "hi"), 59); set (m, layerParam (1, "lo"), 60);
+            auto [a2, b2, r2] = peaks ({ 48 });
+            auto [a3, b3, r3] = peaks ({ 72 });
+            ok = ok && a2 > 0.01f && b2 < 1.0e-4f && a3 < 1.0e-4f && b3 > 0.01f;
+            set (m, layerParam (0, "hi"), 127); set (m, layerParam (1, "lo"), 0);
+            // solo B: A goes quiet; mute B: B goes quiet
+            set (m, layerParam (1, "solo"), 1);
+            auto [a4, b4, r4] = peaks ({ 60 });
+            set (m, layerParam (1, "solo"), 0); set (m, layerParam (1, "mute"), 1);
+            auto [a5, b5, r5] = peaks ({ 60 });
+            ok = ok && a4 < 1.0e-4f && b4 > 0.01f && b5 < 1.0e-4f && a5 > 0.01f;
+            set (m, layerParam (1, "mute"), 0);
+            if (! ok) ++failures;
+            std::printf ("  %-26s %s (B off %.3f on %.3f | split %.3f/%.3f %.3f/%.3f | solo %.3f/%.3f mute %.3f/%.3f)\n", "74_layers_play",
+                         ok ? "ok" : "FAIL", b0, b1, a2, b2, a3, b3, a4, b4, a5, b5);
+
+            // transpose changed while a key is held: the note still stops
+            {
+                set (m, "env1_rel", 0.05f); set (b, "env1_rel", 0.05f);
+                set (m, layerParam (1, "trans"), 12);
+                m.prepareToPlay (kSr, kBlock);
+                juce::AudioBuffer<float> buf (2, kBlock);
+                juce::MidiBuffer mid;
+                mid.addEvent (juce::MidiMessage::noteOn (1, 60, 0.8f), 0);
+                m.processBlock (buf, mid); mid.clear();
+                const int during = b.engine.uiVoices.load();
+                set (m, layerParam (1, "trans"), -7);
+                for (int i = 0; i < 20; ++i) m.processBlock (buf, mid);
+                mid.addEvent (juce::MidiMessage::noteOff (1, 60), 0);
+                m.processBlock (buf, mid); mid.clear();
+                for (int i = 0; i < 200; ++i) m.processBlock (buf, mid);
+                const int after = b.engine.uiVoices.load();
+                const bool ok2 = during > 0 && after == 0;
+                if (! ok2) ++failures;
+                std::printf ("  %-26s %s (voices %d -> %d)\n", "75_layers_noteoff", ok2 ? "ok" : "FAIL", during, after);
+                set (m, layerParam (1, "trans"), 0);
+            }
+
+            // state: the layers come back with the project; presets never carry the layer mix
+            {
+                auto& pm = b.getPresetManager();
+                pm.load (pm.getAll()[42].id);
+                const auto name = b.presetName;
+                set (m, layerParam (1, "level"), -9.0f); set (m, layerParam (3, "on"), 1);
+                m.getOrCreateLayer (3).getPresetManager().load (pm.getAll()[100].id);
+                juce::MemoryBlock mb; m.getStateInformation (mb);
+                PyraAudioProcessor q; q.setStateInformation (mb.getData(), (int) mb.getSize());
+                auto* qb = q.getLayer (1);
+                auto* qd = q.getLayer (3);
+                bool ok3 = qb != nullptr && qd != nullptr && qb->presetName == name
+                           && std::abs (q.apvts.getRawParameterValue (layerParam (1, "level"))->load() + 9.0f) < 0.05f
+                           && qb->apvts.getRawParameterValue (pid::osc (0, "wt"))->load() == b.apvts.getRawParameterValue (pid::osc (0, "wt"))->load();
+                auto data = presetdata::capture (m);
+                if (auto* obj = data["params"].getDynamicObject())
+                    for (auto& prop : obj->getProperties())
+                        if (prop.name.toString().startsWith ("layer")) ok3 = false;
+                // loading a preset into A keeps the layer mix
+                m.getPresetManager().load (pm.getAll()[7].id);
+                ok3 = ok3 && std::abs (m.apvts.getRawParameterValue (layerParam (1, "level"))->load() + 9.0f) < 0.05f;
+                // copy a layer's sound
+                m.copyLayerSound (1, 2);
+                ok3 = ok3 && m.getLayer (2) != nullptr && m.getLayer (2)->presetName == name;
+                // RANDOM on LAYERS makes a multi
+                randomizer::randomizeLayers (m, false, 77u);
+                int onCount = 0;
+                for (int k = 0; k < kNumLayers; ++k) onCount += m.apvts.getRawParameterValue (layerParam (k, "on"))->load() > 0.5f ? 1 : 0;
+                ok3 = ok3 && onCount >= 2;
+                auto rr = render (m, "76_layers_random_multi", 2.0, chord (0.0, 1.5, { 48, 60, 64, 67 }));
+                ok3 = ok3 && rr.peak > 0.001f;
+                if (! ok3) ++failures;
+                std::printf ("  %-26s %s (%d layers on after RANDOM)\n", "76_layers_state", ok3 ? "ok" : "FAIL", onCount);
+            }
         }
     }
 

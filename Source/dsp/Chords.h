@@ -43,6 +43,9 @@ public:
     void clear();
     /** New progression for the given scale (locked slots are kept). */
     void randomize (int count, int scale, float complexity, int sizeMode, uint32_t seed);
+    /** New progression with an emotion (mood > 0, see chordMoodNames()): picks one of the mood's progressions,
+        written in roman numerals, and fits it to the scale (locked slots are kept). */
+    void randomizeMood (int mood, int count, int scale, float complexity, uint32_t seed);
 
     juce::var toVar() const;
     void fromVar (const juce::var&);
@@ -65,6 +68,20 @@ bool chordUseFlats (int scale, int key);
 juce::String pitchClassName (int pc, bool flats);
 /** Start (in beats) and length of each hit inside one chord of `lengthBeats`. */
 std::vector<std::pair<double, double>> chordRhythmHits (int rhythm, double lengthBeats, float swing);
+
+/** Emotions for the RANDOM button of CHORDS (index 0 = any). Append-only. */
+const juce::StringArray& chordMoodNames();
+/** How a mood likes to be played: scales and settings RANDOM picks from. */
+struct ChordMoodStyle
+{
+    std::vector<int> scales;                          // indices in choices::scales()
+    std::vector<int> rhythms, voicings, sizes, lengths, counts;
+    float complexityLo = 0.1f, complexityHi = 0.5f;
+    float strumChance = 0.2f, swingChance = 0.1f, bassChance = 0.7f;
+    int octave = 0;
+    std::vector<const char*> progressions;           // e.g. "i VI III VII", "Imaj7 vi7 ii7 V7"
+};
+const ChordMoodStyle& chordMoodStyle (int mood);
 
 juce::MidiFile chordsToMidiFile (const ChordSettings& s, const ChordPattern& pattern, int loops = 2);
 

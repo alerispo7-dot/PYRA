@@ -273,6 +273,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     addPhase5Parameters (l);
     addSamplerParameters (l);
     addPhase6Parameters (l);
+    addPhase7Parameters (l);
     return l;
 }
 

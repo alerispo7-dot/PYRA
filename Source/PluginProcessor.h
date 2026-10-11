@@ -8,12 +8,13 @@
 #include "dsp/Chords.h"
 #include "Presets.h"
 #include "History.h"
+#include <array>
 
 class PyraAudioProcessor : public juce::AudioProcessor
 {
 public:
     PyraAudioProcessor();
-    ~PyraAudioProcessor() override = default;
+    ~PyraAudioProcessor() override;
 
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override {}
@@ -64,7 +65,49 @@ public:
     /** Keyboard state shared with the on-screen keyboard. */
     juce::MidiKeyboardState keyboardState;
 
+    //==========================================================================
+    // LAYERS: layer A is this sound; layers B..H are complete PYRA sounds living inside this one
+    // (own preset, oscillators, FX, ARP, CHORDS), played by the same MIDI and mixed into the output.
+    bool isLayerChild = false;
+    /** 0 = this processor; 1..7 = the extra layer (nullptr if never used). */
+    PyraAudioProcessor* getLayer (int k) const;
+    /** Creates the layer the first time it is needed (message thread). */
+    PyraAudioProcessor& getOrCreateLayer (int k);
+    /** Copies the whole sound (preset, patterns) of layer `from` into layer `to`. */
+    void copyLayerSound (int from, int to);
+    /** Layer k back to the INIT sound. */
+    void initLayerSound (int k);
+    int totalVoices() const;
+
+    /** Everything that makes the sound (and, for the main instance, the layers). */
+    juce::ValueTree captureState (bool withLayers);
+    void restoreState (const juce::ValueTree&);
+
+    std::atomic<float> uiPeak { 0.0f };                       // output peak for the scope (UI resets it)
+    std::array<std::atomic<float>, pyra::kNumLayers> layerPeak; // per-layer meters (UI resets them)
+
 private:
+    struct LayerRoute
+    {
+        std::array<uint8_t, 16 * 128> sounding {};   // input (channel, note) -> output note + 1 (0 = silent)
+        bool wasOn = false, snap = true;
+        juce::SmoothedValue<float> gainL { 0.0f }, gainR { 0.0f };
+    };
+    struct LayerParams { std::atomic<float>* on {}, *level {}, *pan {}, *trans {}, *lo {}, *hi {}, *vlo {}, *vhi {}, *mute {}, *solo {}, *chan {}; };
+    void routeLayerMidi (int k, const juce::MidiBuffer& in, juce::MidiBuffer& out);
+    void mixLayers (juce::AudioBuffer<float>& out, const juce::MidiBuffer& input);
+    void prepareLayers (double sampleRate, int samplesPerBlock);
+
+    std::array<std::unique_ptr<PyraAudioProcessor>, pyra::kNumLayers> layerOwned;
+    std::array<std::atomic<PyraAudioProcessor*>, pyra::kNumLayers> layerPtr;
+    std::array<LayerRoute, pyra::kNumLayers> routes;
+    std::array<LayerParams, pyra::kNumLayers> lp;
+    juce::AudioBuffer<float> layerBuf;
+    juce::MidiBuffer layerInput, layerMidi;
+    double preparedRate = 0.0;
+    int preparedBlock = 0;
+    juce::CriticalSection layerLock;
+
     pyra::ParamRefs refs;
     pyra::Settings settings;
     juce::AudioBuffer<float> tmpRight;

@@ -37,12 +37,13 @@ PyraLookAndFeel::PyraLookAndFeel()
     setColour (juce::PopupMenu::backgroundColourId, panelHi);
     setColour (juce::PopupMenu::textColourId, text);
     setColour (juce::PopupMenu::highlightedBackgroundColourId, accent.withAlpha (0.85f));
-    setColour (juce::PopupMenu::highlightedTextColourId, juce::Colours::black);
+    setColour (juce::PopupMenu::highlightedTextColourId, text);
     setColour (juce::TextButton::buttonColourId, knobBody);
     setColour (juce::TextButton::buttonOnColourId, accent);
     setColour (juce::TextButton::textColourOffId, text);
-    setColour (juce::TextButton::textColourOnId, juce::Colours::black);
+    setColour (juce::TextButton::textColourOnId, juce::Colour (0xfffff4ec));
     setColour (juce::Slider::textBoxTextColourId, text);
+    setColour (juce::Slider::trackColourId, accent);
     setColour (juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
     setColour (juce::Slider::textBoxBackgroundColourId, juce::Colours::transparentBlack);
     setColour (juce::Slider::textBoxHighlightColourId, accent.withAlpha (0.4f));
@@ -54,11 +55,14 @@ PyraLookAndFeel::PyraLookAndFeel()
     setColour (juce::TextEditor::outlineColourId, edge);
     setColour (juce::TextEditor::focusedOutlineColourId, accent);
     setColour (juce::ScrollBar::thumbColourId, edge);
-    setColour (juce::MidiKeyboardComponent::whiteNoteColourId, juce::Colour (0xffe6d8c4));
-    setColour (juce::MidiKeyboardComponent::blackNoteColourId, juce::Colour (0xff170806));
-    setColour (juce::MidiKeyboardComponent::keySeparatorLineColourId, juce::Colour (0xff6a4a3e));
-    setColour (juce::MidiKeyboardComponent::keyDownOverlayColourId, accent.withAlpha (0.8f));
-    setColour (juce::MidiKeyboardComponent::mouseOverKeyOverlayColourId, accent2.withAlpha (0.3f));
+    setColour (juce::MidiKeyboardComponent::whiteNoteColourId, juce::Colour (0xffd9cfc8));      // pale stone keys
+    setColour (juce::MidiKeyboardComponent::blackNoteColourId, juce::Colour (0xff100b0a));      // obsidian
+    setColour (juce::MidiKeyboardComponent::keySeparatorLineColourId, juce::Colour (0xff5a4a44));
+    setColour (juce::MidiKeyboardComponent::keyDownOverlayColourId, accent.withAlpha (0.85f));
+    setColour (juce::MidiKeyboardComponent::mouseOverKeyOverlayColourId, accent.withAlpha (0.25f));
+    setColour (juce::MidiKeyboardComponent::textLabelColourId, juce::Colour (0xff3a2e2a));
+    setColour (juce::ListBox::backgroundColourId, juce::Colours::transparentBlack);
+    setColour (juce::CaretComponent::caretColourId, accent);
     setColour (juce::MidiKeyboardComponent::shadowColourId, juce::Colours::transparentBlack);
 }
 
@@ -88,10 +92,18 @@ namespace
 {
     juce::Colour lavaAt (float t)
     {
-        // deep red -> lava orange -> molten yellow
+        // dark blood -> lava red -> molten orange (the veins of the logo)
         t = juce::jlimit (0.0f, 1.0f, t);
-        if (t < 0.5f) return juce::Colour (0xffa8180a).interpolatedWith (colours::accent, t * 2.0f);
-        return colours::accent.interpolatedWith (colours::accent2, (t - 0.5f) * 2.0f);
+        if (t < 0.55f) return juce::Colour (0xff6e0806).interpolatedWith (colours::accent, t / 0.55f);
+        return colours::accent.interpolatedWith (juce::Colour (0xffff8a3a), (t - 0.55f) / 0.45f);
+    }
+
+    /** Texture offset that differs from knob to knob (so no two stones look the same). */
+    juce::Point<float> stoneOffset (const void* p)
+    {
+        auto h = (uint32_t) (reinterpret_cast<uintptr_t> (p) >> 4);
+        h = (h ^ (h >> 13)) * 1274126177u;
+        return { (float) (h & 511u), (float) ((h >> 9) & 511u) };
     }
 }
 
@@ -108,25 +120,30 @@ void PyraLookAndFeel::drawRotarySlider (juce::Graphics& g, int x, int y, int w, 
     const float arcR = radius - track * 0.5f;
     const bool enabled = s.isEnabled();
     const bool lavaFace = (bool) s.getProperties().getWithDefault ("lava", false);
+    // bipolar = centred ranges like pan or ±24 st (not -40..+6 dB)
+    const bool bipolar = s.getMinimum() < 0.0 && s.getMaximum() > 0.0
+                         && std::abs (s.getMinimum() + s.getMaximum()) <= 0.05 * (s.getMaximum() - s.getMinimum());
+    const float heat = bipolar ? std::abs (pos - 0.5f) * 2.0f : pos;
 
-    // track: a dark groove
+    // track: a groove cut into the stone
     juce::Path bgArc;
     bgArc.addCentredArc (c.x, c.y, arcR, arcR, 0.0f, startAngle, endAngle, true);
-    g.setColour (juce::Colour (0xff140605));
-    g.strokePath (bgArc, juce::PathStrokeType (track + 1.5f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
-    g.setColour (edge.withAlpha (0.8f));
-    g.strokePath (bgArc, juce::PathStrokeType (track * 0.55f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+    g.setColour (juce::Colour (0xff080505));
+    g.strokePath (bgArc, juce::PathStrokeType (track + 2.0f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+    g.setColour (juce::Colour (0xff2e2421));
+    g.strokePath (bgArc, juce::PathStrokeType (track * 0.5f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
 
-    // value arc: flowing lava (dark red at the start, molten yellow at the tip) with a soft glow
-    const bool bipolar = s.getMinimum() < 0.0 && s.getMaximum() > 0.0;
+    // value arc: lava flowing in the groove, hotter towards the tip
     const float from = bipolar ? (startAngle + endAngle) * 0.5f : startAngle;
     if (std::abs (angle - from) > 0.001f)
     {
         const float a0 = std::min (from, angle), a1 = std::max (from, angle);
         juce::Path glowArc;
         glowArc.addCentredArc (c.x, c.y, arcR, arcR, 0.0f, a0, a1, true);
+        g.setColour ((enabled ? accent : textDim).withAlpha (0.10f));
+        g.strokePath (glowArc, juce::PathStrokeType (track * 3.2f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
         g.setColour ((enabled ? accent : textDim).withAlpha (0.22f));
-        g.strokePath (glowArc, juce::PathStrokeType (track * 2.2f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+        g.strokePath (glowArc, juce::PathStrokeType (track * 1.9f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
         const int segs = juce::jlimit (2, 28, (int) ((a1 - a0) * 9.0f));
         for (int k = 0; k < segs; ++k)
         {
@@ -134,107 +151,167 @@ void PyraLookAndFeel::drawRotarySlider (juce::Graphics& g, int x, int y, int w, 
             juce::Path seg;
             seg.addCentredArc (c.x, c.y, arcR, arcR, 0.0f, s0, s1 + 0.01f, true);
             const float t = bipolar ? 0.35f + 0.65f * (float) (k + 1) / (float) segs : 0.15f + 0.85f * (float) (k + 1) / (float) segs;
-            g.setColour (enabled ? lavaAt (t * (0.55f + 0.45f * (bipolar ? std::abs (pos - 0.5f) * 2.0f : pos))) : textDim);
+            g.setColour (enabled ? lavaAt (t * (0.6f + 0.4f * heat)) : textDim);
             g.strokePath (seg, juce::PathStrokeType (track, juce::PathStrokeType::curved,
                                                      k == 0 || k == segs - 1 ? juce::PathStrokeType::rounded : juce::PathStrokeType::butt));
         }
+        // a thin molten core along the arc
+        if (enabled)
+        {
+            g.setColour (juce::Colour (0xffffc4a0).withAlpha (0.25f + 0.35f * heat));
+            g.strokePath (glowArc, juce::PathStrokeType (std::max (0.8f, track * 0.25f), juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+        }
     }
 
-    // body
+    // body: a round of cracked stone; its veins glow as the value goes up
     const float bodyR = radius - track * 2.0f;
     const auto body = juce::Rectangle<float> (c.x - bodyR, c.y - bodyR, bodyR * 2.0f, bodyR * 2.0f);
-    g.setColour (juce::Colours::black.withAlpha (0.55f));
-    g.fillEllipse (body.translated (0.0f, bodyR * 0.08f).expanded (1.0f));
-    if (lavaFace)
+    g.setColour (juce::Colours::black.withAlpha (0.6f));
+    g.fillEllipse (body.translated (0.0f, bodyR * 0.08f).expanded (1.5f));
     {
-        // molten core (like a magma ball): it turns with the knob and burns brighter as the value goes up
-        const auto& tex = art::lava (512);
+        juce::Graphics::ScopedSaveState ss (g);
+        juce::Path clip; clip.addEllipse (body);
+        g.reduceClipRegion (clip);
+        const float t = (float) (double) s.getProperties().getWithDefault ("time", 0.0);
+        const auto off = stoneOffset (&s);
+        if (lavaFace)
         {
-            juce::Graphics::ScopedSaveState ss (g);
-            juce::Path clip; clip.addEllipse (body);
-            g.reduceClipRegion (clip);
-            const float t = (float) (double) s.getProperties().getWithDefault ("time", 0.0);
+            // molten core like the ear cups of the logo: turns with the knob and burns brighter as the value goes up
+            const auto& tex = art::lava();
             g.drawImageTransformed (tex, juce::AffineTransform::translation (-256.0f, -256.0f)
-                                             .rotated (angle * 0.35f + t * 0.05f)
-                                             .scaled (bodyR * 2.0f / 512.0f * 1.04f)
+                                             .rotated (angle * 0.35f + t * 0.03f)
+                                             .scaled (bodyR * 2.0f / 512.0f * 1.25f)
                                              .translated (c.x, c.y));
-            g.setColour (juce::Colours::black.withAlpha (juce::jlimit (0.0f, 0.8f, 0.5f * (1.0f - pos) + 0.07f * std::sin (t * 2.3f))));   // breathing glow
-            g.fillEllipse (body);
-            const int doodle = (int) s.getProperties().getWithDefault ("doodle", -1);
-            if (doodle >= 0)
-                art::drawDoodle (g, (art::Doodle) doodle, body.withSizeKeepingCentre (bodyR * 1.05f, bodyR * 1.05f),
-                                 juce::Colour (0xff1a0402).withAlpha (0.72f), std::max (1.5f, bodyR * 0.035f), 3u);
-            // dark rim, like a crust
-            juce::ColourGradient rim (juce::Colours::transparentBlack, c.x, c.y, juce::Colours::black.withAlpha (0.75f), c.x + bodyR, c.y, true);
-            rim.addColour (0.75, juce::Colours::transparentBlack);
-            g.setGradientFill (rim);
+            g.setColour (juce::Colours::black.withAlpha (juce::jlimit (0.0f, 0.8f, 0.55f * (1.0f - pos) + 0.06f * std::sin (t * 2.3f))));   // breathing
             g.fillEllipse (body);
         }
-        g.setColour (accent2.withAlpha (0.35f + 0.5f * pos));
-        g.drawEllipse (body, 1.5f);
-    }
-    else
-    {
-        juce::ColourGradient grad (juce::Colour (0xff47302a), c.x, c.y - bodyR, juce::Colour (0xff120807), c.x, c.y + bodyR, false);
-        g.setGradientFill (grad);
-        g.fillEllipse (body);
-        // a faint ember glow inside, growing with the value
-        const float v = bipolar ? std::abs (pos - 0.5f) * 2.0f : pos;
-        if (enabled && v > 0.01f)
+        else
         {
-            juce::ColourGradient ember (accent.withAlpha (0.20f * v), c.x, c.y + bodyR * 0.6f, juce::Colours::transparentBlack, c.x, c.y - bodyR * 0.4f, false);
-            g.setGradientFill (ember);
-            g.fillEllipse (body);
+            const float sc = juce::jlimit (0.12f, 0.4f, bodyR / 110.0f);
+            g.drawImageTransformed (art::stone(), juce::AffineTransform::translation (-off.x, -off.y).rotated (angle * 0.5f).scaled (sc).translated (c.x, c.y));
+            if (enabled && heat > 0.02f)
+            {
+                g.setOpacity (juce::jlimit (0.0f, 1.0f, 0.15f + 0.75f * heat));
+                g.drawImageTransformed (art::lava(), juce::AffineTransform::translation (-off.y * 0.5f, -off.x * 0.5f).rotated (angle * 0.5f).scaled (sc * 0.9f).translated (c.x, c.y));
+                g.setOpacity (1.0f);
+            }
         }
-        g.setColour (juce::Colour (0xff5a3a30).withAlpha (0.8f));
-        g.drawEllipse (body.reduced (0.5f), 1.0f);
-        g.setColour (juce::Colours::black.withAlpha (0.6f));
-        g.drawEllipse (body.expanded (0.5f), 1.0f);
+        // round it: light from above, dark rim
+        juce::ColourGradient shade (juce::Colours::white.withAlpha (0.10f), c.x, c.y - bodyR, juce::Colours::black.withAlpha (0.55f), c.x, c.y + bodyR, false);
+        g.setGradientFill (shade);
+        g.fillEllipse (body);
+        juce::ColourGradient rim (juce::Colours::transparentBlack, c.x, c.y, juce::Colours::black.withAlpha (0.8f), c.x + bodyR, c.y, true);
+        rim.addColour (0.72, juce::Colours::transparentBlack);
+        g.setGradientFill (rim);
+        g.fillEllipse (body);
     }
+    g.setColour (lavaFace ? accent.withAlpha (0.35f + 0.55f * pos) : juce::Colour (0xff5a4842).withAlpha (0.9f));
+    g.drawEllipse (body.reduced (0.5f), lavaFace ? 1.5f : 1.0f);
+    g.setColour (juce::Colours::black.withAlpha (0.7f));
+    g.drawEllipse (body.expanded (0.6f), 1.0f);
 
-    // pointer: molten metal
-    const float glow = bipolar ? std::abs (pos - 0.5f) * 2.0f : pos;
+    // pointer: a white-hot shard
     juce::Path p;
     const float pw = std::max (1.6f, bodyR * (lavaFace ? 0.09f : 0.14f));
     p.addRoundedRectangle (-pw * 0.5f, -bodyR + 2.0f, pw, bodyR * (lavaFace ? 0.38f : 0.55f), pw * 0.5f);
     const auto tr = juce::AffineTransform::rotation (angle).translated (c.x, c.y);
-    if (enabled && glow > 0.05f)
+    g.setColour (juce::Colours::black.withAlpha (0.6f));
+    g.strokePath (p, juce::PathStrokeType (1.2f), tr);
+    if (enabled && heat > 0.05f)
     {
-        g.setColour (accent.withAlpha (0.35f * glow));
-        g.strokePath (p, juce::PathStrokeType (pw * 1.6f), tr);
+        g.setColour (accent.withAlpha (0.45f * heat));
+        g.strokePath (p, juce::PathStrokeType (pw * 1.4f), tr);
     }
-    g.setColour (lavaFace ? juce::Colour (0xfffff2d8) : text.interpolatedWith (accent2, glow * 0.85f));
+    g.setColour (lavaFace ? juce::Colour (0xfffff0e6) : text.interpolatedWith (juce::Colour (0xffffb08a), heat * 0.8f));
     g.fillPath (p, tr);
+}
+
+void PyraLookAndFeel::drawLinearSlider (juce::Graphics& g, int x, int y, int w, int h, float sliderPos, float minPos, float maxPos,
+                                        juce::Slider::SliderStyle style, juce::Slider& s)
+{
+    if (style != juce::Slider::LinearHorizontal && style != juce::Slider::LinearVertical)
+    {
+        LookAndFeel_V4::drawLinearSlider (g, x, y, w, h, sliderPos, minPos, maxPos, style, s);
+        return;
+    }
+    const bool horiz = style == juce::Slider::LinearHorizontal;
+    auto r = juce::Rectangle<float> ((float) x, (float) y, (float) w, (float) h);
+    const float th = 5.0f;
+    auto groove = horiz ? r.withSizeKeepingCentre (r.getWidth(), th) : r.withSizeKeepingCentre (th, r.getHeight());
+    // a groove cut into the stone, filled with the colour of the slider (lava, or violet for modulation)
+    g.setColour (juce::Colour (0xff080505));
+    g.fillRoundedRectangle (groove.expanded (1.0f), 3.0f);
+    g.setColour (juce::Colour (0xff2e2421));
+    g.drawRoundedRectangle (groove.expanded (1.0f), 3.0f, 1.0f);
+    const auto c = s.findColour (juce::Slider::trackColourId);
+    const bool bipolar = s.getMinimum() < 0.0 && s.getMaximum() > 0.0
+                         && std::abs (s.getMinimum() + s.getMaximum()) <= 0.05 * (s.getMaximum() - s.getMinimum());
+    const float zero = bipolar ? (horiz ? groove.getCentreX() : groove.getCentreY()) : (horiz ? groove.getX() : groove.getBottom());
+    auto fill = horiz ? juce::Rectangle<float>::leftTopRightBottom (std::min (zero, sliderPos), groove.getY(), std::max (zero, sliderPos), groove.getBottom())
+                      : juce::Rectangle<float>::leftTopRightBottom (groove.getX(), std::min (zero, sliderPos), groove.getRight(), std::max (zero, sliderPos));
+    if (s.isEnabled())
+    {
+        g.setColour (c.withAlpha (0.25f));
+        g.fillRoundedRectangle (fill.expanded (2.0f), 3.0f);
+        g.setGradientFill (juce::ColourGradient (c.darker (0.5f), fill.getX(), fill.getY(), c.brighter (0.25f), fill.getRight(), fill.getBottom(), false));
+        g.fillRoundedRectangle (fill, 2.5f);
+    }
+    // thumb: a little stone with a hot rim
+    const float tr = 7.0f;
+    const auto tc = horiz ? juce::Point<float> (sliderPos, r.getCentreY()) : juce::Point<float> (r.getCentreX(), sliderPos);
+    auto thumb = juce::Rectangle<float> (tr * 2.0f, tr * 2.0f).withCentre (tc);
+    g.setColour (juce::Colours::black.withAlpha (0.6f));
+    g.fillEllipse (thumb.translated (0.0f, 1.0f).expanded (1.0f));
+    g.setGradientFill (juce::ColourGradient (juce::Colour (0xffe9dfd8), tc.x, thumb.getY(), juce::Colour (0xff7a6c66), tc.x, thumb.getBottom(), false));
+    g.fillEllipse (thumb);
+    g.setColour (s.isMouseOverOrDragging() ? colours::accent : c.withAlpha (0.8f));
+    g.drawEllipse (thumb, 1.2f);
 }
 
 void PyraLookAndFeel::drawButtonBackground (juce::Graphics& g, juce::Button& b, const juce::Colour& base, bool highlighted, bool down)
 {
     using namespace colours;
     auto r = b.getLocalBounds().toFloat().reduced (0.5f);
+    juce::Path shape;
+    shape.addRoundedRectangle (r, 4.0f);
     const bool on = b.getToggleState();
+    const auto origin = juce::Point<float> (-(float) b.getX() * 0.7f, -(float) b.getY() * 0.7f);
     if (on)
     {
-        // active: glowing lava
-        g.setColour (accent.withAlpha (0.25f));
-        g.fillRoundedRectangle (r.expanded (1.5f), 6.0f);
-        juce::ColourGradient lavaG (accent2, r.getX(), r.getY(), juce::Colour (0xffc8300c), r.getX(), r.getBottom(), false);
-        g.setGradientFill (lavaG);
-        g.fillRoundedRectangle (r, 4.0f);
-        g.setColour (juce::Colour (0xffffe0a0).withAlpha (0.8f));
+        // active: a slab of stone split open by lava
+        g.setColour (accent.withAlpha (0.28f));
+        g.fillRoundedRectangle (r.expanded (2.0f), 6.0f);
+        {
+            juce::Graphics::ScopedSaveState ss (g);
+            g.reduceClipRegion (shape);
+            g.setFillType (juce::FillType (art::lava(), juce::AffineTransform::scale (0.45f).translated (origin)));
+            g.fillPath (shape);
+            g.setGradientFill (juce::ColourGradient (juce::Colour (0xd0ff4a22), r.getX(), r.getY(), juce::Colour (0xe08a0a08), r.getX(), r.getBottom(), false));
+            g.fillPath (shape);
+        }
+        g.setColour (juce::Colour (0xffffb090).withAlpha (0.85f));
         g.drawRoundedRectangle (r, 4.0f, 1.0f);
         return;
     }
-    // custom colours (e.g. RANDOM buttons) keep their tint, as dark embers
+    // custom colours (e.g. RANDOM buttons) keep their tint, glowing through the stone
     const bool custom = b.findColour (juce::TextButton::buttonColourId) != knobBody;
-    auto top = custom ? base.brighter (0.15f) : juce::Colour (0xff311a15);
-    auto bottom = custom ? base.darker (0.35f) : juce::Colour (0xff1a0c0a);
-    if (highlighted) { top = top.brighter (0.15f); bottom = bottom.brighter (0.12f); }
-    if (down) { std::swap (top, bottom); }
-    g.setGradientFill (juce::ColourGradient (top, r.getX(), r.getY(), bottom, r.getX(), r.getBottom(), false));
-    g.fillRoundedRectangle (r, 4.0f);
-    g.setColour (highlighted ? accent.withAlpha (0.8f) : edge.brighter (0.15f));
+    art::fillStone (g, shape, origin, custom ? 0.25f : (down ? 0.55f : 0.42f), 0.35f);
+    if (custom)
+    {
+        g.setGradientFill (juce::ColourGradient (base.withAlpha (0.75f), r.getX(), r.getY(), base.darker (0.6f).withAlpha (0.85f), r.getX(), r.getBottom(), false));
+        g.fillPath (shape);
+    }
+    if (highlighted)
+    {
+        g.setColour (accent.withAlpha (0.10f));
+        g.fillPath (shape);
+    }
+    // chiselled edge: pale lip on top, dark below
+    g.setColour (juce::Colours::black.withAlpha (0.8f));
+    g.drawRoundedRectangle (r.expanded (0.5f), 4.5f, 1.0f);
+    g.setColour (highlighted ? accent.withAlpha (0.9f) : juce::Colour (0xff4e3e38));
     g.drawRoundedRectangle (r, 4.0f, 1.0f);
-    g.setColour (juce::Colours::white.withAlpha (0.05f));
+    g.setColour (juce::Colours::white.withAlpha (0.07f));
     g.drawHorizontalLine ((int) r.getY() + 1, r.getX() + 3.0f, r.getRight() - 3.0f);
 }
 
@@ -246,19 +323,18 @@ void PyraLookAndFeel::drawToggleButton (juce::Graphics& g, juce::ToggleButton& b
     auto box = juce::Rectangle<float> (r.getX() + 2.0f, r.getCentreY() - sz * 0.5f, sz, sz);
     const bool on = b.getToggleState();
 
+    // a little socket in the stone; when on, an ember burns in it
+    g.setColour (juce::Colour (0xff0a0707));
+    g.fillEllipse (box);
     if (on)
     {
         g.setColour (accent.withAlpha (0.3f));
         g.fillEllipse (box.expanded (3.0f));
-        g.setGradientFill (juce::ColourGradient (accent2, box.getCentreX(), box.getY(), juce::Colour (0xffc02a0a), box.getCentreX(), box.getBottom(), false));
-        g.fillEllipse (box);
+        g.setGradientFill (juce::ColourGradient (juce::Colour (0xffffa070), box.getCentreX(), box.getY() + sz * 0.3f,
+                                                 juce::Colour (0xffb00c0a), box.getCentreX(), box.getBottom(), true));
+        g.fillEllipse (box.reduced (1.5f));
     }
-    else
-    {
-        g.setColour (juce::Colour (0xff140806));
-        g.fillEllipse (box);
-    }
-    g.setColour (highlighted ? text : edge.brighter (0.3f));
+    g.setColour (highlighted ? accent : juce::Colour (0xff5a4842));
     g.drawEllipse (box, 1.0f);
 
     if (b.getButtonText().isNotEmpty())
@@ -273,15 +349,20 @@ void PyraLookAndFeel::drawComboBox (juce::Graphics& g, int w, int h, bool, int, 
 {
     using namespace colours;
     auto r = juce::Rectangle<float> (0, 0, (float) w, (float) h).reduced (0.5f);
-    g.setGradientFill (juce::ColourGradient (juce::Colour (0xff2a1612), 0.0f, 0.0f, juce::Colour (0xff160a08), 0.0f, (float) h, false));
-    g.fillRoundedRectangle (r, 4.0f);
-    g.setColour (cb.hasKeyboardFocus (false) ? accent : edge);
+    juce::Path shape;
+    shape.addRoundedRectangle (r, 4.0f);
+    art::fillStone (g, shape, { -(float) cb.getX() * 0.7f, -(float) cb.getY() * 0.7f }, 0.62f, 0.35f);
+    g.setColour (juce::Colours::black.withAlpha (0.8f));
+    g.drawRoundedRectangle (r.expanded (0.5f), 4.5f, 1.0f);
+    g.setColour (cb.hasKeyboardFocus (false) || cb.isMouseOver (true) ? accent.withAlpha (0.85f) : juce::Colour (0xff463833));
     g.drawRoundedRectangle (r, 4.0f, 1.0f);
 
     const float a = (float) h * 0.22f;
     juce::Path arrow;
     const float ax = (float) w - (float) h * 0.55f, ay = (float) h * 0.5f;
     arrow.addTriangle (ax - a, ay - a * 0.5f, ax + a, ay - a * 0.5f, ax, ay + a * 0.6f);
+    g.setColour (accent.withAlpha (0.35f));
+    g.strokePath (arrow, juce::PathStrokeType (3.0f));
     g.setColour (accent);
     g.fillPath (arrow);
 }
@@ -301,17 +382,62 @@ juce::Font PyraLookAndFeel::getPopupMenuFont() { return font (15.0f); }
 
 void PyraLookAndFeel::drawPopupMenuBackground (juce::Graphics& g, int w, int h)
 {
-    g.setGradientFill (juce::ColourGradient (juce::Colour (0xff261310), 0.0f, 0.0f, juce::Colour (0xff120807), 0.0f, (float) h, false));
-    g.fillAll();
-    g.setColour (colours::edge.brighter (0.2f));
+    juce::Path shape;
+    shape.addRectangle (0.0f, 0.0f, (float) w, (float) h);
+    art::fillStone (g, shape, {}, 0.62f, 0.45f);
+    g.setColour (colours::accent.withAlpha (0.55f));
     g.drawRect (0, 0, w, h);
+}
+
+void PyraLookAndFeel::drawPopupMenuItem (juce::Graphics& g, const juce::Rectangle<int>& area, bool isSeparator, bool isActive, bool isHighlighted,
+                                         bool isTicked, bool hasSubMenu, const juce::String& text, const juce::String& shortcutKeyText,
+                                         const juce::Drawable* icon, const juce::Colour* textColour)
+{
+    if (isSeparator)
+    {
+        auto r = area.toFloat().reduced (8.0f, 0.0f);
+        art::drawLavaVein (g, art::crackLine ({ r.getX(), r.getCentreY() }, { r.getRight(), r.getCentreY() }, (uint32_t) area.getY(), 0.8f, false), 0.8f, 0.25f);
+        return;
+    }
+    if (isHighlighted && isActive)
+    {
+        auto r = area.toFloat().reduced (2.0f, 1.0f);
+        g.setGradientFill (juce::ColourGradient (colours::accent.withAlpha (0.85f), r.getX(), r.getY(), juce::Colour (0xd08a0a08), r.getX(), r.getBottom(), false));
+        g.fillRoundedRectangle (r, 3.0f);
+    }
+    LookAndFeel_V4::drawPopupMenuItem (g, area, false, isActive, false, isTicked, hasSubMenu, text, shortcutKeyText, icon, textColour);
+}
+
+void PyraLookAndFeel::drawScrollbar (juce::Graphics& g, juce::ScrollBar&, int x, int y, int w, int h, bool vertical, int thumbStart, int thumbSize,
+                                     bool mouseOver, bool)
+{
+    auto track = juce::Rectangle<int> (x, y, w, h).toFloat().reduced (vertical ? (float) w * 0.3f : 0.0f, vertical ? 0.0f : (float) h * 0.3f);
+    g.setColour (juce::Colours::black.withAlpha (0.45f));
+    g.fillRoundedRectangle (track, 2.0f);
+    auto thumb = vertical ? juce::Rectangle<float> (track.getX(), (float) thumbStart, track.getWidth(), (float) thumbSize)
+                          : juce::Rectangle<float> ((float) thumbStart, track.getY(), (float) thumbSize, track.getHeight());
+    g.setColour ((mouseOver ? colours::accent : juce::Colour (0xff6a524a)).withAlpha (0.9f));
+    g.fillRoundedRectangle (thumb.reduced (0.5f), 2.0f);
+}
+
+void PyraLookAndFeel::fillTextEditorBackground (juce::Graphics& g, int w, int h, juce::TextEditor&)
+{
+    g.setColour (juce::Colour (0xff0c0908));
+    g.fillRoundedRectangle (0.0f, 0.0f, (float) w, (float) h, 3.0f);
+}
+
+void PyraLookAndFeel::drawTextEditorOutline (juce::Graphics& g, int w, int h, juce::TextEditor& te)
+{
+    g.setColour (te.hasKeyboardFocus (true) ? colours::accent : colours::edge.brighter (0.2f));
+    g.drawRoundedRectangle (0.5f, 0.5f, (float) w - 1.0f, (float) h - 1.0f, 3.0f, 1.0f);
 }
 
 void PyraLookAndFeel::drawTooltip (juce::Graphics& g, const juce::String& t, int w, int h)
 {
-    g.setColour (juce::Colour (0xf0180a08));
-    g.fillRoundedRectangle (0.0f, 0.0f, (float) w, (float) h, 4.0f);
-    g.setColour (colours::accent.withAlpha (0.7f));
+    juce::Path shape;
+    shape.addRoundedRectangle (0.0f, 0.0f, (float) w, (float) h, 4.0f);
+    art::fillStone (g, shape, {}, 0.7f, 0.4f);
+    g.setColour (colours::accent.withAlpha (0.75f));
     g.drawRoundedRectangle (0.5f, 0.5f, (float) w - 1.0f, (float) h - 1.0f, 4.0f, 1.0f);
     juce::AttributedString s;
     s.setJustification (juce::Justification::centredLeft);
