@@ -3,8 +3,10 @@ setlocal
 title PYRA - Installazione / Install
 
 rem ---- chiede i permessi di amministratore (serve per Program Files) ----
-net session >nul 2>&1
-if errorlevel 1 (
+set "ISADMIN="
+net session >nul 2>&1 && set "ISADMIN=1"
+fltmc >nul 2>&1 && set "ISADMIN=1"
+if not defined ISADMIN (
     echo Richiesta permessi di amministratore... / Asking for administrator rights...
     powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
     exit /b
@@ -37,17 +39,65 @@ echo Sblocco i file scaricati da internet...
 powershell -NoProfile -ExecutionPolicy Bypass -Command "Get-ChildItem -LiteralPath '%~dp0' -Recurse | Unblock-File" >nul 2>&1
 
 if not exist "%DEST%" mkdir "%DEST%"
+set "OLDDLL=%DEST%\PYRA.vst3\Contents\x86_64-win\PYRA.vst3"
+
+rem ---- the old PYRA can't be replaced while a program has it open: FL Studio, ilbridge, other DAWs ----
+rem      set PYRA_AUTOCLOSE=1 to close them without asking
+set "TRIES=0"
+:check_busy
+set "BUSY="
+set "PIDS="
+if not exist "%OLDDLL%" goto remove_old
+for /f "usebackq tokens=1*" %%A in (`powershell -NoProfile -ExecutionPolicy Bypass -Command "$d=$env:OLDDLL; Get-Process | Where-Object { try { $_.Modules.FileName -contains $d } catch { $false } } | ForEach-Object { '' + $_.Id + ' ' + $_.ProcessName + '.exe' }"`) do (
+    call set "PIDS=%%PIDS%% %%A"
+    call set "BUSY=%%BUSY%%  %%B"
+)
+if not defined PIDS goto remove_old
+set /a TRIES+=1
+if %TRIES% GTR 4 goto remove_old
+echo.
+echo [!] PYRA e' ancora aperto in:%BUSY%
+echo     Salva il tuo progetto: per aggiornare PYRA questi programmi vanno chiusi.
+echo [!] PYRA is still open in:%BUSY% - save your project, they need to be closed.
+echo.
+if defined PYRA_AUTOCLOSE goto kill_busy
+choice /C SN /M "Li chiudo io adesso? S = si', N = no, li chiudo da solo"
+if errorlevel 2 (
+    echo Chiudili ^(anche dall'icona in basso a destra vicino all'orologio^), poi premi un tasto...
+    pause >nul
+    goto check_busy
+)
+:kill_busy
+for %%P in (%PIDS%) do taskkill /F /PID %%P >nul 2>&1
+ping -n 3 127.0.0.1 >nul
+goto check_busy
+
+:remove_old
 if exist "%DEST%\PYRA.vst3" (
     echo Rimuovo la versione precedente di PYRA...
-    rmdir /s /q "%DEST%\PYRA.vst3"
+    rmdir /s /q "%DEST%\PYRA.vst3" >nul 2>&1
+)
+rem still locked by something we could not see, like an antivirus: a file in use can usually still be renamed
+if exist "%OLDDLL%" (
+    ren "%OLDDLL%" "PYRA.vst3.old%RANDOM%" >nul 2>&1
+)
+if exist "%OLDDLL%" (
+    echo.
+    echo [ERRORE] Windows tiene ancora bloccato il vecchio PYRA.
+    echo Riavvia il computer e lancia di nuovo install_windows.bat PRIMA di aprire FL Studio.
+    echo [ERROR] The old PYRA is still locked. Restart the computer and run this installer again
+    echo before opening your DAW.
+    echo.
+    pause
+    exit /b 1
 )
 
 echo Copio PYRA.vst3 in "%DEST%" ^(con i suoni campionati, ci vuole qualche secondo^)...
-robocopy "%SRC%" "%DEST%\PYRA.vst3" /E /NFL /NDL /NJH /NJS /NP >nul
+robocopy "%SRC%" "%DEST%\PYRA.vst3" /E /R:3 /W:2 /NFL /NDL /NJH /NJS /NP >nul
 if errorlevel 8 (
     echo.
-    echo [ERRORE] Copia non riuscita. Chiudi FL Studio / la DAW e riprova.
-    echo [ERROR] Copy failed. Close your DAW and try again.
+    echo [ERRORE] Copia non riuscita. Chiudi FL Studio / la DAW ^(o riavvia il computer^) e riprova.
+    echo [ERROR] Copy failed. Close your DAW ^(or restart the computer^) and try again.
     pause
     exit /b 1
 )

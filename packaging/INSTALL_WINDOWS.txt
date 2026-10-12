@@ -20,6 +20,12 @@ Il percorso finale deve essere esattamente:
    C:\Program Files\Common Files\VST3\PYRA.vst3\Contents\...
 (non C:\...\VST3\PYRA\PYRA.vst3 e non dentro un'altra cartella).
 
+SE DICE "ACCESSO NEGATO" O RESTA FERMO SU "COPIA IN CORSO"
+- Vuol dire che un programma ha ancora aperto il vecchio PYRA (di solito FL Studio,
+  anche se la finestra e' chiusa). L'installer ora te lo dice e puo' chiuderlo lui:
+  salva il progetto e rispondi S.
+- Se non basta: riavvia il computer e lancia install_windows.bat PRIMA di aprire FL Studio.
+
 SE FL STUDIO NON LO TROVA
 - In Manage plugins controlla che tra le cartelle di ricerca ci sia
   C:\Program Files\Common Files\VST3 e che la ricerca VST3 sia attiva.

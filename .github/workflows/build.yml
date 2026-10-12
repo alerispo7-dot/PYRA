@@ -81,6 +81,35 @@ jobs:
           Copy-Item packaging/install_windows.bat dist/PYRA/
           Compress-Archive -Path dist/PYRA -DestinationPath dist/PYRA-Windows.zip
 
+      - name: Test the installer (install, update, update while a program keeps PYRA open)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        timeout-minutes: 6
+        run: |
+          $dll = "$env:CommonProgramFiles\VST3\PYRA.vst3\Contents\x86_64-win\PYRA.vst3"
+          Push-Location dist/PYRA
+          cmd /c "install_windows.bat < nul"
+          if (-not (Test-Path $dll)) { throw "fresh install failed" }
+          cmd /c "install_windows.bat < nul"
+          if (-not (Test-Path $dll)) { throw "update failed" }
+          # a program that keeps PYRA loaded, like an open FL Studio
+          @"
+          Add-Type -Name K -Namespace W -MemberDefinition '[DllImport("kernel32.dll", CharSet = CharSet.Unicode)] public static extern System.IntPtr LoadLibraryW(string p);'
+          if ([W.K]::LoadLibraryW('$dll') -eq [System.IntPtr]::Zero) { exit 3 }
+          Start-Sleep 180
+          "@ | Set-Content "$env:RUNNER_TEMP\holder.ps1"
+          $holder = Start-Process powershell -PassThru -WindowStyle Hidden -ArgumentList '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', "$env:RUNNER_TEMP\holder.ps1"
+          Start-Sleep 8
+          if ($holder.HasExited) { throw "could not load PYRA to hold it (exit $($holder.ExitCode))" }
+          Remove-Item -LiteralPath $dll -ErrorAction SilentlyContinue
+          if (-not (Test-Path $dll)) { throw "the test lock did not hold" }
+          $env:PYRA_AUTOCLOSE = "1"
+          cmd /c "install_windows.bat < nul"
+          if (-not (Test-Path $dll)) { throw "update while PYRA was open failed" }
+          if (-not $holder.HasExited) { throw "the installer did not close the program holding PYRA" }
+          Get-ChildItem (Split-Path $dll) | Format-Table Name, Length, LastWriteTime
+          Pop-Location
+
       - name: Validate with pluginval (like a DAW would)
         id: pluginval
         continue-on-error: true
