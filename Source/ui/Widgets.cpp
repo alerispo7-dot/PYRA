@@ -372,6 +372,16 @@ ParamCombo::ParamCombo (juce::AudioProcessorValueTreeState& state, const juce::S
         auto* root = getRootMenu();
         for (auto& [name, items] : *groups)
         {
+            if (name.isEmpty())
+            {   // a group without a name: its items sit on the first level ("Off", ...)
+                for (int idx : items)
+                    if (juce::isPositiveAndBelow (idx, choice->choices.size()))
+                    {
+                        root->addItem (idx + 1, translateItems ? tr (choice->choices[idx]) : choice->choices[idx]);
+                        placed[(size_t) idx] = true;
+                    }
+                continue;
+            }
             juce::PopupMenu sub;
             for (int idx : items)
                 if (juce::isPositiveAndBelow (idx, choice->choices.size()))
@@ -408,6 +418,19 @@ ParamCombo::ParamCombo (juce::AudioProcessorValueTreeState& state, const juce::S
 
 const ParamCombo::Groups* ParamCombo::groupsFor (const juce::String& kind)
 {
+    static const Groups smp {   // sample bank (index = choice of smp_inst), grouped like the preset categories
+        { "", { 0 } },
+        { "Keyboard", { 1, 2, 20, 21, 22, 23, 24, 25, 26, 27 } },
+        { "Organs", { 28, 29, 30 } },
+        { "Bells", { 18, 19, 31, 32, 33, 34, 35, 36, 37, 38, 39 } },
+        { "Guitar", { 9, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51 } },
+        { "Bass", { 52, 53, 54, 55 } },
+        { "Strings", { 3, 4, 5, 6, 7, 8, 56, 57 } },
+        { "Brass", { 10, 61, 11, 12, 13, 58, 59, 60 } },
+        { "Winds", { 14, 63, 62, 15, 16, 17, 64, 65, 66, 67 } },
+        { "Vox", { 68 } },
+        { "Drums", { 69, 70, 71, 73, 72, 74, 75 } } };
+    if (kind == "smp") return &smp;
     static const Groups lfo {
         { "Basic", { 0, 1, 2, 3, 4, 5, 11, 12, 37 } },
         { "Curves", { 7, 8, 13, 14, 15, 16, 17, 18, 33, 36 } },

@@ -225,6 +225,7 @@ static int normalizeBank (const juce::File& in, const juce::File& out, const juc
     PyraAudioProcessor p;
     int problems = 0;
     juce::StringArray report;
+    juce::Array<juce::var> features;
     std::map<juce::String, std::vector<float>> catLevels;
 
     for (int idx = 0; idx < arr->size(); ++idx)
@@ -239,15 +240,27 @@ static int normalizeBank (const juce::File& in, const juce::File& out, const juc
             for (int w = 0; w < 1000 && SampleBank::get().getStatus (k) != SampleBank::Ready; ++w) juce::Thread::sleep (10);
         }
 
-        // test performance by category
+        // test performance by category (and sub-category)
+        const auto sub = preset["sub"].toString();
         std::vector<Note> notes; double len = 2.5;
-        if (cat == "Bass")                         notes = chord (0.0, 1.5, { 36 });
-        else if (cat == "Lead")                    notes = chord (0.0, 1.5, { 60 });
-        else if (cat == "Drums")                   { notes = chord (0.0, 0.15, { 48 }); len = 1.5; }
+        const bool kitLoop = sub == "Drum Loop", percLoop = sub == "Percs Loop";
+        const bool singleNote = cat == "Bass" || sub.contains ("Lead") || sub == "Chords" || sub.startsWith ("Solo") || sub == "Scat"
+                                || sub == "Trumpet" || sub == "Trombone" || sub == "Saxophone" || sub == "Tuba" || sub == "Horn"
+                                || cat == "Winds" || sub == "Accordion";
+        if (cat == "Bass" || cat == "Lead")        notes = chord (0.0, 1.5, { 36 });
+        else if (kitLoop)                          { notes = chord (0.0, 3.0, { 36 }); len = 3.5; }
+        else if (percLoop)                         { notes = chord (0.0, 3.0, { 48 }); len = 3.5; }
+        else if (cat == "Drums")
+        {
+            if (sub == "Tonal Drums") notes = chord (0.0, 0.4, { 48 });
+            else { notes = { { 0.0, 0.15, 36, 0.9f }, { 0.4, 0.15, 38, 0.9f }, { 0.8, 0.15, 42, 0.8f }, { 1.2, 0.15, 48, 0.9f } }; }
+            len = 2.0;
+        }
         else if (cat == "FX")                      { notes = chord (0.0, 4.0, { 60 }); len = 6.0; }
-        else if (cat == "Arp" || cat == "Sequence") { notes = chord (0.0, 3.0, { 48, 55, 60, 63 }); len = 3.5; }
-        else if (cat == "Pad" || cat == "Strings") { notes = chord (0.0, 3.0, { 48, 55, 60, 63 }); len = 4.5; }
-        else if (cat == "Chords")                  notes = chord (0.0, 1.5, { 48 });
+        else if (cat == "Arps" || cat == "Arp" || cat == "Sequence") { notes = chord (0.0, 3.0, { 48, 55, 60, 63 }); len = 3.5; }
+        else if (cat == "Pad")                     { notes = chord (0.0, 3.0, { 48, 55, 60, 63 }); len = 4.5; }
+        else if (singleNote)                       { notes = chord (0.0, 2.0, { 60 }); len = 2.8; }
+        else if (cat == "Strings" || cat == "Brass" || cat == "Vox") { notes = chord (0.0, 2.5, { 48, 55, 60, 64 }); len = 3.5; }
         else                                       notes = chord (0.0, 1.5, { 48, 55, 60, 64 });
 
         // render
@@ -292,6 +305,38 @@ static int normalizeBank (const juce::File& in, const juce::File& out, const juc
         const float peakDb = juce::Decibels::gainToDecibels (peak, -120.0f);
 
         const float targetRms = cat == "Drums" ? -14.0f : -16.0f;
+
+        // sound fingerprint (for finding presets that sound alike): 12 moments x 16 bands, in dB
+        {
+            constexpr int order = 11, N = 1 << order, frames = 12, bands = 16;
+            juce::dsp::FFT fft (order);
+            std::vector<float> buf ((size_t) N * 2);
+            juce::Array<juce::var> fp;
+            for (int f = 0; f < frames; ++f)
+            {
+                const int start = (int) ((double) f / frames * std::max (0, total - N));
+                std::fill (buf.begin(), buf.end(), 0.0f);
+                for (int k = 0; k < N && start + k < total; ++k)
+                {
+                    const float w = 0.5f - 0.5f * std::cos (juce::MathConstants<float>::twoPi * (float) k / (float) N);
+                    buf[(size_t) k] = 0.5f * (outBuf.getSample (0, start + k) + outBuf.getSample (1, start + k)) * w;
+                }
+                fft.performFrequencyOnlyForwardTransform (buf.data());
+                for (int b = 0; b < bands; ++b)
+                {
+                    const double f0 = 40.0 * std::pow (2.0, b * 9.0 / bands), f1 = 40.0 * std::pow (2.0, (b + 1) * 9.0 / bands);
+                    const int k0 = std::max (1, (int) (f0 / kSr * N)), k1 = std::max (k0 + 1, (int) (f1 / kSr * N));
+                    double e = 0; for (int k = k0; k < k1 && k < N / 2; ++k) e += buf[(size_t) k] * buf[(size_t) k];
+                    fp.add (std::round (10.0 * std::log10 (e / (k1 - k0) + 1e-12) * 10.0) / 10.0);
+                }
+            }
+            double side = 0, mid = 0;
+            for (int i = 0; i < total; ++i) { const float l = outBuf.getSample (0, i), r = outBuf.getSample (1, i); side += (l - r) * (l - r); mid += (l + r) * (l + r); }
+            auto* fo = new juce::DynamicObject();
+            fo->setProperty ("i", idx); fo->setProperty ("name", preset["name"]); fo->setProperty ("cat", cat); fo->setProperty ("sub", sub);
+            fo->setProperty ("fp", fp); fo->setProperty ("width", std::sqrt (side / (mid + 1e-12)));
+            features.add (juce::var (fo));
+        }
         const float gainDb = std::min (targetRms - rmsDb, -1.5f - peakDb);
         auto* params = preset["params"].getDynamicObject();
         const float oldMaster = params->hasProperty ("master") ? (float) params->getProperty ("master") : -4.0f;
@@ -328,6 +373,7 @@ static int normalizeBank (const juce::File& in, const juce::File& out, const juc
     }
 
     out.replaceWithText (juce::JSON::toString (bank, true));
+    juce::File::getCurrentWorkingDirectory().getChildFile ("features.json").replaceWithText (juce::JSON::toString (juce::var (features), true));
     report.add (juce::String (problems) + " presets with problems");
     juce::File::getCurrentWorkingDirectory().getChildFile ("normalize_report.txt").replaceWithText (report.joinIntoString ("\n"));
     std::printf ("normalised %d presets, %d with problems (see normalize_report.txt)\n", arr->size(), problems);
@@ -381,6 +427,25 @@ int main (int argc, char** argv)
         juce::File audition;
         if (argc > 4) { audition = juce::File (argv[4]); audition.createDirectory(); }
         return normalizeBank (juce::File (argv[2]), juce::File (argv[3]), audition);
+    }
+    if (argc > 1 && juce::String (argv[1]) == "--choices")
+    {   // every parameter as JSON: range, default and the names of its choices (for the preset generator)
+        PyraAudioProcessor p;
+        auto* all = new juce::DynamicObject();
+        for (auto* ap : p.getParameters())
+            if (auto* r = dynamic_cast<juce::RangedAudioParameter*> (ap))
+            {
+                auto* o = new juce::DynamicObject();
+                const auto& rng = r->getNormalisableRange();
+                o->setProperty ("min", rng.start); o->setProperty ("max", rng.end);
+                o->setProperty ("def", r->convertFrom0to1 (r->getDefaultValue()));
+                if (auto* c = dynamic_cast<juce::AudioParameterChoice*> (r)) o->setProperty ("choices", c->choices);
+                if (dynamic_cast<juce::AudioParameterBool*> (r) != nullptr) o->setProperty ("bool", true);
+                if (dynamic_cast<juce::AudioParameterInt*> (r) != nullptr) o->setProperty ("int", true);
+                all->setProperty (r->getParameterID(), juce::var (o));
+            }
+        std::printf ("%s\n", juce::JSON::toString (juce::var (all), true).toRawUTF8());
+        return 0;
     }
     if (argc > 1 && juce::String (argv[1]) == "--params")
     {

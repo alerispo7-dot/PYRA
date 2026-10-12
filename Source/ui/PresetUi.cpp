@@ -193,7 +193,7 @@ void PresetBar::paint (juce::Graphics& g)
     {
         g.setColour (colours::textDim);
         g.setFont (PyraLookAndFeel::font (12.0f));
-        g.drawText (catLabel (info->category) + (info->subCategory.isNotEmpty() ? "  /  " + info->subCategory : juce::String())
+        g.drawText (catLabel (info->category) + (info->subCategory.isNotEmpty() ? "  /  " + tr (info->subCategory) : juce::String())
                         + (info->factory ? juce::String() : "  " + tr ("(user)")),
                     textArea, juce::Justification::centredRight, true);
     }
@@ -337,7 +337,7 @@ namespace
             tint = colours::accent2;
             on = std::make_unique<ParamToggle> (ui.st, "smp_on");
             setPowerButton (on.get());
-            inst = std::make_unique<ParamCombo> (ui.st, "smp_inst");
+            inst = std::make_unique<ParamCombo> (ui.st, "smp_inst", true, ParamCombo::groupsFor ("smp"));
             route = std::make_unique<ParamCombo> (ui.st, "smp_route");
             for (juce::Component* c : { (juce::Component*) on.get(), (juce::Component*) inst.get(), (juce::Component*) route.get() })
                 addAndMakeVisible (c);
@@ -506,15 +506,15 @@ namespace
             {
                 if (it.header)
                 {
-                    y += 8;
+                    y += 6;
                     g.setColour (colours::textDim);
                     g.setFont (PyraLookAndFeel::font (10.5f, true));
-                    g.drawText (it.label, side.getX() + 14, y, side.getWidth() - 28, 18, juce::Justification::centredLeft);
-                    y += 20;
+                    g.drawText (it.label, side.getX() + 14, y, side.getWidth() - 28, 16, juce::Justification::centredLeft);
+                    y += 18;
                     continue;
                 }
                 const bool sel = filter.category == it.key;
-                auto row = juce::Rectangle<int> (side.getX() + 6, y, side.getWidth() - 12, 26);
+                auto row = juce::Rectangle<int> (side.getX() + 6, y, side.getWidth() - 12, kRowH - 1);
                 if (sel) { g.setColour (colours::accent.withAlpha (0.25f)); g.fillRoundedRectangle (row.toFloat(), 4.0f); }
                 g.setColour (sel ? colours::text : colours::text.withAlpha (0.8f));
                 g.setFont (PyraLookAndFeel::font (13.5f, sel));
@@ -522,7 +522,20 @@ namespace
                 g.setColour (colours::textDim);
                 g.setFont (PyraLookAndFeel::font (11.5f));
                 g.drawText (juce::String (it.count), row.reduced (10, 0), juce::Justification::centredRight);
-                y += 27;
+                y += kRowH;
+            }
+
+            // sub-categories of the chosen category, as chips above the list
+            for (auto& c : chips())
+            {
+                const bool sel = filter.subCategory == c.sub;
+                g.setColour (sel ? colours::accent.withAlpha (0.85f) : colours::panelHi);
+                g.fillRoundedRectangle (c.r.toFloat(), 11.0f);
+                g.setColour (sel ? colours::accent2 : colours::edge);
+                g.drawRoundedRectangle (c.r.toFloat().reduced (0.5f), 11.0f, 1.0f);
+                g.setColour (sel ? colours::text : colours::text.withAlpha (0.85f));
+                g.setFont (PyraLookAndFeel::font (12.0f, sel));
+                g.drawText (c.label, c.r, juce::Justification::centred);
             }
 
             // info panel for the selected preset
@@ -540,7 +553,7 @@ namespace
                 g.drawFittedText (p->name, r.removeFromTop (28), juce::Justification::centredLeft, 1);
                 g.setColour (colours::text);
                 g.setFont (PyraLookAndFeel::font (13.5f));
-                g.drawText (catLabel (p->category) + (p->subCategory.isNotEmpty() ? "  /  " + p->subCategory : juce::String()),
+                g.drawText (catLabel (p->category) + (p->subCategory.isNotEmpty() ? "  /  " + tr (p->subCategory) : juce::String()),
                             r.removeFromTop (22), juce::Justification::centredLeft);
                 g.setColour (colours::textDim);
                 g.drawText ((p->factory ? tr ("Factory preset") : tr ("Your preset")) + (p->author.isNotEmpty() ? "  -  " + p->author : juce::String()),
@@ -591,7 +604,9 @@ namespace
         {
             const int x = 230 + 16, right = getWidth() - 8 - 300 - 8;
             search.setBounds (x, 8, right - x, 34);
-            list.setBounds (x, 50, right - x, getHeight() - 58);
+            const auto cs = chips();
+            const int top = cs.empty() ? 50 : cs.back().r.getBottom() + 8;
+            list.setBounds (x, top, right - x, getHeight() - top - 8);
             auto info = infoArea();
             sampleLayer.setBounds (info.getX(), info.getBottom() + 8, info.getWidth(), 300);
             auto bottom = juce::Rectangle<int> (info.getX(), sampleLayer.getBottom() + 8, info.getWidth(), getHeight() - sampleLayer.getBottom() - 16);
@@ -615,8 +630,8 @@ namespace
             int y = sideArea().getY() + 10;
             for (auto& it : sideItems())
             {
-                if (it.header) { y += 28; continue; }
-                if (e.y >= y && e.y < y + 27)
+                if (it.header) { y += 24; continue; }
+                if (e.y >= y && e.y < y + kRowH)
                 {
                     if (it.key == "*recent" && e.mods.isPopupMenu())
                     {   // right click: forget the history
@@ -626,10 +641,52 @@ namespace
                         m.showMenuAsync (juce::PopupMenu::Options(), [safe] (int r) { if (safe != nullptr && r == 1) safe->pm.clearRecent(); });
                         return;
                     }
-                    filter.category = it.key; filter.subCategory = {}; refresh(); repaint(); return;
+                    filter.category = it.key; filter.subCategory = {}; resized(); refresh(); repaint(); return;
                 }
-                y += 27;
+                y += kRowH;
             }
+        }
+
+        // ---- sub-category chips
+        struct Chip { juce::String sub, label; juce::Rectangle<int> r; };
+        static constexpr int kRowH = 24;
+
+        juce::StringArray subCategoriesOf (const juce::String& cat) const
+        {
+            juce::StringArray subs;
+            if (cat.isEmpty() || cat.startsWith ("*") || cat.startsWith ("#")) return subs;
+            for (auto& p : pm.getAll())
+                if (p.category == cat && p.subCategory.isNotEmpty()) subs.addIfNotAlreadyThere (p.subCategory);
+            return subs;
+        }
+
+        std::vector<Chip> chips() const
+        {
+            std::vector<Chip> out;
+            const auto subs = subCategoriesOf (filter.category);
+            if (subs.isEmpty()) return out;
+            const int x0 = 230 + 16, x1 = getWidth() - 8 - 300 - 8;
+            int x = x0, y = 48;
+            auto font = PyraLookAndFeel::font (12.0f, true);
+            auto add = [&] (const juce::String& sub, const juce::String& label)
+            {
+                const int w = juce::GlyphArrangement::getStringWidthInt (font, label) + 22;
+                if (x + w > x1) { x = x0; y += 28; }
+                out.push_back ({ sub, label, { x, y, w, 23 } });
+                x += w + 6;
+            };
+            add ({}, tr ("All"));
+            for (auto& s : subs) add (s, tr (s));
+            return out;
+        }
+
+        void mouseDown (const juce::MouseEvent& e) override
+        {
+            for (auto& c : chips())
+                if (c.r.contains (e.getPosition()))
+                {
+                    filter.subCategory = c.sub; refresh(); repaint(); return;
+                }
         }
 
         // ---- list
@@ -648,7 +705,7 @@ namespace
             g.drawText (p->name, 34, 0, w / 2 - 34, h, juce::Justification::centredLeft, true);
             g.setColour (colours::textDim);
             g.setFont (PyraLookAndFeel::font (12.0f));
-            g.drawText (catLabel (p->category) + "  /  " + (p->subCategory.isNotEmpty() ? p->subCategory : tr ("User")),
+            g.drawText (catLabel (p->category) + "  /  " + (p->subCategory.isNotEmpty() ? tr (p->subCategory) : tr ("User")),
                         w / 2, 0, w / 2 - 10, h, juce::Justification::centredLeft, true);
             int right = w - 10;
             if (! p->factory)

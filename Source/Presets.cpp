@@ -1,6 +1,7 @@
 #include "Presets.h"
 #include "PluginProcessor.h"
 #include "BinaryData.h"
+#include <map>
 
 namespace pyra
 {
@@ -108,8 +109,8 @@ PresetManager::PresetManager (PyraAudioProcessor& p) : proc (p)
 
 juce::StringArray PresetManager::getCategories()
 {
-    return { "Bass", "Lead", "Pad", "Keys", "Pluck", "Strings", "Brass & Winds", "Guitar",
-             "Arp", "Sequence", "Chords", "Drums", "FX" };
+    return { "Bass", "Synth", "Pad", "Keyboard", "Organs", "Bells", "Guitar", "Strings", "Brass", "Winds", "Vox",
+             "Arps", "Drums", "FX" };
 }
 
 juce::File PresetManager::getUserFolder()
@@ -172,6 +173,10 @@ void PresetManager::scanUser()
         if (info.id.isEmpty()) info.id = "user:" + entry.getFile().getFileNameWithoutExtension();
         info.name = v["name"].toString().isNotEmpty() ? v["name"].toString() : entry.getFile().getFileNameWithoutExtension();
         info.category = v["category"].toString().isNotEmpty() ? v["category"].toString() : "User";
+        // presets saved before 0.9 used the old categories
+        static const std::map<juce::String, juce::String> moved { { "Lead", "Synth" }, { "Keys", "Keyboard" }, { "Pluck", "Synth" },
+            { "Brass & Winds", "Brass" }, { "Arp", "Arps" }, { "Sequence", "Arps" }, { "Chords", "Synth" }, { "Wind", "Winds" } };
+        if (auto it = moved.find (info.category); it != moved.end()) info.category = it->second;
         info.subCategory = v["sub"].toString();
         info.author = v["author"].toString();
         if (auto* t = v["tags"].getArray()) for (auto& tag : *t) info.tags.add (tag.toString());

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(PYRA VERSION 0.8.0 LANGUAGES C CXX)
+project(PYRA VERSION 0.9.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -134,7 +134,7 @@ if(PYRA_BUILD_TESTS)
     target_include_directories(PyraRenderTest PRIVATE Source)
     target_compile_definitions(PyraRenderTest PRIVATE ${PYRA_DEFINITIONS}
         JucePlugin_Name="PYRA" JucePlugin_IsSynth=1 JucePlugin_WantsMidiInput=1
-        JucePlugin_ProducesMidiOutput=0 JucePlugin_IsMidiEffect=0 JucePlugin_VersionString="0.8.0"
+        JucePlugin_ProducesMidiOutput=0 JucePlugin_IsMidiEffect=0 JucePlugin_VersionString="0.9.0"
         JUCE_STANDALONE_APPLICATION=1)
     target_link_libraries(PyraRenderTest PRIVATE
         PyraData juce::juce_audio_utils juce::juce_dsp

@@ -9,3 +9,92 @@
 982|clicca per un accordo|clic para un acorde|clic pour un accord|Klick für einen Akkord|clique para um acorde
 983|In proporzione a DURATA ACCORDO|Relativo a DURACIÓN ACORDE|Relatif à DURÉE ACCORD|Relativ zur AKKORDLÄNGE|Relativo à DURAÇÃO DO ACORDE
 984|Valori di nota (T = terzina)|Valores de nota (T = tresillo)|Valeurs de note (T = triolet)|Notenwerte (T = Triole)|Valores de nota (T = tercina)
+985|Synth|Sintetizador|Synthé|Synth|Sintetizador
+986|Pianoforti|Teclados|Claviers|Tasteninstrumente|Teclados
+987|Organi|Órganos|Orgues|Orgeln|Órgãos
+988|Campane|Campanas|Cloches|Glocken|Sinos
+989|Ottoni|Metales|Cuivres|Blechbläser|Metais
+990|Fiati|Vientos|Vents|Holzbläser|Sopros
+991|Voci|Voces|Voix|Stimmen|Vozes
+992|Arpeggi|Arpegios|Arpèges|Arpeggios|Arpejos
+993|Tutti|Todos|Tous|Alle|Todos
+994|Basso synth|Bajo synth|Basse synthé|Synthbass|Baixo synth
+995|Basso elettrico|Bajo eléctrico|Basse électrique|E-Bass|Baixo elétrico
+996|Basso acustico|Bajo acústico|Basse acoustique|Akustikbass|Baixo acústico
+997|Basso Reese|Bajo Reese|Basse Reese|Reese-Bass|Baixo Reese
+998|Basso duro|Bajo duro|Basse dure|Harter Bass|Baixo pesado
+999|Basso morbido|Bajo suave|Basse douce|Weicher Bass|Baixo suave
+1000|Sub basso|Sub bajo|Sub-basse|Subbass|Sub grave
+1001|Basso acid|Bajo acid|Basse acid|Acid-Bass|Baixo acid
+1002|808|808|808|808|808
+1003|Lead morbido|Lead suave|Lead doux|Weicher Lead|Lead suave
+1004|Lead duro|Lead duro|Lead dur|Harter Lead|Lead pesado
+1005|Polysynth|Polysynth|Polysynthé|Polysynth|Polysynth
+1006|Tastiere synth|Teclas synth|Claviers synthé|Synth-Keys|Teclas synth
+1007|Pad morbido|Pad suave|Pad doux|Weiches Pad|Pad suave
+1008|Pad enorme|Pad enorme|Pad énorme|Riesiges Pad|Pad enorme
+1009|Pad brillante|Pad brillante|Pad brillant|Helles Pad|Pad brilhante
+1010|Pad ambient|Pad ambiental|Pad ambiant|Ambient-Pad|Pad ambiente
+1011|Pad caldo|Pad cálido|Pad chaud|Warmes Pad|Pad quente
+1012|Pad dinamico|Pad dinámico|Pad dynamique|Dynamisches Pad|Pad dinâmico
+1013|Pianoforte acustico|Piano acústico|Piano acoustique|Akustikpiano|Piano acústico
+1014|Piano elettrico|Piano eléctrico|Piano électrique|E-Piano|Piano elétrico
+1015|Organo elettrico|Órgano eléctrico|Orgue électrique|E-Orgel|Órgão elétrico
+1016|Organo a canne|Órgano de tubos|Orgue à tuyaux|Pfeifenorgel|Órgão de tubos
+1017|Organo ad ance|Armonio|Harmonium|Harmonium|Harmônio
+1018|Organo da chiesa|Órgano de iglesia|Orgue d'église|Kirchenorgel|Órgão de igreja
+1019|Campane tubolari|Campanas tubulares|Cloches tubulaires|Röhrenglocken|Sinos tubulares
+1020|Campane da chiesa|Campanas de iglesia|Cloches d'église|Kirchenglocken|Sinos de igreja
+1021|Celesta|Celesta|Célesta|Celesta|Celesta
+1022|Xilofono|Xilófono|Xylophone|Xylophon|Xilofone
+1023|Steel pan|Steel pan|Steel drum|Steelpan|Steel pan
+1024|Percussioni a battente|Mazas|Mailloches|Mallets|Baquetas
+1025|Campanelli|Carillones|Carillons|Windspiele|Carrilhões
+1026|Chitarra acustica|Guitarra acústica|Guitare acoustique|Akustikgitarre|Violão
+1027|Chitarra elettrica|Guitarra eléctrica|Guitare électrique|E-Gitarre|Guitarra elétrica
+1028|Chitarra distorta|Guitarra distorsionada|Guitare saturée|Verzerrte Gitarre|Guitarra distorcida
+1029|Arpe|Arpas|Harpes|Harfen|Harpas
+1030|Clavinet|Clavinet|Clavinet|Clavinet|Clavinet
+1031|Clavicembalo|Clavecín|Clavecin|Cembalo|Cravo
+1032|Corde etniche|Cuerdas étnicas|Cordes ethniques|Ethno-Saiten|Cordas étnicas
+1033|Archi solisti|Cuerdas solistas|Cordes solo|Solo-Streicher|Cordas solo
+1034|Ensemble d'archi|Conjunto de cuerdas|Ensemble de cordes|Streicherensemble|Conjunto de cordas
+1035|Archi orchestrali|Cuerdas orquestales|Cordes orchestrales|Orchesterstreicher|Cordas orquestrais
+1036|Violoncello solista|Chelo solista|Violoncelle solo|Solo-Cello|Violoncelo solo
+1037|Violoncelli|Sección de chelos|Violoncelles|Cello-Ensemble|Violoncelos
+1038|Ottoni solisti|Metal solista|Cuivres solo|Solo-Blech|Metais solo
+1039|Sezione ottoni|Sección de metales|Section de cuivres|Bläsersatz|Naipe de metais
+1040|Ottoni orchestrali|Metales orquestales|Cuivres d'orchestre|Orchesterblech|Metais orquestrais
+1041|Ottoni synth|Metales synth|Cuivres synthé|Synth-Brass|Metais synth
+1042|Sassofono|Saxofón|Saxophone|Saxophon|Saxofone
+1043|Corno|Trompa|Cor|Horn|Trompa
+1044|Fiati vari|Vientos variados|Vents divers|Diverse Bläser|Sopros diversos
+1045|Flauto dolce|Flauta dulce|Flûte à bec|Blockflöte|Flauta doce
+1046|Fisarmonica|Acordeón|Accordéon|Akkordeon|Acordeão
+1047|Armonica|Armónica|Harmonica|Mundharmonika|Gaita
+1048|Voce solista|Voz solista|Voix solo|Solostimme|Voz solo
+1049|Coro|Coro|Chœur|Chor|Coro
+1050|Coro orchestrale|Coro orquestal|Chœur symphonique|Orchesterchor|Coro orquestral
+1051|Scat|Scat|Scat|Scat|Scat
+1052|Arpeggi semplici|Arpegios simples|Arpèges simples|Einfache Arpeggios|Arpejos simples
+1053|Arpeggi complessi|Arpegios complejos|Arpèges complexes|Komplexe Arpeggios|Arpejos complexos
+1054|Frasi|Frases|Phrases|Phrasen|Frases
+1055|Accenti|Acentos|Accents|Akzente|Acentos
+1056|Pulsanti|Pulsantes|Pulsations|Pulsierend|Pulsantes
+1057|Batteria realistica|Batería realista|Batterie réaliste|Echte Drums|Bateria realista
+1058|Batteria synth|Batería synth|Batterie synthé|Synth-Drums|Bateria synth
+1059|Tamburi etnici|Tambores étnicos|Percussions ethniques|Ethno-Trommeln|Tambores étnicos
+1060|Percussioni orchestrali|Percusión orquestal|Percussions d'orchestre|Orchesterschlagwerk|Percussão orquestral
+1061|Percussioni|Percusión|Percussions|Percussion|Percussão
+1062|Tamburi intonati|Tambores tonales|Tambours accordés|Tonale Trommeln|Tambores tonais
+1063|Loop di batteria|Loop de batería|Boucle de batterie|Drum-Loop|Loop de bateria
+1064|Loop di percussioni|Loop de percusión|Boucle de percussions|Percussion-Loop|Loop de percussão
+1065|Effetti sonori|Efectos de sonido|Effets sonores|Soundeffekte|Efeitos sonoros
+1066|Texture|Texturas|Textures|Texturen|Texturas
+1067|Bordoni|Drones|Drones|Drones|Drones
+1068|Salite|Subidas|Montées|Riser|Subidas
+1069|Discese|Bajadas|Descentes|Downlifter|Descidas
+1070|Impatti|Impactos|Impacts|Hits|Impactos
+1071|Rumori|Foley|Bruitages|Geräusche|Foley
+1072|Tieni C1|Mantén C1|Tenir C1|C1 halten|Segure C1
+1073|Tieni C2|Mantén C2|Tenir C2|C2 halten|Segure C2
