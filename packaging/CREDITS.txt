@@ -2,19 +2,65 @@ PYRA - credits / crediti
 ========================
 
 Sampled instruments / Strumenti campionati
+------------------------------------------
+All the libraries below allow redistribution. Thank you to their authors!
+Tutte le librerie qui sotto ne permettono la distribuzione. Grazie ai loro autori!
 
-* Grand Piano / Pianoforte a coda:
+* Grand Piano:
   Salamander Grand Piano by Alexander Holm - Creative Commons Attribution 3.0
   https://creativecommons.org/licenses/by/3.0/
 
-* All other sampled instruments / Tutti gli altri strumenti campionati:
+* Violins, Violas, Cellos, Contrabass, Solo Violin, Pizzicato Strings, Trumpet, French Horn, Trombone, Tuba,
+  Flute, Clarinet, Oboe, Bassoon, Marimba, Glockenspiel, Harp, Upright Piano, Muted Trumpet, Piccolo:
   VS Chamber Orchestra: Community Edition (VSCO 2 CE)
   by Versilian Studios / Sam Gossner and Ivy Audio / Simon Dalzell
-  http://vis.versilstudios.net/vsco-community.html
+  http://vis.versilstudios.net/vsco-community.html  -  https://github.com/sgossner/VSCO-2-CE
   "You are permitted to use these samples for ANY purpose."
 
-The samples were edited for PYRA (trimmed, tuned, looped, levelled).
-I campioni sono stati adattati per PYRA (tagliati, accordati, messi in loop, bilanciati).
+* FM E-Piano, Harpsichord, Clavi, Church Organ, Soft Pipe Organ, Renaissance Organ, Vibraphone, Xylophone,
+  Hand Chimes, Kalimba, Balafon, Wine Glasses, Strumstick, Dan Tranh, Folk Harp, Tenor Sax, Recorder, Ocarina,
+  Harmonica, Orchestral Percussion, Hand Percussion:
+  Versilian Community Sample Library (VCSL) by Versilian Studios - CC0 1.0
+  https://github.com/sgossner/VCSL
+
+* Wurlitzer, Pianet, Electric Grand:
+  Greg Sullivan's E-Pianos (Wurlitzer EP200, Hohner Pianet T, Yamaha CP80) by Greg Sullivan,
+  mapped by kinwie - Creative Commons Attribution 3.0
+  https://github.com/sfzinstruments/GregSullivan.E-Pianos  -  https://creativecommons.org/licenses/by/3.0/
+
+* Alto Sax, Baritone Sax:
+  MTG Solo Saxophones, built from the Music Technology Group (Universitat Pompeu Fabra) recordings
+  on freesound.org (https://freesound.org/people/MTG/) - Creative Commons Attribution 4.0
+  https://github.com/sfzinstruments/MTG.SoloSax  -  https://creativecommons.org/licenses/by/4.0/
+
+* Concert Grand: Splendid Grand Piano (Akai, public domain), mapped by kinwie
+  https://github.com/sfzinstruments/SplendidGrandPiano
+
+* Steel Pan: jSteelDrum by Jeff Learman - public domain (Unlicense)
+  https://github.com/sfzinstruments/jlearman.SteelDrum
+
+* FreePats project (https://freepats.zenvoid.org) - CC0 1.0:
+  Vintage Piano (old-piano-FB), Tubular Bells, Hang Drum, Classical Guitar (spanish-classical-guitar),
+  Clean Electric Guitar and Overdrive Guitar (e-guitar-FSBS), Ukulele, Finger Bass and Pick Bass (electric-bass-YR),
+  Accordion (button-accordion-HN), Bagpipe, World Percussion, Drum Machine (synthesizer-percussion)
+  https://github.com/freepats
+
+* Karoryfer Samples (https://karoryfer.com) - CC0 1.0:
+  Archtop Guitar (Shiny Guitar), Twang Guitar (Black and Green Guitars), Growl Bass (Growlybass),
+  Solo Cello (Karoryfer x bigcat cello), Voice Aah (Hadzi-Fia, from the legato vocal tutorial),
+  Vintage Drum Kit (Big Rusty Drums), Jazz Drum Kit (Swirly Drums)
+
+* sfzinstruments collection (https://github.com/sfzinstruments) - CC0 1.0:
+  Banjo (Ganjo, by itsclipping), Medieval Lyre (Cithara Barbarica), Zither (Hungarian zither), Erhu (Aliexpress erhu),
+  Upright Bass (double bass by D. Smolken), Studio Drum Kit (Virtuosity Drums, played by Austin McMahon)
+
+The samples were edited for PYRA (trimmed, tuned, looped, levelled, encoded to Ogg Vorbis).
+I campioni sono stati adattati per PYRA (tagliati, accordati, messi in loop, bilanciati, convertiti in Ogg Vorbis).
+
+Sitar, mandolin, balalaika, lute, celesta, church bells and scat are emulations: they are built from PYRA's own
+synthesis and from the instruments above (e.g. a reshaped glockenspiel for the celesta), not from recordings of them.
+Sitar, mandolino, balalaika, liuto, celesta, campane di chiesa e scat sono emulazioni: sono costruiti con la sintesi
+di PYRA e con gli strumenti qui sopra (es. un glockenspiel rimodellato per la celesta), non da registrazioni.
 
 
 Logo (horned headphones) and PYRA lettering: provided by Alessio for PYRA.

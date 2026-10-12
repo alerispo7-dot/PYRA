@@ -1,0 +1,121 @@
+{
+ "id": "tubular_bells",
+ "name": "Tubular Bells",
+ "category": "Bells",
+ "sampleRate": 44100,
+ "sustained": false,
+ "attack": 0.0,
+ "release": 1.0,
+ "zones": [
+  {
+   "file": "60_100.ogg",
+   "root": 60,
+   "tune": -0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 48,
+   "hi": 61,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "62_100.ogg",
+   "root": 62,
+   "tune": -0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 62,
+   "hi": 63,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "64_100.ogg",
+   "root": 64,
+   "tune": -0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 64,
+   "hi": 65,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "66_100.ogg",
+   "root": 66,
+   "tune": -0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 66,
+   "hi": 67,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "68_100.ogg",
+   "root": 68,
+   "tune": -0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 68,
+   "hi": 69,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "70_100.ogg",
+   "root": 70,
+   "tune": -0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 70,
+   "hi": 71,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "72_100.ogg",
+   "root": 72,
+   "tune": -0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 72,
+   "hi": 73,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "74_100.ogg",
+   "root": 74,
+   "tune": -0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 74,
+   "hi": 75,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "76_100.ogg",
+   "root": 76,
+   "tune": -0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 76,
+   "hi": 79,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "82_100.ogg",
+   "root": 82,
+   "tune": -0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 80,
+   "hi": 94,
+   "velLo": 0,
+   "velHi": 127
+  }
+ ]
+}

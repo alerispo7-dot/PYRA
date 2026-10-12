@@ -1,0 +1,121 @@
+{
+ "id": "erhu",
+ "name": "Erhu",
+ "category": "Strings",
+ "sampleRate": 44100,
+ "sustained": true,
+ "attack": 0.06,
+ "release": 0.3,
+ "zones": [
+  {
+   "file": "50_100.ogg",
+   "root": 62,
+   "tune": 20.2,
+   "loopStart": 85750,
+   "loopEnd": 92365,
+   "lo": 50,
+   "hi": 63,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "52_100.ogg",
+   "root": 64,
+   "tune": -7.9,
+   "loopStart": 79594,
+   "loopEnd": 106054,
+   "lo": 64,
+   "hi": 65,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "54_100.ogg",
+   "root": 66,
+   "tune": 3.2,
+   "loopStart": 68996,
+   "loopEnd": 95456,
+   "lo": 66,
+   "hi": 67,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "56_100.ogg",
+   "root": 68,
+   "tune": 1.0,
+   "loopStart": 68377,
+   "loopEnd": 94837,
+   "lo": 68,
+   "hi": 69,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "58_100.ogg",
+   "root": 70,
+   "tune": -5.9,
+   "loopStart": 73862,
+   "loopEnd": 80477,
+   "lo": 70,
+   "hi": 71,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "60_100.ogg",
+   "root": 72,
+   "tune": -11.5,
+   "loopStart": 76898,
+   "loopEnd": 87923,
+   "lo": 72,
+   "hi": 73,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "62_100.ogg",
+   "root": 74,
+   "tune": -8.5,
+   "loopStart": 59646,
+   "loopEnd": 77286,
+   "lo": 74,
+   "hi": 75,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "64_100.ogg",
+   "root": 76,
+   "tune": 6.0,
+   "loopStart": 50545,
+   "loopEnd": 68185,
+   "lo": 76,
+   "hi": 77,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "66_100.ogg",
+   "root": 78,
+   "tune": 13.2,
+   "loopStart": 65881,
+   "loopEnd": 83521,
+   "lo": 78,
+   "hi": 79,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "68_100.ogg",
+   "root": 80,
+   "tune": 9.5,
+   "loopStart": 68546,
+   "loopEnd": 75161,
+   "lo": 80,
+   "hi": 92,
+   "velLo": 0,
+   "velHi": 127
+  }
+ ]
+}

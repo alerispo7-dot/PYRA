@@ -1,0 +1,55 @@
+{
+ "id": "wine_glass",
+ "name": "Wine Glasses",
+ "category": "Bells",
+ "sampleRate": 44100,
+ "sustained": true,
+ "attack": 0.3,
+ "release": 0.8,
+ "zones": [
+  {
+   "file": "63_1.ogg",
+   "root": 75,
+   "tune": 0.0,
+   "loopStart": 133940,
+   "loopEnd": 173630,
+   "lo": 63,
+   "hi": 76,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "66_1.ogg",
+   "root": 78,
+   "tune": 0.0,
+   "loopStart": 133940,
+   "loopEnd": 173630,
+   "lo": 77,
+   "hi": 80,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "70_1.ogg",
+   "root": 82,
+   "tune": 0.0,
+   "loopStart": 147958,
+   "loopEnd": 158983,
+   "lo": 81,
+   "hi": 84,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "74_1.ogg",
+   "root": 86,
+   "tune": 0.0,
+   "loopStart": 156184,
+   "loopEnd": 173824,
+   "lo": 85,
+   "hi": 98,
+   "velLo": 0,
+   "velHi": 127
+  }
+ ]
+}

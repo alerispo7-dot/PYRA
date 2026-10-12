@@ -58,7 +58,7 @@ private:
 
     juce::File folder;
     juce::CriticalSection folderLock;
-    static constexpr int kMax = 64;
+    static constexpr int kMax = 128;
     std::atomic<const SampleInstrument*> loaded[kMax] {};
     std::atomic<int> status[kMax] {};
     std::atomic<bool> requested[kMax] {};

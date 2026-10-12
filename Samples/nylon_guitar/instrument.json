@@ -1,0 +1,209 @@
+{
+ "id": "nylon_guitar",
+ "name": "Classical Guitar",
+ "category": "Guitar",
+ "sampleRate": 44100,
+ "sustained": false,
+ "attack": 0.0,
+ "release": 0.4,
+ "zones": [
+  {
+   "file": "31_100.ogg",
+   "root": 31,
+   "tune": -11.4,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 19,
+   "hi": 32,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "34_100.ogg",
+   "root": 34,
+   "tune": -3.8,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 33,
+   "hi": 35,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "37_100.ogg",
+   "root": 37,
+   "tune": 2.1,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 36,
+   "hi": 38,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "40_100.ogg",
+   "root": 40,
+   "tune": -1.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 39,
+   "hi": 41,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "43_100.ogg",
+   "root": 43,
+   "tune": -10.7,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 42,
+   "hi": 45,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "47_100.ogg",
+   "root": 47,
+   "tune": -7.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 46,
+   "hi": 48,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "50_100.ogg",
+   "root": 50,
+   "tune": -4.9,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 49,
+   "hi": 51,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "53_100.ogg",
+   "root": 53,
+   "tune": -4.4,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 52,
+   "hi": 54,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "56_100.ogg",
+   "root": 56,
+   "tune": -7.4,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 55,
+   "hi": 57,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "59_100.ogg",
+   "root": 59,
+   "tune": -14.6,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 58,
+   "hi": 60,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "62_100.ogg",
+   "root": 62,
+   "tune": -7.6,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 61,
+   "hi": 63,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "65_100.ogg",
+   "root": 65,
+   "tune": -2.8,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 64,
+   "hi": 67,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "69_100.ogg",
+   "root": 69,
+   "tune": -3.3,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 68,
+   "hi": 70,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "72_100.ogg",
+   "root": 72,
+   "tune": -10.9,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 71,
+   "hi": 73,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "75_100.ogg",
+   "root": 75,
+   "tune": -3.9,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 74,
+   "hi": 76,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "78_100.ogg",
+   "root": 78,
+   "tune": -1.2,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 77,
+   "hi": 79,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "81_100.ogg",
+   "root": 81,
+   "tune": -8.6,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 80,
+   "hi": 82,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "84_100.ogg",
+   "root": 84,
+   "tune": -7.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 83,
+   "hi": 96,
+   "velLo": 0,
+   "velHi": 127
+  }
+ ]
+}

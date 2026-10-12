@@ -1,0 +1,165 @@
+{
+ "id": "drive_guitar",
+ "name": "Electric Guitar (overdrive)",
+ "category": "Guitar",
+ "sampleRate": 44100,
+ "sustained": false,
+ "attack": 0.0,
+ "release": 0.25,
+ "zones": [
+  {
+   "file": "36_110.ogg",
+   "root": 36,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 24,
+   "hi": 38,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "40_110.ogg",
+   "root": 40,
+   "tune": -9.5,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 39,
+   "hi": 42,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "45_110.ogg",
+   "root": 45,
+   "tune": -9.3,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 43,
+   "hi": 46,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "48_110.ogg",
+   "root": 48,
+   "tune": -5.3,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 47,
+   "hi": 50,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "52_110.ogg",
+   "root": 52,
+   "tune": -8.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 51,
+   "hi": 53,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "55_110.ogg",
+   "root": 55,
+   "tune": 3.8,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 54,
+   "hi": 57,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "59_110.ogg",
+   "root": 59,
+   "tune": -0.3,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 58,
+   "hi": 61,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "64_110.ogg",
+   "root": 64,
+   "tune": 1.5,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 62,
+   "hi": 65,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "67_110.ogg",
+   "root": 67,
+   "tune": -0.5,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 66,
+   "hi": 69,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "71_110.ogg",
+   "root": 71,
+   "tune": -0.9,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 70,
+   "hi": 72,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "74_110.ogg",
+   "root": 74,
+   "tune": -3.9,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 73,
+   "hi": 75,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "77_110.ogg",
+   "root": 77,
+   "tune": -2.5,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 76,
+   "hi": 78,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "80_110.ogg",
+   "root": 80,
+   "tune": -0.3,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 79,
+   "hi": 82,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "85_110.ogg",
+   "root": 85,
+   "tune": 1.9,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 83,
+   "hi": 97,
+   "velLo": 0,
+   "velHi": 127
+  }
+ ]
+}

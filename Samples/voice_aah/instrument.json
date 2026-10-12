@@ -1,0 +1,143 @@
+{
+ "id": "voice_aah",
+ "name": "Voice Aah",
+ "category": "Vox",
+ "sampleRate": 44100,
+ "sustained": true,
+ "attack": 0.08,
+ "release": 0.4,
+ "zones": [
+  {
+   "file": "48_100.ogg",
+   "root": 36,
+   "tune": 0.0,
+   "loopStart": 168373,
+   "loopEnd": 174988,
+   "lo": 24,
+   "hi": 37,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "50_100.ogg",
+   "root": 38,
+   "tune": 1.9,
+   "loopStart": 164978,
+   "loopEnd": 171593,
+   "lo": 38,
+   "hi": 39,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "52_100.ogg",
+   "root": 40,
+   "tune": -14.8,
+   "loopStart": 148722,
+   "loopEnd": 175182,
+   "lo": 40,
+   "hi": 41,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "54_100.ogg",
+   "root": 42,
+   "tune": -1.2,
+   "loopStart": 148140,
+   "loopEnd": 174600,
+   "lo": 42,
+   "hi": 43,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "56_100.ogg",
+   "root": 44,
+   "tune": -62.3,
+   "loopStart": 139985,
+   "loopEnd": 157625,
+   "lo": 44,
+   "hi": 45,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "58_100.ogg",
+   "root": 46,
+   "tune": 45.2,
+   "loopStart": 156442,
+   "loopEnd": 163057,
+   "lo": 46,
+   "hi": 47,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "60_100.ogg",
+   "root": 48,
+   "tune": 11.9,
+   "loopStart": 146600,
+   "loopEnd": 157625,
+   "lo": 48,
+   "hi": 49,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "62_100.ogg",
+   "root": 50,
+   "tune": 54.6,
+   "loopStart": 157949,
+   "loopEnd": 168974,
+   "lo": 50,
+   "hi": 51,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "64_100.ogg",
+   "root": 52,
+   "tune": 70.2,
+   "loopStart": 119099,
+   "loopEnd": 158789,
+   "lo": 52,
+   "hi": 53,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "66_100.ogg",
+   "root": 54,
+   "tune": 16.5,
+   "loopStart": 145869,
+   "loopEnd": 152484,
+   "lo": 54,
+   "hi": 55,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "68_100.ogg",
+   "root": 56,
+   "tune": 14.0,
+   "loopStart": 116868,
+   "loopEnd": 156558,
+   "lo": 56,
+   "hi": 57,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "70_100.ogg",
+   "root": 58,
+   "tune": 45.7,
+   "loopStart": 168761,
+   "loopEnd": 175376,
+   "lo": 58,
+   "hi": 70,
+   "velLo": 0,
+   "velHi": 127
+  }
+ ]
+}

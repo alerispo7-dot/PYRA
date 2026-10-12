@@ -1,0 +1,99 @@
+{
+ "id": "xylophone",
+ "name": "Xylophone",
+ "category": "Bells",
+ "sampleRate": 44100,
+ "sustained": false,
+ "attack": 0.0,
+ "release": 0.2,
+ "zones": [
+  {
+   "file": "55_2.ogg",
+   "root": 67,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 55,
+   "hi": 69,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "60_2.ogg",
+   "root": 72,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 70,
+   "hi": 75,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "67_2.ogg",
+   "root": 79,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 76,
+   "hi": 81,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "72_2.ogg",
+   "root": 84,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 82,
+   "hi": 87,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "79_2.ogg",
+   "root": 91,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 88,
+   "hi": 93,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "84_2.ogg",
+   "root": 96,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 94,
+   "hi": 99,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "91_2.ogg",
+   "root": 103,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 100,
+   "hi": 105,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "96_2.ogg",
+   "root": 108,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 106,
+   "hi": 120,
+   "velLo": 0,
+   "velHi": 127
+  }
+ ]
+}

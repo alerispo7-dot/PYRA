@@ -1,0 +1,143 @@
+{
+ "id": "bagpipe",
+ "name": "Bagpipe",
+ "category": "Wind",
+ "sampleRate": 44100,
+ "sustained": true,
+ "attack": 0.05,
+ "release": 0.3,
+ "zones": [
+  {
+   "file": "67_100.ogg",
+   "root": 67,
+   "tune": 34.8,
+   "loopStart": 134231,
+   "loopEnd": 173921,
+   "lo": 55,
+   "hi": 68,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "69_100.ogg",
+   "root": 69,
+   "tune": 26.0,
+   "loopStart": 143477,
+   "loopEnd": 161117,
+   "lo": 69,
+   "hi": 69,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "70_100.ogg",
+   "root": 70,
+   "tune": 38.8,
+   "loopStart": 110272,
+   "loopEnd": 149962,
+   "lo": 70,
+   "hi": 70,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "71_100.ogg",
+   "root": 71,
+   "tune": 38.0,
+   "loopStart": 141156,
+   "loopEnd": 167616,
+   "lo": 71,
+   "hi": 71,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "72_100.ogg",
+   "root": 72,
+   "tune": 32.9,
+   "loopStart": 135686,
+   "loopEnd": 175376,
+   "lo": 72,
+   "hi": 72,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "73_100.ogg",
+   "root": 73,
+   "tune": 49.9,
+   "loopStart": 122300,
+   "loopEnd": 161990,
+   "lo": 73,
+   "hi": 73,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "74_100.ogg",
+   "root": 74,
+   "tune": 17.8,
+   "loopStart": 147033,
+   "loopEnd": 153648,
+   "lo": 74,
+   "hi": 74,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "75_100.ogg",
+   "root": 75,
+   "tune": 60.6,
+   "loopStart": 127382,
+   "loopEnd": 153842,
+   "lo": 75,
+   "hi": 75,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "76_100.ogg",
+   "root": 76,
+   "tune": 60.4,
+   "loopStart": 151819,
+   "loopEnd": 169459,
+   "lo": 76,
+   "hi": 76,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "77_100.ogg",
+   "root": 77,
+   "tune": 46.8,
+   "loopStart": 132322,
+   "loopEnd": 149962,
+   "lo": 77,
+   "hi": 77,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "78_100.ogg",
+   "root": 78,
+   "tune": 45.2,
+   "loopStart": 148055,
+   "loopEnd": 159080,
+   "lo": 78,
+   "hi": 78,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "79_100.ogg",
+   "root": 79,
+   "tune": 26.7,
+   "loopStart": 143290,
+   "loopEnd": 169750,
+   "lo": 79,
+   "hi": 91,
+   "velLo": 0,
+   "velHi": 127
+  }
+ ]
+}

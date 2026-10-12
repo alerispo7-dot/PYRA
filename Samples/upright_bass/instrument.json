@@ -1,0 +1,231 @@
+{
+ "id": "upright_bass",
+ "name": "Upright Bass (pizz)",
+ "category": "Bass",
+ "sampleRate": 44100,
+ "sustained": false,
+ "attack": 0.0,
+ "release": 0.2,
+ "zones": [
+  {
+   "file": "24_60.ogg",
+   "root": 24,
+   "tune": 16.9,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 12,
+   "hi": 25,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "24_110.ogg",
+   "root": 24,
+   "tune": 4.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 12,
+   "hi": 25,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "27_60.ogg",
+   "root": 27,
+   "tune": 16.6,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 26,
+   "hi": 29,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "27_110.ogg",
+   "root": 27,
+   "tune": 18.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 26,
+   "hi": 29,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "31_60.ogg",
+   "root": 31,
+   "tune": 4.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 30,
+   "hi": 32,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "31_110.ogg",
+   "root": 31,
+   "tune": -3.2,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 30,
+   "hi": 32,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "34_60.ogg",
+   "root": 34,
+   "tune": 11.5,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 33,
+   "hi": 36,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "34_110.ogg",
+   "root": 34,
+   "tune": 5.1,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 33,
+   "hi": 36,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "38_60.ogg",
+   "root": 38,
+   "tune": 1.2,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 37,
+   "hi": 39,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "38_110.ogg",
+   "root": 38,
+   "tune": -6.5,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 37,
+   "hi": 39,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "41_60.ogg",
+   "root": 41,
+   "tune": 1.1,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 40,
+   "hi": 43,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "41_110.ogg",
+   "root": 41,
+   "tune": -6.9,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 40,
+   "hi": 43,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "45_60.ogg",
+   "root": 45,
+   "tune": 3.5,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 44,
+   "hi": 46,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "45_110.ogg",
+   "root": 45,
+   "tune": -5.1,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 44,
+   "hi": 46,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "48_60.ogg",
+   "root": 48,
+   "tune": -1.6,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 47,
+   "hi": 50,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "48_110.ogg",
+   "root": 48,
+   "tune": -4.9,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 47,
+   "hi": 50,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "52_60.ogg",
+   "root": 52,
+   "tune": 3.6,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 51,
+   "hi": 53,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "52_110.ogg",
+   "root": 52,
+   "tune": 0.6,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 51,
+   "hi": 53,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "55_60.ogg",
+   "root": 55,
+   "tune": -4.4,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 54,
+   "hi": 67,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "55_110.ogg",
+   "root": 55,
+   "tune": -3.2,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 54,
+   "hi": 67,
+   "velLo": 65,
+   "velHi": 127
+  }
+ ]
+}

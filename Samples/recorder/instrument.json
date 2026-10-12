@@ -1,0 +1,143 @@
+{
+ "id": "recorder",
+ "name": "Recorder",
+ "category": "Wind",
+ "sampleRate": 44100,
+ "sustained": true,
+ "attack": 0.03,
+ "release": 0.15,
+ "zones": [
+  {
+   "file": "53_1.ogg",
+   "root": 65,
+   "tune": -1.8,
+   "loopStart": 110272,
+   "loopEnd": 127912,
+   "lo": 53,
+   "hi": 66,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "56_1.ogg",
+   "root": 68,
+   "tune": -6.7,
+   "loopStart": 128799,
+   "loopEnd": 146439,
+   "lo": 67,
+   "hi": 69,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "58_1.ogg",
+   "root": 70,
+   "tune": -1.1,
+   "loopStart": 120561,
+   "loopEnd": 147021,
+   "lo": 70,
+   "hi": 71,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "60_1.ogg",
+   "root": 72,
+   "tune": -6.7,
+   "loopStart": 91714,
+   "loopEnd": 131404,
+   "lo": 72,
+   "hi": 73,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "62_1.ogg",
+   "root": 74,
+   "tune": 3.7,
+   "loopStart": 99280,
+   "loopEnd": 138970,
+   "lo": 74,
+   "hi": 75,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "64_1.ogg",
+   "root": 76,
+   "tune": -0.9,
+   "loopStart": 126575,
+   "loopEnd": 153035,
+   "lo": 76,
+   "hi": 77,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "66_1.ogg",
+   "root": 78,
+   "tune": -12.1,
+   "loopStart": 93848,
+   "loopEnd": 133538,
+   "lo": 78,
+   "hi": 79,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "68_1.ogg",
+   "root": 80,
+   "tune": -2.5,
+   "loopStart": 88222,
+   "loopEnd": 127912,
+   "lo": 80,
+   "hi": 81,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "70_1.ogg",
+   "root": 82,
+   "tune": 0.0,
+   "loopStart": 106593,
+   "loopEnd": 133053,
+   "lo": 82,
+   "hi": 83,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "72_1.ogg",
+   "root": 84,
+   "tune": -3.7,
+   "loopStart": 113636,
+   "loopEnd": 153326,
+   "lo": 84,
+   "hi": 85,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "74_1.ogg",
+   "root": 86,
+   "tune": -2.9,
+   "loopStart": 94624,
+   "loopEnd": 134314,
+   "lo": 86,
+   "hi": 87,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "76_1.ogg",
+   "root": 88,
+   "tune": -3.5,
+   "loopStart": 108495,
+   "loopEnd": 148185,
+   "lo": 88,
+   "hi": 100,
+   "velLo": 0,
+   "velHi": 127
+  }
+ ]
+}

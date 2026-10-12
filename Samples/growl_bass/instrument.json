@@ -1,0 +1,143 @@
+{
+ "id": "growl_bass",
+ "name": "Electric Bass (growl)",
+ "category": "Bass",
+ "sampleRate": 44100,
+ "sustained": false,
+ "attack": 0.0,
+ "release": 0.15,
+ "zones": [
+  {
+   "file": "37_100.ogg",
+   "root": 25,
+   "tune": -15.1,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 13,
+   "hi": 26,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "40_100.ogg",
+   "root": 28,
+   "tune": -28.7,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 27,
+   "hi": 30,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "45_100.ogg",
+   "root": 33,
+   "tune": 3.1,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 31,
+   "hi": 34,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "48_100.ogg",
+   "root": 36,
+   "tune": 8.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 35,
+   "hi": 37,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "51_100.ogg",
+   "root": 39,
+   "tune": -1.1,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 38,
+   "hi": 40,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "54_100.ogg",
+   "root": 42,
+   "tune": -1.6,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 41,
+   "hi": 43,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "57_100.ogg",
+   "root": 45,
+   "tune": 4.7,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 44,
+   "hi": 48,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "63_100.ogg",
+   "root": 51,
+   "tune": -5.2,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 49,
+   "hi": 52,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "66_100.ogg",
+   "root": 54,
+   "tune": 7.6,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 53,
+   "hi": 55,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "69_100.ogg",
+   "root": 57,
+   "tune": -5.6,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 56,
+   "hi": 58,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "72_100.ogg",
+   "root": 60,
+   "tune": -6.4,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 59,
+   "hi": 61,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "75_100.ogg",
+   "root": 63,
+   "tune": -8.4,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 62,
+   "hi": 75,
+   "velLo": 0,
+   "velHi": 127
+  }
+ ]
+}

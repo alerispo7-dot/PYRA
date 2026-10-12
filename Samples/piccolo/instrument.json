@@ -1,0 +1,66 @@
+{
+ "id": "piccolo",
+ "name": "Piccolo",
+ "category": "Wind",
+ "sampleRate": 44100,
+ "sustained": true,
+ "attack": 0.03,
+ "release": 0.15,
+ "zones": [
+  {
+   "file": "67_1.ogg",
+   "root": 79,
+   "tune": -2.5,
+   "loopStart": 132970,
+   "loopEnd": 150610,
+   "lo": 67,
+   "hi": 81,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "72_1.ogg",
+   "root": 84,
+   "tune": 6.1,
+   "loopStart": 89580,
+   "loopEnd": 129270,
+   "lo": 82,
+   "hi": 87,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "79_1.ogg",
+   "root": 91,
+   "tune": -11.9,
+   "loopStart": 96079,
+   "loopEnd": 135769,
+   "lo": 88,
+   "hi": 93,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "84_1.ogg",
+   "root": 96,
+   "tune": -13.6,
+   "loopStart": 105623,
+   "loopEnd": 132083,
+   "lo": 94,
+   "hi": 99,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "91_1.ogg",
+   "root": 103,
+   "tune": -6.3,
+   "loopStart": 109950,
+   "loopEnd": 149640,
+   "lo": 100,
+   "hi": 115,
+   "velLo": 0,
+   "velHi": 127
+  }
+ ]
+}

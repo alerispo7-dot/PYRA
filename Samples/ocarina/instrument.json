@@ -1,0 +1,99 @@
+{
+ "id": "ocarina",
+ "name": "Ocarina",
+ "category": "Wind",
+ "sampleRate": 44100,
+ "sustained": true,
+ "attack": 0.03,
+ "release": 0.15,
+ "zones": [
+  {
+   "file": "57_1.ogg",
+   "root": 69,
+   "tune": 1.6,
+   "loopStart": 112763,
+   "loopEnd": 152453,
+   "lo": 57,
+   "hi": 70,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "59_1.ogg",
+   "root": 71,
+   "tune": 3.6,
+   "loopStart": 98989,
+   "loopEnd": 138679,
+   "lo": 71,
+   "hi": 72,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "61_1.ogg",
+   "root": 73,
+   "tune": -9.5,
+   "loopStart": 106943,
+   "loopEnd": 146633,
+   "lo": 73,
+   "hi": 74,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "63_1.ogg",
+   "root": 75,
+   "tune": 7.8,
+   "loopStart": 92296,
+   "loopEnd": 131986,
+   "lo": 75,
+   "hi": 76,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "66_1.ogg",
+   "root": 78,
+   "tune": -6.3,
+   "loopStart": 138130,
+   "loopEnd": 149155,
+   "lo": 77,
+   "hi": 79,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "68_1.ogg",
+   "root": 80,
+   "tune": -3.6,
+   "loopStart": 105779,
+   "loopEnd": 145469,
+   "lo": 80,
+   "hi": 81,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "70_1.ogg",
+   "root": 82,
+   "tune": -11.4,
+   "loopStart": 105003,
+   "loopEnd": 144693,
+   "lo": 82,
+   "hi": 83,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "72_1.ogg",
+   "root": 84,
+   "tune": -4.5,
+   "loopStart": 97049,
+   "loopEnd": 136739,
+   "lo": 84,
+   "hi": 96,
+   "velLo": 0,
+   "velHi": 127
+  }
+ ]
+}

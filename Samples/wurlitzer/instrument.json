@@ -1,0 +1,220 @@
+{
+ "id": "wurlitzer",
+ "name": "Wurlitzer EP200",
+ "category": "Keyboard",
+ "sampleRate": 44100,
+ "sustained": false,
+ "attack": 0.0,
+ "release": 0.25,
+ "zones": [
+  {
+   "file": "33_50.ogg",
+   "root": 33,
+   "tune": -5.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 21,
+   "hi": 34,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "33_110.ogg",
+   "root": 33,
+   "tune": -0.6,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 21,
+   "hi": 34,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "36_110.ogg",
+   "root": 36,
+   "tune": -5.2,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 35,
+   "hi": 38,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "40_50.ogg",
+   "root": 40,
+   "tune": -8.8,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 39,
+   "hi": 43,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "47_110.ogg",
+   "root": 47,
+   "tune": -1.4,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 44,
+   "hi": 49,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "51_50.ogg",
+   "root": 51,
+   "tune": -9.4,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 50,
+   "hi": 53,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "56_50.ogg",
+   "root": 56,
+   "tune": -11.2,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 54,
+   "hi": 58,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "56_110.ogg",
+   "root": 56,
+   "tune": -4.9,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 54,
+   "hi": 58,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "61_50.ogg",
+   "root": 61,
+   "tune": -1.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 59,
+   "hi": 62,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "61_110.ogg",
+   "root": 61,
+   "tune": 5.5,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 59,
+   "hi": 62,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "64_110.ogg",
+   "root": 64,
+   "tune": 0.7,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 63,
+   "hi": 65,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "67_110.ogg",
+   "root": 67,
+   "tune": 2.3,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 66,
+   "hi": 69,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "71_50.ogg",
+   "root": 71,
+   "tune": -5.3,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 70,
+   "hi": 75,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "79_50.ogg",
+   "root": 79,
+   "tune": -9.2,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 76,
+   "hi": 82,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "79_110.ogg",
+   "root": 79,
+   "tune": -4.9,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 76,
+   "hi": 82,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "85_50.ogg",
+   "root": 85,
+   "tune": -0.3,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 83,
+   "hi": 88,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "85_110.ogg",
+   "root": 85,
+   "tune": 0.5,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 83,
+   "hi": 88,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "92_50.ogg",
+   "root": 92,
+   "tune": -4.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 89,
+   "hi": 104,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "92_110.ogg",
+   "root": 92,
+   "tune": -3.8,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 89,
+   "hi": 104,
+   "velLo": 65,
+   "velHi": 127
+  }
+ ]
+}

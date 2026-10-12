@@ -1,0 +1,231 @@
+{
+ "id": "vibraphone",
+ "name": "Vibraphone",
+ "category": "Bells",
+ "sampleRate": 44100,
+ "sustained": false,
+ "attack": 0.0,
+ "release": 0.6,
+ "zones": [
+  {
+   "file": "41_1.ogg",
+   "root": 53,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 41,
+   "hi": 55,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "41_2.ogg",
+   "root": 53,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 41,
+   "hi": 55,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "45_1.ogg",
+   "root": 57,
+   "tune": 0.3,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 56,
+   "hi": 58,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "45_2.ogg",
+   "root": 57,
+   "tune": 19.6,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 56,
+   "hi": 58,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "48_2.ogg",
+   "root": 60,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 59,
+   "hi": 62,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "52_2.ogg",
+   "root": 64,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 63,
+   "hi": 65,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "55_1.ogg",
+   "root": 67,
+   "tune": 0.1,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 66,
+   "hi": 69,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "55_2.ogg",
+   "root": 67,
+   "tune": 0.1,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 66,
+   "hi": 69,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "59_1.ogg",
+   "root": 71,
+   "tune": 0.1,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 70,
+   "hi": 72,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "59_2.ogg",
+   "root": 71,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 70,
+   "hi": 72,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "62_1.ogg",
+   "root": 74,
+   "tune": -0.1,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 73,
+   "hi": 75,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "62_2.ogg",
+   "root": 74,
+   "tune": -0.1,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 73,
+   "hi": 75,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "65_1.ogg",
+   "root": 77,
+   "tune": -0.2,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 76,
+   "hi": 79,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "65_2.ogg",
+   "root": 77,
+   "tune": -0.2,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 76,
+   "hi": 79,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "69_1.ogg",
+   "root": 81,
+   "tune": -0.3,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 80,
+   "hi": 82,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "69_2.ogg",
+   "root": 81,
+   "tune": -0.3,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 80,
+   "hi": 82,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "72_1.ogg",
+   "root": 84,
+   "tune": -0.5,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 83,
+   "hi": 86,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "72_2.ogg",
+   "root": 84,
+   "tune": -0.4,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 83,
+   "hi": 86,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "76_1.ogg",
+   "root": 88,
+   "tune": -0.3,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 87,
+   "hi": 100,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "76_2.ogg",
+   "root": 88,
+   "tune": -0.3,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 87,
+   "hi": 100,
+   "velLo": 65,
+   "velHi": 127
+  }
+ ]
+}

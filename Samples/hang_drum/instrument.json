@@ -1,0 +1,110 @@
+{
+ "id": "hang_drum",
+ "name": "Hang Drum",
+ "category": "Drums",
+ "sampleRate": 44100,
+ "sustained": false,
+ "attack": 0.0,
+ "release": 0.8,
+ "zones": [
+  {
+   "file": "57_100.ogg",
+   "root": 57,
+   "tune": -0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 45,
+   "hi": 59,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "62_100.ogg",
+   "root": 62,
+   "tune": -0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 60,
+   "hi": 63,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "64_100.ogg",
+   "root": 64,
+   "tune": -0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 64,
+   "hi": 64,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "65_100.ogg",
+   "root": 65,
+   "tune": -0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 65,
+   "hi": 66,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "67_100.ogg",
+   "root": 67,
+   "tune": -0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 67,
+   "hi": 68,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "69_100.ogg",
+   "root": 69,
+   "tune": -0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 69,
+   "hi": 69,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "70_100.ogg",
+   "root": 70,
+   "tune": -0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 70,
+   "hi": 71,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "72_100.ogg",
+   "root": 72,
+   "tune": -0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 72,
+   "hi": 73,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "74_100.ogg",
+   "root": 74,
+   "tune": -0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 74,
+   "hi": 86,
+   "velLo": 0,
+   "velHi": 127
+  }
+ ]
+}

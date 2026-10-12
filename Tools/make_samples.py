@@ -24,6 +24,12 @@ NOTE = {"C": 0, "C#": 1, "D": 2, "D#": 3, "E": 4, "F": 5, "F#": 6, "G": 7, "G#":
 DYN = {"pp": 1, "p": 2, "mp": 3, "soft": 2, "mf": 4, "medium": 4, "f": 5, "loud": 6, "ff": 6}
 
 
+# These sets name their files one octave under the pitch you hear (measured: harmonic series and instrument ranges),
+# so their zones are moved up by an octave and every key plays its own pitch.
+OCTAVE_FIX = {i: 12 for i in ("violins", "violas", "cellos", "contrabass", "pizzicato", "trumpet", "french_horn", "trombone",
+                              "tuba", "flute", "clarinet", "oboe", "bassoon", "marimba", "glockenspiel")}
+
+
 def midi(name):
     m = re.match(r"([A-G]#?)(-?\d)$", name)
     return 12 * (int(m.group(2)) + 1) + NOTE[m.group(1)]
@@ -205,7 +211,7 @@ def process(inst, files, out_dir, report):
             rms = float(np.sqrt(np.mean(y[: min(len(y), int(0.6 * SR))] ** 2)) + 1e-9)
             layer_rms[v].append(rms)
             fn = f"{note}_{v}.wav"
-            zones.append({"file": fn.replace(".wav", ".ogg"), "root": note, "vel": v, "tune": tune,
+            zones.append({"file": fn.replace(".wav", ".ogg"), "root": note + OCTAVE_FIX.get(iid, 0), "vel": v, "tune": tune,
                           "loopStart": int(ls), "loopEnd": int(le), "rms": rms, "_data": y})
 
     if not zones: return None

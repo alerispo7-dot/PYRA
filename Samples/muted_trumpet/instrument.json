@@ -1,0 +1,88 @@
+{
+ "id": "muted_trumpet",
+ "name": "Muted Trumpet",
+ "category": "Brass",
+ "sampleRate": 44100,
+ "sustained": true,
+ "attack": 0.02,
+ "release": 0.2,
+ "zones": [
+  {
+   "file": "46_1.ogg",
+   "root": 58,
+   "tune": 3.9,
+   "loopStart": 154890,
+   "loopEnd": 161505,
+   "lo": 46,
+   "hi": 60,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "50_1.ogg",
+   "root": 62,
+   "tune": -1.0,
+   "loopStart": 161777,
+   "loopEnd": 168392,
+   "lo": 61,
+   "hi": 64,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "55_1.ogg",
+   "root": 67,
+   "tune": -12.9,
+   "loopStart": 144163,
+   "loopEnd": 170623,
+   "lo": 65,
+   "hi": 68,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "58_1.ogg",
+   "root": 70,
+   "tune": -6.4,
+   "loopStart": 143638,
+   "loopEnd": 150253,
+   "lo": 69,
+   "hi": 72,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "62_1.ogg",
+   "root": 74,
+   "tune": 1.3,
+   "loopStart": 144854,
+   "loopEnd": 155879,
+   "lo": 73,
+   "hi": 75,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "65_1.ogg",
+   "root": 77,
+   "tune": 6.6,
+   "loopStart": 121815,
+   "loopEnd": 161505,
+   "lo": 76,
+   "hi": 79,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "69_1.ogg",
+   "root": 81,
+   "tune": 2.2,
+   "loopStart": 152595,
+   "loopEnd": 170235,
+   "lo": 80,
+   "hi": 93,
+   "velLo": 0,
+   "velHi": 127
+  }
+ ]
+}

@@ -22,7 +22,17 @@ const juce::StringArray& SampleBank::ids()
 {
     static juce::StringArray a { "", "grand_piano", "upright_piano", "violins", "violas", "cellos", "contrabass", "solo_violin",
                                  "pizzicato", "harp", "trumpet", "french_horn", "trombone", "tuba", "flute", "clarinet", "oboe",
-                                 "bassoon", "marimba", "glockenspiel" };
+                                 "bassoon", "marimba", "glockenspiel",
+                                 // v0.9 (VCSL, FreePats, Karoryfer, sfzinstruments - see CREDITS.txt)
+                                 "concert_grand", "vintage_piano", "wurlitzer", "pianet", "cp80", "fm_epiano", "harpsichord",
+                                 "clavisynth", "church_organ", "pipe_organ_soft", "renaissance_organ", "tubular_bells",
+                                 "vibraphone", "xylophone", "steel_pan", "hand_chimes", "kalimba", "balafon", "wine_glass",
+                                 "hang_drum", "nylon_guitar", "archtop_guitar", "clean_guitar", "twang_guitar", "drive_guitar",
+                                 "ukulele", "banjo", "lyre", "zither", "strumstick", "dan_tranh", "folk_harp", "finger_bass",
+                                 "picked_bass", "growl_bass", "upright_bass", "solo_cello", "erhu", "alto_sax", "tenor_sax",
+                                 "bari_sax", "muted_trumpet", "recorder", "piccolo", "ocarina", "harmonica", "accordion",
+                                 "bagpipe", "voice_aah", "studio_kit", "rusty_kit", "jazz_kit", "world_perc",
+                                 "drum_machine", "orch_perc", "hand_perc" };
     return a;
 }
 
@@ -30,7 +40,17 @@ const juce::StringArray& SampleBank::displayNames()
 {
     static juce::StringArray a { "Off", "Grand Piano", "Upright Piano", "Violins", "Violas", "Cellos", "Contrabass", "Solo Violin",
                                  "Pizzicato Strings", "Harp", "Trumpet", "French Horn", "Trombone", "Tuba", "Flute", "Clarinet", "Oboe",
-                                 "Bassoon", "Marimba", "Glockenspiel" };
+                                 "Bassoon", "Marimba", "Glockenspiel",
+                                 "Concert Grand", "Vintage Piano", "Wurlitzer", "Pianet", "Electric Grand", "FM E-Piano",
+                                 "Harpsichord", "Clavi", "Church Organ", "Soft Pipe Organ", "Renaissance Organ", "Tubular Bells",
+                                 "Vibraphone", "Xylophone", "Steel Pan", "Hand Chimes", "Kalimba", "Balafon", "Wine Glasses",
+                                 "Hang Drum", "Classical Guitar", "Archtop Guitar", "Clean Electric Guitar", "Twang Guitar",
+                                 "Overdrive Guitar", "Ukulele", "Banjo", "Medieval Lyre", "Zither", "Strumstick", "Dan Tranh",
+                                 "Folk Harp", "Finger Bass", "Pick Bass", "Growl Bass", "Upright Bass", "Solo Cello", "Erhu",
+                                 "Alto Sax", "Tenor Sax", "Baritone Sax", "Muted Trumpet", "Recorder", "Piccolo", "Ocarina",
+                                 "Harmonica", "Accordion", "Bagpipe", "Voice Aah", "Studio Drum Kit",
+                                 "Vintage Drum Kit", "Jazz Drum Kit", "World Percussion", "Drum Machine",
+                                 "Orchestral Percussion", "Hand Percussion" };
     return a;
 }
 

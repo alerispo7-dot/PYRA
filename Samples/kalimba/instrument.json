@@ -1,0 +1,132 @@
+{
+ "id": "kalimba",
+ "name": "Kalimba",
+ "category": "Bells",
+ "sampleRate": 44100,
+ "sustained": false,
+ "attack": 0.0,
+ "release": 0.3,
+ "zones": [
+  {
+   "file": "47_3.ogg",
+   "root": 59,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 47,
+   "hi": 60,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "49_3.ogg",
+   "root": 61,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 61,
+   "hi": 62,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "51_3.ogg",
+   "root": 63,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 63,
+   "hi": 64,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "54_3.ogg",
+   "root": 66,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 65,
+   "hi": 67,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "56_3.ogg",
+   "root": 68,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 68,
+   "hi": 69,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "59_3.ogg",
+   "root": 71,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 70,
+   "hi": 72,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "61_3.ogg",
+   "root": 73,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 73,
+   "hi": 74,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "63_3.ogg",
+   "root": 75,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 75,
+   "hi": 76,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "66_3.ogg",
+   "root": 78,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 77,
+   "hi": 79,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "69_3.ogg",
+   "root": 81,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 80,
+   "hi": 82,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "71_3.ogg",
+   "root": 83,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 83,
+   "hi": 95,
+   "velLo": 0,
+   "velHi": 127
+  }
+ ]
+}

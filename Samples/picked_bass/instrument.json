@@ -1,0 +1,154 @@
+{
+ "id": "picked_bass",
+ "name": "Electric Bass (pick)",
+ "category": "Bass",
+ "sampleRate": 44100,
+ "sustained": false,
+ "attack": 0.0,
+ "release": 0.15,
+ "zones": [
+  {
+   "file": "28_100.ogg",
+   "root": 28,
+   "tune": -17.8,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 16,
+   "hi": 28,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "29_100.ogg",
+   "root": 29,
+   "tune": -20.4,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 29,
+   "hi": 29,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "30_100.ogg",
+   "root": 30,
+   "tune": -25.7,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 30,
+   "hi": 30,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "31_100.ogg",
+   "root": 31,
+   "tune": -13.6,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 31,
+   "hi": 31,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "32_100.ogg",
+   "root": 32,
+   "tune": -13.4,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 32,
+   "hi": 32,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "33_100.ogg",
+   "root": 33,
+   "tune": -2.6,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 33,
+   "hi": 33,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "34_100.ogg",
+   "root": 34,
+   "tune": -9.7,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 34,
+   "hi": 34,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "35_100.ogg",
+   "root": 35,
+   "tune": -8.8,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 35,
+   "hi": 35,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "36_100.ogg",
+   "root": 36,
+   "tune": -8.7,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 36,
+   "hi": 36,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "37_100.ogg",
+   "root": 37,
+   "tune": -9.3,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 37,
+   "hi": 37,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "38_100.ogg",
+   "root": 38,
+   "tune": -6.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 38,
+   "hi": 38,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "39_100.ogg",
+   "root": 39,
+   "tune": -3.1,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 39,
+   "hi": 39,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "40_100.ogg",
+   "root": 40,
+   "tune": -1.4,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 40,
+   "hi": 52,
+   "velLo": 0,
+   "velHi": 127
+  }
+ ]
+}

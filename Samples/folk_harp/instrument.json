@@ -1,0 +1,176 @@
+{
+ "id": "folk_harp",
+ "name": "Folk Harp",
+ "category": "Guitar",
+ "sampleRate": 44100,
+ "sustained": false,
+ "attack": 0.0,
+ "release": 0.6,
+ "zones": [
+  {
+   "file": "24_2.ogg",
+   "root": 36,
+   "tune": -11.1,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 24,
+   "hi": 38,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "28_2.ogg",
+   "root": 40,
+   "tune": -7.8,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 39,
+   "hi": 42,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "32_2.ogg",
+   "root": 44,
+   "tune": -0.4,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 43,
+   "hi": 46,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "36_2.ogg",
+   "root": 48,
+   "tune": 1.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 47,
+   "hi": 50,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "40_2.ogg",
+   "root": 52,
+   "tune": -1.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 51,
+   "hi": 54,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "44_2.ogg",
+   "root": 56,
+   "tune": -0.5,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 55,
+   "hi": 58,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "48_2.ogg",
+   "root": 60,
+   "tune": 1.5,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 59,
+   "hi": 62,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "52_2.ogg",
+   "root": 64,
+   "tune": -2.2,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 63,
+   "hi": 66,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "56_2.ogg",
+   "root": 68,
+   "tune": -2.7,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 67,
+   "hi": 70,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "60_2.ogg",
+   "root": 72,
+   "tune": -1.5,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 71,
+   "hi": 74,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "64_2.ogg",
+   "root": 76,
+   "tune": 4.8,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 75,
+   "hi": 78,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "68_2.ogg",
+   "root": 80,
+   "tune": 1.2,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 79,
+   "hi": 82,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "72_2.ogg",
+   "root": 84,
+   "tune": 0.4,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 83,
+   "hi": 86,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "76_2.ogg",
+   "root": 88,
+   "tune": -1.2,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 87,
+   "hi": 90,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "80_2.ogg",
+   "root": 92,
+   "tune": 1.2,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 91,
+   "hi": 104,
+   "velLo": 0,
+   "velHi": 127
+  }
+ ]
+}

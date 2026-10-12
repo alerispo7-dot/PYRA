@@ -1,0 +1,209 @@
+{
+ "id": "solo_cello",
+ "name": "Solo Cello",
+ "category": "Strings",
+ "sampleRate": 44100,
+ "sustained": true,
+ "attack": 0.08,
+ "release": 0.4,
+ "zones": [
+  {
+   "file": "24_70.ogg",
+   "root": 36,
+   "tune": -5.6,
+   "loopStart": 184011,
+   "loopEnd": 190626,
+   "lo": 24,
+   "hi": 39,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "24_110.ogg",
+   "root": 36,
+   "tune": -6.0,
+   "loopStart": 195346,
+   "loopEnd": 201961,
+   "lo": 24,
+   "hi": 39,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "30_70.ogg",
+   "root": 42,
+   "tune": 4.3,
+   "loopStart": 178854,
+   "loopEnd": 205314,
+   "lo": 40,
+   "hi": 45,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "30_110.ogg",
+   "root": 42,
+   "tune": 3.0,
+   "loopStart": 199236,
+   "loopEnd": 210261,
+   "lo": 40,
+   "hi": 45,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "36_70.ogg",
+   "root": 48,
+   "tune": 0.0,
+   "loopStart": 165302,
+   "loopEnd": 176327,
+   "lo": 46,
+   "hi": 51,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "36_110.ogg",
+   "root": 48,
+   "tune": -3.5,
+   "loopStart": 133618,
+   "loopEnd": 173308,
+   "lo": 46,
+   "hi": 51,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "42_70.ogg",
+   "root": 54,
+   "tune": -1.9,
+   "loopStart": 166513,
+   "loopEnd": 173128,
+   "lo": 52,
+   "hi": 57,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "42_110.ogg",
+   "root": 54,
+   "tune": -1.7,
+   "loopStart": 181221,
+   "loopEnd": 187836,
+   "lo": 52,
+   "hi": 57,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "48_70.ogg",
+   "root": 60,
+   "tune": -3.2,
+   "loopStart": 159207,
+   "loopEnd": 185667,
+   "lo": 58,
+   "hi": 63,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "48_110.ogg",
+   "root": 60,
+   "tune": -0.6,
+   "loopStart": 133346,
+   "loopEnd": 159806,
+   "lo": 58,
+   "hi": 63,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "54_70.ogg",
+   "root": 66,
+   "tune": -1.5,
+   "loopStart": 136100,
+   "loopEnd": 175790,
+   "lo": 64,
+   "hi": 68,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "54_110.ogg",
+   "root": 66,
+   "tune": -0.8,
+   "loopStart": 126744,
+   "loopEnd": 153204,
+   "lo": 64,
+   "hi": 68,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "59_70.ogg",
+   "root": 71,
+   "tune": -101.5,
+   "loopStart": 147453,
+   "loopEnd": 173913,
+   "lo": 69,
+   "hi": 73,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "59_110.ogg",
+   "root": 71,
+   "tune": -96.1,
+   "loopStart": 108615,
+   "loopEnd": 135075,
+   "lo": 69,
+   "hi": 73,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "63_70.ogg",
+   "root": 75,
+   "tune": -2.8,
+   "loopStart": 102766,
+   "loopEnd": 142456,
+   "lo": 74,
+   "hi": 78,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "63_110.ogg",
+   "root": 75,
+   "tune": -7.3,
+   "loopStart": 130684,
+   "loopEnd": 141709,
+   "lo": 74,
+   "hi": 78,
+   "velLo": 65,
+   "velHi": 127
+  },
+  {
+   "file": "69_70.ogg",
+   "root": 81,
+   "tune": -2.2,
+   "loopStart": 111399,
+   "loopEnd": 151089,
+   "lo": 79,
+   "hi": 93,
+   "velLo": 0,
+   "velHi": 64
+  },
+  {
+   "file": "69_110.ogg",
+   "root": 81,
+   "tune": 2.7,
+   "loopStart": 130224,
+   "loopEnd": 136839,
+   "lo": 79,
+   "hi": 93,
+   "velLo": 65,
+   "velHi": 127
+  }
+ ]
+}

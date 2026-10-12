@@ -1,0 +1,121 @@
+{
+ "id": "hand_chimes",
+ "name": "Hand Chimes",
+ "category": "Bells",
+ "sampleRate": 44100,
+ "sustained": false,
+ "attack": 0.0,
+ "release": 0.8,
+ "zones": [
+  {
+   "file": "48_1.ogg",
+   "root": 60,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 48,
+   "hi": 62,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "52_1.ogg",
+   "root": 64,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 63,
+   "hi": 66,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "56_1.ogg",
+   "root": 68,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 67,
+   "hi": 70,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "60_1.ogg",
+   "root": 72,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 71,
+   "hi": 74,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "64_1.ogg",
+   "root": 76,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 75,
+   "hi": 78,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "68_1.ogg",
+   "root": 80,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 79,
+   "hi": 82,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "72_1.ogg",
+   "root": 84,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 83,
+   "hi": 86,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "76_1.ogg",
+   "root": 88,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 87,
+   "hi": 90,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "80_1.ogg",
+   "root": 92,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 91,
+   "hi": 94,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "84_1.ogg",
+   "root": 96,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 95,
+   "hi": 108,
+   "velLo": 0,
+   "velHi": 127
+  }
+ ]
+}

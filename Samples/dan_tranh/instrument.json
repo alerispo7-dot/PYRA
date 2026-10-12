@@ -1,0 +1,187 @@
+{
+ "id": "dan_tranh",
+ "name": "Dan Tranh (zither)",
+ "category": "Guitar",
+ "sampleRate": 44100,
+ "sustained": false,
+ "attack": 0.0,
+ "release": 0.4,
+ "zones": [
+  {
+   "file": "35_7.ogg",
+   "root": 47,
+   "tune": -5.6,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 35,
+   "hi": 48,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "37_7.ogg",
+   "root": 49,
+   "tune": -41.7,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 49,
+   "hi": 50,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "39_7.ogg",
+   "root": 51,
+   "tune": -40.9,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 51,
+   "hi": 52,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "42_7.ogg",
+   "root": 54,
+   "tune": -33.7,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 53,
+   "hi": 55,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "44_7.ogg",
+   "root": 56,
+   "tune": -30.3,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 56,
+   "hi": 57,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "47_7.ogg",
+   "root": 59,
+   "tune": -24.7,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 58,
+   "hi": 60,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "49_7.ogg",
+   "root": 61,
+   "tune": -60.6,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 61,
+   "hi": 62,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "51_7.ogg",
+   "root": 63,
+   "tune": -10.4,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 63,
+   "hi": 64,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "54_7.ogg",
+   "root": 66,
+   "tune": 8.8,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 65,
+   "hi": 67,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "56_7.ogg",
+   "root": 68,
+   "tune": 7.2,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 68,
+   "hi": 69,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "59_7.ogg",
+   "root": 71,
+   "tune": 19.4,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 70,
+   "hi": 72,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "61_7.ogg",
+   "root": 73,
+   "tune": 7.8,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 73,
+   "hi": 74,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "63_7.ogg",
+   "root": 75,
+   "tune": 1.6,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 75,
+   "hi": 76,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "66_7.ogg",
+   "root": 78,
+   "tune": 9.6,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 77,
+   "hi": 79,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "68_7.ogg",
+   "root": 80,
+   "tune": 3.8,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 80,
+   "hi": 81,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "71_7.ogg",
+   "root": 83,
+   "tune": 13.6,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 82,
+   "hi": 95,
+   "velLo": 0,
+   "velHi": 127
+  }
+ ]
+}

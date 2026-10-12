@@ -1,0 +1,154 @@
+{
+ "id": "ukulele",
+ "name": "Ukulele",
+ "category": "Guitar",
+ "sampleRate": 44100,
+ "sustained": false,
+ "attack": 0.0,
+ "release": 0.3,
+ "zones": [
+  {
+   "file": "47_100.ogg",
+   "root": 47,
+   "tune": 0.0,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 35,
+   "hi": 53,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "60_100.ogg",
+   "root": 60,
+   "tune": -2.2,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 54,
+   "hi": 61,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "62_100.ogg",
+   "root": 62,
+   "tune": -6.1,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 62,
+   "hi": 63,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "64_100.ogg",
+   "root": 64,
+   "tune": -1.6,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 64,
+   "hi": 65,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "66_100.ogg",
+   "root": 66,
+   "tune": -5.3,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 66,
+   "hi": 67,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "69_100.ogg",
+   "root": 69,
+   "tune": 0.7,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 68,
+   "hi": 70,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "71_100.ogg",
+   "root": 71,
+   "tune": 0.2,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 71,
+   "hi": 72,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "73_100.ogg",
+   "root": 73,
+   "tune": 2.3,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 73,
+   "hi": 74,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "75_100.ogg",
+   "root": 75,
+   "tune": 3.1,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 75,
+   "hi": 76,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "77_100.ogg",
+   "root": 77,
+   "tune": 5.2,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 77,
+   "hi": 78,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "79_100.ogg",
+   "root": 79,
+   "tune": 6.7,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 79,
+   "hi": 80,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "81_100.ogg",
+   "root": 81,
+   "tune": 8.6,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 81,
+   "hi": 82,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "84_100.ogg",
+   "root": 84,
+   "tune": 1.5,
+   "loopStart": 0,
+   "loopEnd": 0,
+   "lo": 83,
+   "hi": 96,
+   "velLo": 0,
+   "velHi": 127
+  }
+ ]
+}

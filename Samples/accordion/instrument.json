@@ -1,0 +1,198 @@
+{
+ "id": "accordion",
+ "name": "Accordion",
+ "category": "Wind",
+ "sampleRate": 44100,
+ "sustained": true,
+ "attack": 0.04,
+ "release": 0.15,
+ "zones": [
+  {
+   "file": "47_100.ogg",
+   "root": 47,
+   "tune": -16.8,
+   "loopStart": 33763,
+   "loopEnd": 51403,
+   "lo": 35,
+   "hi": 48,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "50_100.ogg",
+   "root": 50,
+   "tune": -26.5,
+   "loopStart": 37546,
+   "loopEnd": 55186,
+   "lo": 49,
+   "hi": 52,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "54_100.ogg",
+   "root": 54,
+   "tune": -7.2,
+   "loopStart": 28717,
+   "loopEnd": 68407,
+   "lo": 53,
+   "hi": 54,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "55_100.ogg",
+   "root": 55,
+   "tune": -20.1,
+   "loopStart": 42380,
+   "loopEnd": 60020,
+   "lo": 55,
+   "hi": 56,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "57_100.ogg",
+   "root": 57,
+   "tune": -19.1,
+   "loopStart": 52752,
+   "loopEnd": 63777,
+   "lo": 57,
+   "hi": 58,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "59_100.ogg",
+   "root": 59,
+   "tune": -16.7,
+   "loopStart": 25494,
+   "loopEnd": 65184,
+   "lo": 59,
+   "hi": 59,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "60_100.ogg",
+   "root": 60,
+   "tune": -16.8,
+   "loopStart": 44233,
+   "loopEnd": 55258,
+   "lo": 60,
+   "hi": 61,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "62_100.ogg",
+   "root": 62,
+   "tune": -23.6,
+   "loopStart": 35548,
+   "loopEnd": 53188,
+   "lo": 62,
+   "hi": 63,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "64_100.ogg",
+   "root": 64,
+   "tune": -15.3,
+   "loopStart": 66306,
+   "loopEnd": 72921,
+   "lo": 64,
+   "hi": 65,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "66_100.ogg",
+   "root": 66,
+   "tune": -19.3,
+   "loopStart": 69308,
+   "loopEnd": 75923,
+   "lo": 66,
+   "hi": 66,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "67_100.ogg",
+   "root": 67,
+   "tune": -16.9,
+   "loopStart": 57720,
+   "loopEnd": 64335,
+   "lo": 67,
+   "hi": 68,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "69_100.ogg",
+   "root": 69,
+   "tune": -19.2,
+   "loopStart": 57100,
+   "loopEnd": 83560,
+   "lo": 69,
+   "hi": 70,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "71_100.ogg",
+   "root": 71,
+   "tune": -14.4,
+   "loopStart": 25706,
+   "loopEnd": 65396,
+   "lo": 71,
+   "hi": 71,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "72_100.ogg",
+   "root": 72,
+   "tune": -20.0,
+   "loopStart": 72580,
+   "loopEnd": 79195,
+   "lo": 72,
+   "hi": 73,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "74_100.ogg",
+   "root": 74,
+   "tune": -14.5,
+   "loopStart": 20402,
+   "loopEnd": 38042,
+   "lo": 74,
+   "hi": 75,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "76_100.ogg",
+   "root": 76,
+   "tune": -22.5,
+   "loopStart": 53047,
+   "loopEnd": 70687,
+   "lo": 76,
+   "hi": 77,
+   "velLo": 0,
+   "velHi": 127
+  },
+  {
+   "file": "79_100.ogg",
+   "root": 79,
+   "tune": -7.8,
+   "loopStart": 26632,
+   "loopEnd": 37657,
+   "lo": 78,
+   "hi": 91,
+   "velLo": 0,
+   "velHi": 127
+  }
+ ]
+}
