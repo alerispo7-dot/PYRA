@@ -417,11 +417,71 @@ static int convertList (const juce::File& list, int oggQuality)
     return failed == 0 ? 0 : 1;
 }
 
+/** Renders short musical phrases of chosen presets (for the website's sound demos).
+    jobs: [{ "name", "preset": {...}, "bpm", "seconds", "notes": [[time s, length s, note, velocity 0..1], ...] }] */
+static int renderDemos (const juce::File& jobsFile, const juce::File& outDir)
+{
+    auto jobs = juce::JSON::parse (jobsFile);
+    auto* arr = jobs.getArray();
+    if (arr == nullptr) { std::printf ("cannot read %s\n", jobsFile.getFullPathName().toRawUTF8()); return 1; }
+    outDir.createDirectory();
+    PyraAudioProcessor p;
+    FakePlayHead ph;
+    p.setPlayHead (&ph);
+    for (auto& job : *arr)
+    {
+        presetdata::apply (p, job["preset"]);
+        if (p.apvts.getRawParameterValue ("smp_on")->load() > 0.5f)
+        {
+            const int k = (int) std::lround (p.apvts.getRawParameterValue ("smp_inst")->load());
+            SampleBank::get().acquire (k);
+            for (int w = 0; w < 1000 && SampleBank::get().getStatus (k) != SampleBank::Ready; ++w) juce::Thread::sleep (10);
+        }
+        ph.bpm = (double) job["bpm"]; ph.ppq = 0.0; ph.playing = true;
+        std::vector<Note> notes;
+        if (auto* ns = job["notes"].getArray())
+            for (auto& n : *ns) notes.push_back ({ (double) n[0], (double) n[1], (int) n[2], (float) (double) n[3] });
+        const int total = (int) ((double) job["seconds"] * kSr);
+        p.prepareToPlay (kSr, kBlock);
+        juce::AudioBuffer<float> out (2, total), block (2, kBlock);
+        for (int pos = 0; pos < total; pos += kBlock)
+        {
+            const int len = std::min (kBlock, total - pos);
+            block.setSize (2, len, false, false, true);
+            juce::MidiBuffer midi;
+            for (auto& n : notes)
+            {
+                const int on = (int) (n.time * kSr), off = (int) ((n.time + n.length) * kSr);
+                if (on >= pos && on < pos + len) midi.addEvent (juce::MidiMessage::noteOn (1, n.note, n.vel), on - pos);
+                if (off >= pos && off < pos + len) midi.addEvent (juce::MidiMessage::noteOff (1, n.note), off - pos);
+            }
+            ph.ppq = pos / kSr * ph.bpm / 60.0;
+            p.processBlock (block, midi);
+            for (int c = 0; c < 2; ++c) out.copyFrom (c, pos, block, c, 0, len);
+        }
+        auto f = outDir.getChildFile (job["name"].toString() + ".wav");
+        f.deleteFile();
+        juce::WavAudioFormat wav;
+        if (auto stream = std::make_unique<juce::FileOutputStream> (f); stream->openedOk())
+            if (auto* w = wav.createWriterFor (stream.get(), kSr, 2, 24, {}, 0))
+            {
+                stream.release();
+                std::unique_ptr<juce::AudioFormatWriter> writer (w);
+                writer->writeFromAudioSampleBuffer (out, 0, total);
+            }
+        std::printf ("  %s  peak %.3f\n", job["name"].toString().toRawUTF8(), out.getMagnitude (0, total));
+    }
+    p.setPlayHead (nullptr);
+    return 0;
+}
+
 int main (int argc, char** argv)
 {
     juce::ScopedJuceInitialiser_GUI init;
     if (argc > 2 && juce::String (argv[1]) == "--convert")
         return convertList (juce::File (argv[2]), argc > 3 ? juce::String (argv[3]).getIntValue() : 6);
+    if (argc > 3 && juce::String (argv[1]) == "--demo")
+        return renderDemos (juce::File (argv[2]), juce::File (argv[3]));
     if (argc > 3 && juce::String (argv[1]) == "--normalize")
     {
         juce::File audition;
