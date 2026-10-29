@@ -86,7 +86,7 @@ private:
     std::vector<HeldNote> held, latched;
     int physicallyDown = 0, orderCounter = 0;
     bool wasOn = false, wasPlaying = false;
-    double internalBeat = 0.0;
+    double internalBeat = 0.0, expectedBeat = -1.0;
     long long fireIndex = 0;
     long long lastStepIndex = -1;
     uint32_t seed = 1;

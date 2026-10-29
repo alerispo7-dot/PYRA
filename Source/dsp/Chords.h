@@ -49,6 +49,9 @@ public:
     /** New progression with an emotion (mood > 0, see chordMoodNames()): picks one of the mood's progressions,
         written in roman numerals, and fits it to the scale (locked slots are kept). */
     void randomizeMood (int mood, int count, int scale, float complexity, uint32_t seed);
+    /** A new chord for one slot only: different from the one it had, chosen to lead well from the chord before
+        and into the chord after (a rest becomes a chord). Length and lock stay. */
+    void randomizeOne (int slot, int count, int scale, float complexity, uint32_t seed);
 
     juce::var toVar() const;
     void fromVar (const juce::var&);

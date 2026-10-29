@@ -399,12 +399,12 @@ void ParamRefs::fill (Settings& s) const
     {
         // AGE pushes every analog control up together; each knob still works on its own
         const float a = f (age);
-        s.drift     = std::min (1.0f, f (drift) + a * 0.6f);
-        s.spread    = std::min (1.0f, f (spread) + a * 0.5f);
-        s.tolerance = std::min (1.0f, f (tolerance) + a * 0.5f);
-        s.circuit   = std::min (1.0f, f (circuit) + a * 0.45f);
-        s.noiseFloor = std::min (1.0f, f (anNoise) + a * 0.35f);
-        s.hum        = std::min (1.0f, f (anHum) + a * 0.15f);
+        s.drift     = std::min (1.0f, f (drift) + a * 0.8f);
+        s.spread    = std::min (1.0f, f (spread) + a * 0.7f);
+        s.tolerance = std::min (1.0f, f (tolerance) + a * 0.7f);
+        s.circuit   = std::min (1.0f, f (circuit) + a * 0.6f);
+        s.noiseFloor = std::min (1.0f, f (anNoise) + a * 0.45f);
+        s.hum        = std::min (1.0f, f (anHum) + a * 0.25f);
         s.humFreq    = i (anHumFreq);
         s.bits       = f (anBits);        // vintage converter is a separate choice, not part of AGE
         s.rateReduce = f (anRate);

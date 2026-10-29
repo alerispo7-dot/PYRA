@@ -206,7 +206,7 @@ void Arpeggiator::prepare (double sampleRate)
     sr = sampleRate;
     held.clear(); latched.clear(); playing.clear();
     held.reserve (128); latched.reserve (128); playing.reserve (256);
-    physicallyDown = 0; internalBeat = 0.0; fireIndex = 0; lastStepIndex = -1;
+    physicallyDown = 0; internalBeat = 0.0; fireIndex = 0; lastStepIndex = -1; expectedBeat = -1.0;
     currentStep = -1;
 }
 
@@ -279,14 +279,23 @@ void Arpeggiator::process (juce::MidiBuffer& midi, int numSamples, const HostInf
     const double bpm = host.bpm > 1.0 ? host.bpm : 120.0;
     const double bps = bpm / 60.0 / sr;                       // beats per sample
     const bool hostRunning = host.playing && host.ppqValid;
-    if (hostRunning && ! wasPlaying) lastStepIndex = -1;
-    wasPlaying = hostRunning;
-
     double startBeat = hostRunning ? host.ppq : internalBeat;
     const double stepLen = choices::syncDivisionBeats (s.rate);
     const int steps = juce::jlimit (1, kMaxArpSteps, s.steps);
 
     juce::MidiBuffer out;
+
+    // the host started, looped back or jumped: follow the new position (a loop must not leave the arp waiting
+    // for a step number it already played), release what was sounding and start the pattern again
+    const bool jumped = hostRunning && wasPlaying && expectedBeat >= 0.0
+                        && (startBeat < expectedBeat - 1.0e-3 || startBeat > expectedBeat + stepLen);
+    if ((hostRunning && ! wasPlaying) || jumped)
+    {
+        if (jumped) allOff (out, 0);
+        lastStepIndex = (long long) std::ceil (startBeat / stepLen - 1.0e-6) - 1;
+        fireIndex = 0;
+    }
+    wasPlaying = hostRunning;
     auto active = [&] () -> const std::vector<HeldNote>& { return held.empty() && s.latch ? latched : held; };
 
     auto beatAt = [&] (int pos) { return startBeat + pos * bps; };
@@ -369,6 +378,7 @@ void Arpeggiator::process (juce::MidiBuffer& midi, int numSamples, const HostInf
     runRange (cursor, numSamples);
 
     if (! hostRunning) internalBeat = startBeat + numSamples * bps;
+    expectedBeat = hostRunning ? startBeat + numSamples * bps : -1.0;
     if (active().empty() && playing.empty()) currentStep = -1;
 
     midi.swapWith (out);

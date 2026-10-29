@@ -122,9 +122,9 @@ void Engine::applyAnalog (float* l, float* r, int n, const Settings& s)
     // vintage converter: lower bit depth and sample rate (with a soft anti-alias low-pass, like old samplers)
     if (s.bits > 0.0f || s.rateReduce > 0.0f)
     {
-        const int factor = 1 + (int) (s.rateReduce * 15.0f);
+        const int factor = 1 + (int) (s.rateReduce * 15.0f + s.rateReduce * s.rateReduce * s.rateReduce * 17.0f);
         const float lpA = factor > 1 ? std::min (1.0f, 2.0f * kPi * (float) (sr * 0.42 / factor) / (float) sr) : 1.0f;
-        const float q = s.bits > 0.0f ? std::exp2 (15.0f - s.bits * 11.0f) : 0.0f;
+        const float q = s.bits > 0.0f ? std::exp2 (15.0f - s.bits * 10.0f - s.bits * s.bits * s.bits * 2.5f) : 0.0f;   // down to ~2.5 bits
         for (int i = 0; i < n; ++i)
         {
             convLp[0] += lpA * (l[i] - convLp[0]);
@@ -139,8 +139,8 @@ void Engine::applyAnalog (float* l, float* r, int n, const Settings& s)
     // noise floor + mains hum, only while the synth is sounding (no hiss in silent parts of a song)
     if (s.noiseFloor <= 0.0f && s.hum <= 0.0f) { activity = 0.0f; return; }
     const bool sounding = getActiveVoiceCount() > 0;
-    const float noiseGain = s.noiseFloor > 0.0f ? juce::Decibels::decibelsToGain (-88.0f + s.noiseFloor * 46.0f) : 0.0f;
-    const float humGain = s.hum > 0.0f ? juce::Decibels::decibelsToGain (-80.0f + s.hum * 44.0f) : 0.0f;
+    const float noiseGain = s.noiseFloor > 0.0f ? juce::Decibels::decibelsToGain (-88.0f + s.noiseFloor * 46.0f + std::pow (s.noiseFloor, 3.0f) * 16.0f) : 0.0f;
+    const float humGain = s.hum > 0.0f ? juce::Decibels::decibelsToGain (-80.0f + s.hum * 44.0f + std::pow (s.hum, 3.0f) * 18.0f) : 0.0f;
     const float humInc = (s.humFreq == 1 ? 60.0f : 50.0f) / (float) sr;
     const float actUp = 1.0f / (0.005f * (float) sr), actDown = 1.0f / (0.4f * (float) sr);
     for (int i = 0; i < n; ++i)

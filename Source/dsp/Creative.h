@@ -12,6 +12,22 @@ namespace pyra
 {
 constexpr int kMaxGlitchSteps = 16;
 
+/** Settings of each GLITCH effect (shared by every step that uses it). Up to 3 per effect; the defaults are the
+    sound GLITCH had before the settings existed. */
+constexpr int kGlitchParams = 3;
+struct GlitchParamSpec
+{
+    const char* name = nullptr;     // nullptr = unused slot
+    float min = 0, max = 1, def = 0;
+    bool integer = false;
+    const char* unit = "";          // shown after the value ("st", "x", "%"...)
+    int choices = 0;                // 1 = fractions of the step (1, 1/2, 1/3...)
+};
+const GlitchParamSpec& glitchParamSpec (int fx, int index);
+/** Fractions of the step offered by the "length" style settings. */
+const std::vector<float>& glitchFractions();
+juce::String glitchParamText (int fx, int index, float value);
+
 /** One step of the GLITCH pattern (shared UI / audio thread). */
 struct GlitchStep
 {
@@ -24,6 +40,12 @@ class GlitchPattern
 public:
     GlitchPattern() { clear(); }
     std::array<GlitchStep, kMaxGlitchSteps> steps;
+    std::array<std::array<std::atomic<float>, kGlitchParams>, GCount> params;
+
+    float param (int fx, int i) const { return params[(size_t) fx][(size_t) i].load(); }
+    void setParam (int fx, int i, float v);
+    void resetParams();
+    bool paramsAreDefault() const;
 
     void clear();
     /** New random pattern: `density` 0..1 = how many steps get an effect. Locked steps are kept. */
@@ -102,6 +124,8 @@ private:
     long long curStep = LLONG_MIN;
     int curFx = GOff, prevFx = GOff;
     long long stepStart = 0, anchor = 0;
+    float fxGain = 1.0f, gateTarget = 1.0f;     // per-sample gain of the current effect (decay, fades, chops)
+    float curP[kGlitchParams] {};               // settings of the effect playing now
     double stepLen = 1000.0;          // samples
     double lastPos = 0.0, lastSpeed = 1.0;
     // crossfade from the previous read head

@@ -201,6 +201,7 @@ void PyraAudioProcessor::mixLayers (juce::AudioBuffer<float>& out, const juce::M
         view.clear();
         child->setPlayHead (getPlayHead());
         child->parentChordsOn.store (apvts.getRawParameterValue ("chord_on")->load() > 0.5f);
+        child->concertA.store (concertA.load());   // every layer plays in the same tuning
         child->parentArpOn.store (apvts.getRawParameterValue ("arp_on")->load() > 0.5f);
         child->processBlock (view, layerMidi);
 
@@ -248,6 +249,9 @@ juce::ValueTree PyraAudioProcessor::captureState (bool withLayers)
     state.appendChild (lfoDrawn.toTree(), nullptr);
     state.setProperty ("presetId", presetId, nullptr);
     state.setProperty ("presetName", presetName, nullptr);
+    state.setProperty ("holdArp", holdArp.load(), nullptr);
+    state.setProperty ("holdChords", holdChords.load(), nullptr);
+    if (! isLayerChild) state.setProperty ("concertA", concertA.load(), nullptr);
 
     if (withLayers && ! isLayerChild)
     {
@@ -276,7 +280,12 @@ void PyraAudioProcessor::restoreState (const juce::ValueTree& source)
     lfoDrawn.fromTree (tree.getChildWithName ("LFO_DRAWN"));
     presetId = tree.getProperty ("presetId").toString();
     presetName = tree.getProperty ("presetName", "Init").toString();
+    ++soundLoading;
     apvts.replaceState (tree);
+    --soundLoading;
+    holdArp = (bool) tree.getProperty ("holdArp", false);
+    holdChords = (bool) tree.getProperty ("holdChords", false);
+    if (! isLayerChild && tree.hasProperty ("concertA")) concertA = juce::jlimit (400.0f, 480.0f, (float) tree.getProperty ("concertA"));
 
     if (isLayerChild) return;
     for (int k = 1; k < pyra::kNumLayers; ++k)

@@ -302,6 +302,64 @@ bool ChordPattern::isDefault() const
     return true;
 }
 
+void ChordPattern::randomizeOne (int slot, int count, int scale, float complexity, uint32_t seed)
+{
+    count = juce::jlimit (1, kMaxChordSlots, count);
+    if (slot < 0 || slot >= kMaxChordSlots) return;
+    Rng r; r.seed (seed * 2654435761u + 0x51e7u);
+    r.next();
+    const auto& st = scaleFor (scale);
+    const int n = (int) st.size();
+    const bool majorLike = std::find (st.begin(), st.end(), 4) != st.end() && std::find (st.begin(), st.end(), 3) == st.end();
+    // how well degree a moves to degree b (functional harmony, 7-note scales)
+    static const float walk[7][7] = {
+        { 0, 2, 1, 3, 3, 3, 0.3f }, { 0.5f, 0, 0, 1, 5, 0.5f, 1 }, { 0.5f, 0, 0, 3, 0.5f, 3, 0 }, { 3, 2, 0.5f, 0, 4, 1, 0.5f },
+        { 5, 0, 0.5f, 1, 0, 3, 0.3f }, { 1, 3, 1, 4, 2, 0, 0.3f }, { 5, 0, 1, 0, 0, 2, 0 } };
+    static const float walkMinor[7][7] = {
+        { 0, 0.5f, 2, 3, 2, 3, 3 }, { 0.5f, 0, 0, 1, 4, 0.5f, 1 }, { 1, 0, 0, 2, 0.5f, 3, 2 }, { 3, 0.5f, 1, 0, 3, 1, 2 },
+        { 5, 0, 0.5f, 1, 0, 3, 0.5f }, { 1, 0.5f, 2, 3, 2, 0, 3 }, { 4, 0, 3, 0.5f, 0.5f, 2, 0 } };
+    auto degreeOf = [&] (int k) -> int
+    {
+        if (k < 0 || k >= count || slots[(size_t) k].empty.load()) return -1;
+        return ((slots[(size_t) k].degree.load() % n) + n) % n;
+    };
+    int prev = -1, next = -1;
+    for (int k = slot - 1; k >= 0 && prev < 0; --k) prev = degreeOf (k);
+    for (int k = slot + 1; k < count && next < 0; ++k) next = degreeOf (k);
+    auto& s = slots[(size_t) slot];
+    const int current = s.empty.load() ? -1 : ((s.degree.load() % n) + n) % n;
+
+    std::vector<float> w ((size_t) n, 1.0f);
+    for (int d = 0; d < n; ++d)
+    {
+        if (n == 7)
+        {
+            const auto& tab = majorLike ? walk : walkMinor;
+            if (prev >= 0) w[(size_t) d] += tab[prev][d];
+            if (next >= 0) w[(size_t) d] += tab[d][next];
+        }
+        if (d == current || d == prev) w[(size_t) d] = 0.0f;   // something new, not the same chord twice in a row
+    }
+    float total = 0; for (auto x : w) total += x;
+    int deg = current < 0 ? 0 : (current + 1) % n;
+    if (total > 0.0f)
+    {
+        float u = r.uni() * total;
+        for (int d = 0; d < n; ++d) { u -= w[(size_t) d]; if (u <= 0.0f && w[(size_t) d] > 0.0f) { deg = d; break; } }
+    }
+    int q = QAuto;
+    if (n == 7 && r.uni() < complexity * 0.45f)
+    {
+        const int third = ((st[(size_t) ((deg + 2) % 7)] - st[(size_t) deg]) % 12 + 12) % 12;
+        const int fifth = ((st[(size_t) ((deg + 4) % 7)] - st[(size_t) deg]) % 12 + 12) % 12;
+        if (third == 3 && fifth == 7) q = r.uni() < 0.6f ? QMin7 : QMin9;
+        else if (third == 4 && fifth == 7) q = deg == 4 ? QDom7 : (r.uni() < 0.5f ? QMaj7 : QAdd9);
+    }
+    const int octave = s.empty.load() ? 0 : (int) std::floor ((double) s.degree.load() / n) * n;   // keep its register
+    s.degree = deg + octave; s.shift = 0; s.quality = q; s.empty = false;
+    ++changeCounter;
+}
+
 void ChordPattern::randomize (int count, int scale, float complexity, int sizeMode, uint32_t seed)
 {
     (void) sizeMode;

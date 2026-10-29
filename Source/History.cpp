@@ -30,6 +30,8 @@ UndoHistory::Snapshot UndoHistory::capture() const
 
 void UndoHistory::apply (const Snapshot& s)
 {
+    ++proc.soundLoading;
+    const juce::ScopeGuard done { [this] { --proc.soundLoading; } };
     const auto& params = proc.getParameters();
     for (int i = 0; i < params.size() && i < (int) s.params.size(); ++i)
     {

@@ -1126,14 +1126,17 @@ int main (int argc, char** argv)
             resetAll (p);
             p.chordPattern.slots[2].degree = 4; p.chordPattern.slots[2].quality = QDom7; p.chordPattern.slots[1].lock = true;
             p.glitchPattern.steps[5].fx = GTapeStop;
+            p.glitchPattern.setParam (GStutter, 2, 7.0f);
             juce::MemoryBlock mb; p.getStateInformation (mb);
             PyraAudioProcessor q; q.setStateInformation (mb.getData(), (int) mb.getSize());
             bool ok = q.chordPattern.slots[2].degree.load() == 4 && q.chordPattern.slots[2].quality.load() == QDom7
-                      && q.chordPattern.slots[1].lock.load() && q.glitchPattern.steps[5].fx.load() == GTapeStop;
+                      && q.chordPattern.slots[1].lock.load() && q.glitchPattern.steps[5].fx.load() == GTapeStop
+                      && std::abs (q.glitchPattern.param (GStutter, 2) - 7.0f) < 0.01f;
             auto data = presetdata::capture (p);
             q.chordPattern.clear(); q.glitchPattern.clear();
             presetdata::apply (q, data);
-            ok = ok && q.chordPattern.slots[2].quality.load() == QDom7 && q.glitchPattern.steps[5].fx.load() == GTapeStop;
+            ok = ok && q.chordPattern.slots[2].quality.load() == QDom7 && q.glitchPattern.steps[5].fx.load() == GTapeStop
+                    && std::abs (q.glitchPattern.param (GStutter, 2) - 7.0f) < 0.01f;
             presetdata::apply (q, juce::var (new juce::DynamicObject()));
             ok = ok && q.chordPattern.isDefault() && q.glitchPattern.isEmpty();
             if (! ok) ++failures;
@@ -1365,6 +1368,119 @@ int main (int argc, char** argv)
                 render (p, "81_lfo_" + juce::String (ls).paddedLeft ('0', 2) + "_" + choices::lfoShapes()[ls].removeCharacters (" %+-/()&"), 0.8,
                         chord (0.0, 0.7, { 48 }));
             }
+        }
+    }
+
+    // ---- 0.9.x fixes
+    {
+        // ARP in a looping DAW pattern: the clip's chord ends exactly where it starts again (note-on sent before the
+        // note-off at the same instant) and the song position jumps back: every pass must play
+        PyraAudioProcessor q;
+        q.prepareToPlay (kSr, kBlock);
+        FakePlayHead ph; ph.bpm = 120.0;
+        q.setPlayHead (&ph);
+        set (q, "arp_on", 1); set (q, "env1_dec", 0.1f); set (q, "env1_sus", 0.2f); set (q, "env1_rel", 0.05f);
+        const int loopLen = (int) (2.0 * kSr), passes = 3;
+        juce::AudioBuffer<float> b (2, kBlock);
+        double passEnergy[passes] = {};
+        for (int pos = 0; pos < loopLen * passes; pos += kBlock)
+        {
+            juce::MidiBuffer m;
+            const int inLoop = pos % loopLen;
+            if (inLoop == 0)
+                for (int n : { 60, 64, 67 })
+                {
+                    m.addEvent (juce::MidiMessage::noteOn (1, n, 0.8f), 0);
+                    if (pos > 0) m.addEvent (juce::MidiMessage::noteOff (1, n), 0);   // the old note-off arrives after the new note-on
+                }
+            ph.ppq = inLoop / kSr * ph.bpm / 60.0;
+            q.processBlock (b, m);
+            passEnergy[pos / loopLen] += b.getRMSLevel (0, 0, kBlock);
+        }
+        q.setPlayHead (nullptr);
+        const bool ok = passEnergy[0] > 0.0 && passEnergy[1] > 0.3 * passEnergy[0] && passEnergy[2] > 0.3 * passEnergy[0];
+        if (! ok) ++failures;
+        std::printf ("  %-26s %s (pass energy %.1f / %.1f / %.1f)\n", "50_arp_daw_loop", ok ? "ok" : "FAIL", passEnergy[0], passEnergy[1], passEnergy[2]);
+    }
+    {
+        // the ARP / CHORDS the user set up stay when another preset is loaded; an untouched one follows the preset
+        PyraAudioProcessor q;
+        auto& pm = q.getPresetManager();
+        juce::String arpPreset, plainPreset;
+        for (auto& info : pm.getAll())
+        {
+            if (arpPreset.isEmpty() && info.category == "Arps") arpPreset = info.id;
+            if (plainPreset.isEmpty() && info.category == "Pad") plainPreset = info.id;
+        }
+        pm.load (plainPreset);
+        set (q, "arp_on", 1); set (q, "arp_rate", 9.0f); set (q, "arp_mode", 2.0f);   // the user sets up an arp
+        q.arpPattern.steps[3].degree = 5; ++q.arpPattern.changeCounter; q.markArpEdited();
+        pm.load (arpPreset);
+        const bool kept = q.apvts.getRawParameterValue ("arp_on")->load() > 0.5f && std::lround (q.apvts.getRawParameterValue ("arp_rate")->load()) == 9
+                          && q.arpPattern.steps[3].degree.load() == 5;
+        set (q, "arp_on", 0);                      // the user switches it off: the next preset brings its own
+        pm.load (arpPreset);
+        const bool follows = ! q.holdArp.load();
+        const bool ok = kept && follows;
+        if (! ok) ++failures;
+        std::printf ("  %-26s %s\n", "51_arp_kept_on_preset", ok ? "ok" : "FAIL");
+    }
+    {
+        // concert pitch: A4 at 432 Hz
+        PyraAudioProcessor q;
+        q.prepareToPlay (kSr, kBlock);
+        resetAll (q);
+        set (q, pid::osc (0, "wt"), 1.0f);   // sine
+        q.concertA = 432.0f;
+        juce::AudioBuffer<float> b (2, kBlock);
+        std::vector<float> out;
+        for (int k = 0; k < (int) (1.0 * kSr / kBlock); ++k)
+        {
+            juce::MidiBuffer m;
+            if (k == 0) m.addEvent (juce::MidiMessage::noteOn (1, 69, 0.8f), 0);
+            q.processBlock (b, m);
+            for (int i = 0; i < kBlock; ++i) out.push_back (b.getSample (0, i));
+        }
+        int crossings = 0; double first = -1, last = -1;
+        for (size_t i = (size_t) (0.3 * kSr); i + 1 < out.size(); ++i)
+            if (out[i] < 0.0f && out[i + 1] >= 0.0f)
+            {
+                const double t = (double) i + out[i] / (out[i] - out[i + 1]);
+                if (first < 0) first = t; last = t; ++crossings;
+            }
+        const double hz = crossings > 1 ? (crossings - 1) / ((last - first) / kSr) : 0.0;
+        const bool ok = std::abs (hz - 432.0) < 1.0;
+        if (! ok) ++failures;
+        std::printf ("  %-26s %s (A4 = %.2f Hz)\n", "52_concert_pitch_432", ok ? "ok" : "FAIL", hz);
+    }
+    {
+        // GLITCH settings: every effect at its extremes stays finite and bounded
+        FakePlayHead ph; ph.bpm = 128.0;
+        transport = &ph; p.setPlayHead (&ph);
+        for (int fx = 1; fx < GCount; ++fx)
+            for (int extreme = 0; extreme < 2; ++extreme)
+            {
+                resetAll (p);
+                p.glitchPattern.clear();
+                for (int k = 0; k < kMaxGlitchSteps; ++k) p.glitchPattern.steps[(size_t) k].fx = (k % 2) ? fx : GOff;
+                for (int i = 0; i < kGlitchParams; ++i)
+                {
+                    const auto& sp = glitchParamSpec (fx, i);
+                    if (sp.name != nullptr) p.glitchPattern.setParam (fx, i, extreme ? sp.max : sp.min);
+                }
+                set (p, "fx_glt_on", 1);
+                render (p, "53_glitch_" + juce::String (fx) + (extreme ? "_max" : "_min"), 2.0, chord (0.0, 1.9, { 48, 60, 67 }));
+            }
+        p.glitchPattern.clear();
+        p.setPlayHead (nullptr); transport = nullptr;
+    }
+    {
+        // ANALOG at the top of every knob: clearly audible, never broken
+        for (auto* id : { "an_age", "drift", "spread", "an_tolerance", "an_circuit", "an_noise", "an_hum", "an_bits", "an_rate" })
+        {
+            resetAll (p);
+            set (p, id, 1.0f);
+            render (p, juce::String ("54_analog_max_") + id, 2.0, chord (0.0, 1.5, { 48, 55, 60, 64 }));
         }
     }
 

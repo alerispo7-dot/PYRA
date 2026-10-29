@@ -243,7 +243,9 @@ void Voice::render (float* outL, float* outR, int n, const VoiceContext& ctx)
         driftVal += (driftTarget - driftVal) * std::min (1.0f, dt * 1.5f);
     }
 
-    const float timeScale = 1.0f + spreadR[2] * s.spread * 0.2f + tolFilter * s.tolerance * 0.1f;
+    // ANALOG: the cubic terms leave low settings as they were and make the top of each knob clearly audible
+    const float sp3 = s.spread * s.spread * s.spread, tol3 = s.tolerance * s.tolerance * s.tolerance, dr3 = s.drift * s.drift * s.drift;
+    const float timeScale = 1.0f + spreadR[2] * (s.spread * 0.2f + sp3 * 0.45f) + tolFilter * (s.tolerance * 0.1f + tol3 * 0.3f);
 
     // ---- modulation envelopes + LFOs
     for (int e = 1; e < kNumEnv; ++e)
@@ -264,7 +266,7 @@ void Voice::render (float* outL, float* outR, int n, const VoiceContext& ctx)
     // ---- pitch
     const float bend = (s.mpe && channel != 1) ? mpeBendSemis + ctx.globalBendSemis : ctx.globalBendSemis;
     const float basePitch = noteCur + (float) s.transpose + s.tune * 0.01f + bend
-                          + s.drift * driftVal * 0.18f + spreadR[0] * s.spread * 0.12f;
+                          + driftVal * (s.drift * 0.18f + dr3 * 0.55f) + spreadR[0] * (s.spread * 0.12f + sp3 * 0.33f);
 
     // ---- oscillator setup
     struct OscRun
@@ -284,7 +286,7 @@ void Voice::render (float* outL, float* outR, int n, const VoiceContext& ctx)
         if (! r.on) { osc[o].lastOut = 0.0f; continue; }
 
         const float pitch = basePitch + (float) (os.oct * 12) + v[dOsc (o, OPitch)] + v[dOsc (o, OFine)] * 0.01f
-                          + tolOsc[o] * s.tolerance * 0.09f;   // component tolerance: each oscillator slightly off
+                          + tolOsc[o] * (s.tolerance * 0.09f + tol3 * 0.36f);   // component tolerance: each oscillator slightly off
         const float hz = midiToHz (pitch);
         const int nv = os.voices;
         const float detune = v[dOsc (o, ODetune)];
@@ -375,8 +377,8 @@ void Voice::render (float* outL, float* outR, int n, const VoiceContext& ctx)
         if (! s.filt[f].on) continue;
         const float norm = std::clamp (s.baseNorm[dFilt (f, FCutoff)] + cutOff[f] + env2 * v[dFilt (f, FEnv)], 0.0f, 1.0f);
         const float hz = 20.0f * std::pow (1000.0f, norm)
-                       * std::exp2 (s.filt[f].key * keyOffset + spreadR[1] * s.spread * 0.25f + s.drift * driftVal * 0.08f
-                                    + tolFilter * s.tolerance * 0.2f);
+                       * std::exp2 (s.filt[f].key * keyOffset + spreadR[1] * (s.spread * 0.25f + sp3 * 0.7f) + driftVal * (s.drift * 0.08f + dr3 * 0.5f)
+                                    + tolFilter * (s.tolerance * 0.2f + tol3 * 0.6f));
         filters[f].setTarget (s.filt[f].type, hz, v[dFilt (f, FRes)], v[dFilt (f, FDrive)], v[dFilt (f, FMix)], n);
     }
 
@@ -627,7 +629,8 @@ void Voice::render (float* outL, float* outR, int n, const VoiceContext& ctx)
 
         if (s.circuit > 0.0f)
         {   // analog circuit: soft, slightly asymmetric saturation
-            const float cg = 1.0f + s.circuit * 3.5f, cc = 1.0f / (1.0f + s.circuit * 1.6f), bias = s.circuit * 0.08f;
+            const float c3 = s.circuit * s.circuit * s.circuit;
+            const float cg = 1.0f + s.circuit * 3.5f + c3 * 9.0f, cc = 1.0f / (1.0f + s.circuit * 1.6f + c3 * 2.2f), bias = s.circuit * 0.08f + c3 * 0.14f;
             yL = (fastTanh (yL * cg + bias) - fastTanh (bias)) * cc;
             yR = (fastTanh (yR * cg + bias) - fastTanh (bias)) * cc;
         }

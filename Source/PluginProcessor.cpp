@@ -1,6 +1,7 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "dsp/Wavetables.h"
+#include "Lang.h"
 
 PyraAudioProcessor::PyraAudioProcessor()
     : AudioProcessor (BusesProperties().withOutput ("Output", juce::AudioChannelSet::stereo(), true)),
@@ -8,12 +9,17 @@ PyraAudioProcessor::PyraAudioProcessor()
 {
     pyra::Wavetables::get();   // build the wavetable bank now, never on the audio thread
     pyra::SampleBank::get();   // start the background sample loader
+    concertA = juce::jlimit (400.0f, 480.0f, (float) pyra::lang::settings().getDoubleValue ("concertA", 440.0));   // the default you chose last
     refs.init (apvts);
     fx.init (apvts, glitchPattern);
     arp.init (apvts, arpPattern);
     chords.init (apvts, chordPattern);
     for (auto& p : layerPtr) p.store (nullptr);
     for (auto& p : layerPeak) p.store (0.0f);
+    for (auto* ap : getParameters())
+        if (auto* rp = dynamic_cast<juce::RangedAudioParameter*> (ap))
+            if (rp->getParameterID().startsWith ("arp_") || rp->getParameterID().startsWith ("chord_"))
+                apvts.addParameterListener (rp->getParameterID(), &sectionWatch);
     for (int k = 0; k < pyra::kNumLayers; ++k)
     {
         auto raw = [&] (const char* n) { return apvts.getRawParameterValue (pyra::layerParam (k, n)); };
@@ -24,6 +30,9 @@ PyraAudioProcessor::PyraAudioProcessor()
 
 PyraAudioProcessor::~PyraAudioProcessor()
 {
+    for (auto* ap : getParameters())
+        if (auto* rp = dynamic_cast<juce::RangedAudioParameter*> (ap))
+            apvts.removeParameterListener (rp->getParameterID(), &sectionWatch);
     for (auto& p : layerPtr) p.store (nullptr);
 }
 
@@ -52,7 +61,36 @@ void PyraAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     // notes played on the on-screen keyboard
     keyboardState.processNextMidiBuffer (midi, 0, buffer.getNumSamples(), true);
 
+    // a note that ends exactly where the next one starts (a looped or repeated clip): some hosts send the new
+    // note-on before the old note-off at the same instant, which would silence the new note (and the ARP)
+    {
+        bool needs = false;
+        int lastPos = -1; bool onAtPos = false;
+        for (const auto meta : midi)
+        {
+            const auto m = meta.getMessage();
+            if (meta.samplePosition != lastPos) { lastPos = meta.samplePosition; onAtPos = false; }
+            if (m.isNoteOn()) onAtPos = true;
+            else if (m.isNoteOff() && onAtPos) { needs = true; break; }
+        }
+        if (needs)
+        {
+            std::vector<std::pair<int, juce::MidiMessage>> ev;
+            for (const auto meta : midi) ev.push_back ({ meta.samplePosition, meta.getMessage() });
+            std::stable_sort (ev.begin(), ev.end(), [] (const auto& a, const auto& b)
+            {
+                auto rank = [] (const juce::MidiMessage& m) { return m.isNoteOff() ? 0 : (m.isNoteOn() ? 2 : 1); };
+                if (a.first != b.first) return a.first < b.first;
+                return rank (a.second) < rank (b.second);
+            });
+            midi.clear();
+            for (auto& [pos, m] : ev) midi.addEvent (m, pos);
+        }
+    }
+
     refs.fill (settings);
+    if (const float a4 = concertA.load(); std::abs (a4 - 440.0f) > 0.01f)
+        settings.tune += 1200.0f * std::log2 (a4 / 440.0f);   // cents
     for (int k = 0; k < pyra::kNumLfo; ++k) settings.lfo[k].drawn = &lfoDrawn.lfo[(size_t) k];
 
     pyra::HostInfo host;
@@ -150,7 +188,9 @@ void PyraAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
         {
             if (xml->hasAttribute ("uiWidth")) editorWidth = xml->getIntAttribute ("uiWidth");
             xml->removeAttribute ("uiWidth");
+            const bool hasTuning = xml->hasAttribute ("concertA");
             restoreState (juce::ValueTree::fromXml (*xml));
+            if (! hasTuning) concertA = 440.0f;   // projects saved before the tuning setting existed were all at 440 Hz
         }
 }
 

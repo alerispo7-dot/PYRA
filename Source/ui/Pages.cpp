@@ -992,6 +992,22 @@ namespace
             mpe = bm.toggle ("mpe", tr ("MPE on"));
             mpeRange = bm.knob ("mpeRange", "Bend Range", false);
 
+            // concert pitch (A4): saved with the project, and remembered as the default for new PYRAs
+            mpePanel.addAndMakeVisible (a4Combo);
+            for (int i = 0; i < (int) std::size (kA4); ++i)
+                a4Combo.addItem (juce::String (kA4[i]) + " Hz" + (kA4[i] == 440 ? "  (" + tr ("standard") + ")" : (kA4[i] == 415 ? "  (" + tr ("baroque") + ")" : juce::String())), i + 1);
+            a4Combo.setTooltip (tr ("Tuning reference: the pitch of the A above middle C. 440 Hz is the standard today; some musicians prefer 432 Hz. Every oscillator, sample and layer follows it."));
+            a4Combo.onChange = [this, pr = &ui.proc]
+            {
+                const int i = a4Combo.getSelectedId() - 1;
+                if (! juce::isPositiveAndBelow (i, (int) std::size (kA4))) return;
+                pr->concertA = (float) kA4[i];
+                lang::settings().setValue ("concertA", kA4[i]);
+                lang::settings().saveIfNeeded();
+            };
+            proc = &ui.proc;
+            syncA4();
+
             // LANGUAGE: one button per language, each written in its own language
             for (int l = 0; l < lang::NumLanguages; ++l)
             {
@@ -1103,6 +1119,12 @@ namespace
             label (startCombo, tr ("Open on"));
             label (&sizeMinus, tr ("Window size"));
             {
+                auto r = a4Combo.getBounds().translated (mpePanel.getX(), mpePanel.getY());
+                g.setColour (colours::textDim);
+                g.setFont (PyraLookAndFeel::font (10.5f, true));
+                g.drawText (tr ("TUNING (A4)"), r.getX(), r.getY() - 18, r.getWidth(), 16, juce::Justification::centredLeft, true);
+            }
+            {
                 auto r = sizeValueArea().translated (pb.getX(), pb.getY());
                 g.setColour (colours::display);
                 g.fillRoundedRectangle (r.toFloat(), 4.0f);
@@ -1118,8 +1140,18 @@ namespace
 
         juce::Rectangle<int> sizeValueArea() const { return sizeMinus.getBounds().withX (sizeMinus.getRight() + 4).withWidth (58); }
 
+        static constexpr int kA4[] = { 415, 432, 435, 438, 440, 442, 443, 444, 446 };
+        void syncA4()
+        {
+            const float a4 = proc->concertA.load();
+            int best = 4;
+            for (int i = 0; i < (int) std::size (kA4); ++i) if (std::abs ((float) kA4[i] - a4) < std::abs ((float) kA4[best] - a4)) best = i;
+            if (a4Combo.getSelectedId() != best + 1) a4Combo.setSelectedId (best + 1, juce::dontSendNotification);
+        }
+
         void tick() override
         {
+            syncA4();
             const int pct = windowPercent ? windowPercent() : 50;
             if (pct != shownPercent)
             {
@@ -1146,6 +1178,7 @@ namespace
 
             mpe->setBounds (14, 34, 120, 24);
             mpeRange->setBounds (14, 70, 90, 90);
+            a4Combo.setBounds (juce::jmin (170, mpePanel.getWidth() - 200), 70, 190, 26);
 
             for (int i = 0; i < langButtons.size(); ++i)
                 langButtons[i]->setBounds (14 + i * 133, 48, 125, 36);
@@ -1170,6 +1203,8 @@ namespace
         }
 
         Panel voice, mpePanel, language, personal, about;
+        juce::ComboBox a4Combo;
+        PyraAudioProcessor* proc = nullptr;
         std::function<void()> onLanguageChanged;
         std::function<void (int)> onWindowScale;
         std::function<int()> windowPercent;

@@ -331,7 +331,7 @@ namespace
         void mouseDown (const juce::MouseEvent& e) override
         {
             for (int fx = 0; fx < GCount; ++fx)
-                if (paletteCell (fx).contains (e.getPosition())) { brush = fx; repaint(); return; }
+                if (paletteCell (fx).contains (e.getPosition())) { brush = fx; if (onBrush) onBrush (fx); repaint(); return; }
             if (lockArea().contains (e.getPosition()))
             {
                 auto& st = pattern.steps[(size_t) columnAt (e.x)];
@@ -373,25 +373,135 @@ namespace
         juce::TextButton randomBtn, clearBtn, unlockBtn;
         int brush = GRepeat, lastSig = -1;
         bool painting = false, erase = false;
+        std::function<void (int)> onBrush;
     };
 
-    class CreativeInfo : public Panel
+    /** The settings of the GLITCH effect chosen in the palette (every step painted with it uses them). */
+    class GlitchSettings : public Panel
     {
     public:
-        CreativeInfo() : Panel (tr ("TIP")) { tint = colours::accent2; }
+        explicit GlitchSettings (GlitchPattern& p) : pattern (p)
+        {
+            tint = colours::hot;
+            for (int i = 0; i < kGlitchParams; ++i)
+            {
+                auto* sl = sliders.add (new juce::Slider (juce::Slider::RotaryHorizontalVerticalDrag, juce::Slider::NoTextBox));
+                sl->setPopupDisplayEnabled (false, false, nullptr);
+                sl->setDoubleClickReturnValue (true, 0.0);
+                sl->onValueChange = [this, i]
+                {
+                    if (updating) return;
+                    pattern.setParam (fx, i, (float) sliders[i]->getValue());
+                    repaint();
+                };
+                addChildComponent (sl);
+            }
+            setEffect (GRepeat);
+        }
+
+        void setEffect (int newFx)
+        {
+            fx = newFx;
+            title = tr ("SETTINGS") + ": " + tr (choices::glitchEffects()[fx]).toUpperCase();
+            const juce::ScopedValueSetter<bool> svs (updating, true);
+            for (int i = 0; i < kGlitchParams; ++i)
+            {
+                const auto& sp = glitchParamSpec (fx, i);
+                auto* sl = sliders[i];
+                sl->setVisible (sp.name != nullptr);
+                if (sp.name == nullptr) continue;
+                sl->setRange (sp.min, sp.max, sp.integer ? 1.0 : 0.0);
+                sl->setDoubleClickReturnValue (true, sp.def);
+                sl->setValue (pattern.param (fx, i), juce::dontSendNotification);
+                sl->setTooltip (tr (helpFor (fx, i)));
+            }
+            resized();
+            repaint();
+        }
+
+        static const char* helpFor (int fx, int i)
+        {
+            switch (fx)
+            {
+                case GRepeat:   return i == 0 ? "How much of the step is looped" : i == 1 ? "Each repeat a little quieter" : "Plays the loop higher or lower";
+                case GStutter:  return i == 0 ? "Length of each stutter slice" : i == 1 ? "How much of each slice sounds (lower = choppier)" : "Each repeat goes up (or down) by this many semitones";
+                case GReverse:  return i == 0 ? "Speed of the backwards playback (2x = an octave higher)" : "Fades the reversed sound in, like a reverse swell";
+                case GTapeStop: return i == 0 ? "How long the tape takes to stop" : "Stop = slows down to silence. Start = speeds up from nothing";
+                case GSlow:     return "Playback speed (0.5x = an octave lower)";
+                case GPitchUp:  return "How many semitones higher the step is replayed";
+                case GScratch:  return i == 0 ? "How far the record is pushed back and forth" : "How many back-and-forth movements per step";
+                case GGate:     return i == 0 ? "1 = the whole step is silent; more = the step is chopped into pieces" : "How much of each piece stays open";
+                case GCrush:    return i == 0 ? "Bit depth (lower = harsher)" : "Sample-rate reduction (higher = more aliasing)";
+                default:        return "";
+            }
+        }
+
+        juce::Rectangle<int> cellFor (int i) const
+        {
+            const int n = juce::jmax (1, visibleCount()), w = getWidth() - 20;
+            const int cols = w / n >= 86 ? n : 2;
+            const int cw = w / cols;
+            const int row = i / cols, col = i % cols;
+            return { 10 + col * cw, 40 + row * 120, cw, 116 };
+        }
+        int visibleCount() const
+        {
+            int n = 0;
+            for (int i = 0; i < kGlitchParams; ++i) if (glitchParamSpec (fx, i).name != nullptr) ++n;
+            return n;
+        }
+
+        void resized() override
+        {
+            for (int i = 0; i < kGlitchParams; ++i)
+                sliders[i]->setBounds (cellFor (i).withTrimmedTop (16).withTrimmedBottom (18).withSizeKeepingCentre (78, 78));
+        }
+
         void paint (juce::Graphics& g) override
         {
             Panel::paint (g);
-            drawText (g, tr ("Turn CHAOS up to the top (with MANGLE) and these three effects come in by themselves: the sound gets cut, reversed, stretched and scattered."),
-                      getLocalBounds().withTrimmedTop (30).reduced (12, 4), 12.5f, colours::text, juce::Justification::topLeft, false, 8);
+            if (fx == GOff)
+            {
+                drawText (g, tr ("Pick an effect in EFFECT TO PAINT to see its settings."), getLocalBounds().withTrimmedTop (34).reduced (12, 4), 12.5f,
+                          colours::textDim, juce::Justification::topLeft, false, 4);
+                return;
+            }
+            for (int i = 0; i < kGlitchParams; ++i)
+            {
+                const auto& sp = glitchParamSpec (fx, i);
+                if (sp.name == nullptr) continue;
+                auto c = cellFor (i);
+                drawText (g, tr (sp.name).toUpperCase(), c.withHeight (16), 10.5f, colours::textDim, juce::Justification::centred, true, 1);
+                drawText (g, tr (glitchParamText (fx, i, pattern.param (fx, i))), c.withTrimmedTop (c.getHeight() - 18), 12.0f, colours::accent2,
+                          juce::Justification::centred, true, 1);
+            }
+            drawText (g, tr ("Every step painted with this effect uses these settings."), getLocalBounds().removeFromBottom (36).reduced (12, 2), 11.0f,
+                      colours::textDim, juce::Justification::centredLeft, false, 2);
         }
+
+        void tick()
+        {
+            const int cc = pattern.changeCounter.load();
+            if (cc == lastCounter) return;
+            lastCounter = cc;
+            const juce::ScopedValueSetter<bool> svs (updating, true);
+            for (int i = 0; i < kGlitchParams; ++i)
+                if (glitchParamSpec (fx, i).name != nullptr) sliders[i]->setValue (pattern.param (fx, i), juce::dontSendNotification);
+            repaint();
+        }
+
+        GlitchPattern& pattern;
+        juce::OwnedArray<juce::Slider> sliders;
+        int fx = GRepeat, lastCounter = -1;
+        bool updating = false;
     };
 
     class FxPage : public Page
     {
     public:
-        explicit FxPage (UiContext& ui) : glitchPanel (ui)
+        explicit FxPage (UiContext& ui) : glitchPanel (ui), creativeInfo (ui.proc.glitchPattern)
         {
+            glitchPanel.onBrush = [this] (int fx) { creativeInfo.setEffect (fx); };
             addAndMakeVisible (mainView);
             addChildComponent (creativeView);
             for (auto* t : { &tabMain, &tabCreative })
@@ -485,9 +595,9 @@ namespace
             const int gh = 380;
             glitchPanel.setBounds (m, m / 2, area.getWidth() - 2 * m, gh);
             const int y2 = m / 2 + gh + m, h2 = area.getHeight() - y2 - m;
-            granular->setBounds (m, y2, 640, h2);
-            shifter->setBounds (m + 640 + m, y2, 370, h2);
-            creativeInfo.setBounds (m + 640 + m + 370 + m, y2, area.getWidth() - (m + 640 + m + 370 + m) - m, h2);
+            granular->setBounds (m, y2, 600, h2);
+            shifter->setBounds (m + 600 + m, y2, 340, h2);
+            creativeInfo.setBounds (m + 600 + m + 340 + m, y2, area.getWidth() - (m + 600 + m + 340 + m) - m, h2);
         }
 
         void paint (juce::Graphics& g) override
@@ -500,6 +610,7 @@ namespace
         {
             comp->tick();
             glitchPanel.tick();
+            creativeInfo.tick();
             // delay: show the time knob or the musical division depending on Sync
             if (delayPanel->syncToggle != nullptr)
             {
@@ -520,7 +631,7 @@ namespace
         ChainInfo info;
         GlitchPanel glitchPanel;
         std::unique_ptr<FxPanel> granular, shifter;
-        CreativeInfo creativeInfo;
+        GlitchSettings creativeInfo;
     };
 
     //==========================================================================
@@ -877,140 +988,171 @@ namespace
     };
 
     //==========================================================================
-    /** Step editor: lock / note / velocity / gate / on / tie for up to 32 steps. */
-    class StepEditor : public juce::Component
+    /** Step editor as a piano roll: each column is a step, each row a note of the scale (relative to the key you play).
+        Click a cell to put the step's note there, click the note again to silence the step, drag to draw a melody.
+        Under the roll: velocity, gate and tie lanes; the lock row keeps steps when you press RANDOM. */
+    class StepEditor : public juce::Component, public juce::SettableTooltipClient
     {
     public:
         StepEditor (PyraAudioProcessor& p) : proc (p), pattern (p.arpPattern)
         {
             steps = p.apvts.getRawParameterValue ("arp_steps");
-            setRepaintsOnMouseActivity (false);
+            scaleParam = p.apvts.getRawParameterValue ("arp_scale");
+            keyParam = p.apvts.getRawParameterValue ("arp_key");
+            setRepaintsOnMouseActivity (true);
+            setTooltip (tr ("Click a cell to place the note of that step, click it again to silence the step, drag to draw. Right-click = silence. Double-click = back to the root."));
         }
 
-        enum Row { RLock, RNote, RVel, RGate, ROn, RTie, RCount };
+        static constexpr int kTop = 14, kBottom = -14, kRows = kTop - kBottom + 1;
+        enum Lane { LLock, LRoll, LVel, LGate, LTie, LCount };
 
-        juce::Rectangle<int> rowBounds (Row r) const
+        juce::Rectangle<int> laneBounds (Lane l) const
         {
-            const int x = labelW, w = getWidth() - labelW;
-            switch (r)
+            const int x = labelW, w = getWidth() - labelW, h = getHeight();
+            const int lockH = 22, velH = 62, gateH = 62, tieH = 20, numH = 16, gap = 6;
+            const int rollY = lockH + gap, rollH = h - (lockH + velH + gateH + tieH + numH + 5 * gap);
+            switch (l)
             {
-                case RLock: return { x, 0, w, 24 };
-                case RNote: return { x, 28, w, 210 };
-                case RVel:  return { x, 244, w, 96 };
-                case RGate: return { x, 346, w, 96 };
-                case ROn:   return { x, 448, w, 24 };
-                default:    return { x, 476, w, 24 };
+                case LLock: return { x, 0, w, lockH };
+                case LRoll: return { x, rollY, w, rollH };
+                case LVel:  return { x, rollY + rollH + gap, w, velH };
+                case LGate: return { x, rollY + rollH + gap + velH + gap, w, gateH };
+                default:    return { x, rollY + rollH + gap + velH + gap + gateH + gap, w, tieH };
             }
         }
-
-        int columnAt (int x) const
+        float rowH() const { return (float) laneBounds (LRoll).getHeight() / (float) kRows; }
+        float rowY (int degree) const { return (float) laneBounds (LRoll).getY() + (float) (kTop - degree) * rowH(); }
+        int degreeAt (int y) const { return juce::jlimit (kBottom, kTop, kTop - (int) std::floor (((float) y - (float) laneBounds (LRoll).getY()) / rowH())); }
+        float colW() const { return (float) (getWidth() - labelW) / (float) kMaxArpSteps; }
+        int columnAt (int x) const { return juce::jlimit (0, kMaxArpSteps - 1, (int) ((float) (x - labelW) / colW())); }
+        juce::Rectangle<float> cell (Lane l, int c) const
         {
-            const float cw = (float) (getWidth() - labelW) / (float) kMaxArpSteps;
-            return juce::jlimit (0, kMaxArpSteps - 1, (int) ((float) (x - labelW) / cw));
+            const auto rb = laneBounds (l).toFloat();
+            return { rb.getX() + colW() * (float) c + 1.0f, rb.getY(), colW() - 2.0f, rb.getHeight() };
         }
 
-        juce::Rectangle<float> cell (Row r, int c) const
+        static juce::String pcName (int n)
         {
-            const auto rb = rowBounds (r).toFloat();
-            const float cw = rb.getWidth() / (float) kMaxArpSteps;
-            return { rb.getX() + cw * (float) c + 1.5f, rb.getY(), cw - 3.0f, rb.getHeight() };
+            static const char* names[] = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
+            return names[((n % 12) + 12) % 12];
         }
 
         void paint (juce::Graphics& g) override
         {
             const int active = juce::jlimit (1, kMaxArpSteps, (int) std::lround (steps->load()));
             const int playing = proc.arp.currentStep.load();
-            const char* labels[RCount] = { "LOCK", "NOTE", "VELOCITY", "GATE", "ON", "TIE" };
+            const int scale = (int) std::lround (scaleParam->load()), key = (int) std::lround (keyParam->load());
+            const int perOct = juce::jmax (1, (int) choices::scaleSteps (scale).size());
+            const auto roll = laneBounds (LRoll).toFloat();
+            const auto mouse = getMouseXYRelative();
+            const bool over = isMouseOver() && laneBounds (LRoll).contains (mouse);
 
-            for (int r = 0; r < RCount; ++r)
-                drawText (g, tr (labels[r]), rowBounds ((Row) r).withX (0).withWidth (labelW - 8), 11.0f, colours::textDim,
-                          juce::Justification::centredRight, true, 1);
+            // row labels and background stripes: the root and its octaves stand out, like the C rows of a piano roll
+            for (int d = kBottom; d <= kTop; ++d)
+            {
+                const auto r = juce::Rectangle<float> ((float) labelW, rowY (d), roll.getWidth(), rowH());
+                const bool root = ((d % perOct) + perOct) % perOct == 0;
+                g.setColour (root ? colours::accent.withAlpha (d == 0 ? 0.16f : 0.09f) : ((d & 1) ? colours::panel : colours::panelHi).withAlpha (0.7f));
+                g.fillRect (r);
+                if (over && degreeAt (mouse.y) == d) { g.setColour (colours::text.withAlpha (0.05f)); g.fillRect (r); }
+                const int note = scaleShift (60 + key, d, scale, key);
+                const juce::String lab = (d == 0 ? tr ("ROOT") : (d > 0 ? "+" : "") + juce::String (d)) + "  " + pcName (note);
+                if (rowH() >= 9.0f || root)
+                    drawText (g, lab, juce::Rectangle<float> (0.0f, rowY (d), (float) labelW - 6.0f, rowH()).toNearestInt(),
+                              juce::jmin (10.5f, rowH() + 0.5f), root ? colours::accent2 : colours::textDim, juce::Justification::centredRight, root, 1);
+            }
 
+            // columns: beat groups, steps not in use, playhead, hover column
+            for (int c = 0; c < kMaxArpSteps; ++c)
+            {
+                const float x = (float) labelW + colW() * (float) c;
+                g.setColour ((c % 4 == 0 ? colours::edge : colours::edge.withAlpha (0.35f)));
+                g.drawVerticalLine ((int) x, roll.getY(), roll.getBottom());
+                if (c >= active) { g.setColour (juce::Colours::black.withAlpha (0.45f)); g.fillRect (x, roll.getY(), colW(), roll.getHeight()); }
+                if (c == playing && c < active) { g.setColour (colours::accent.withAlpha (0.16f)); g.fillRect (x, roll.getY(), colW(), roll.getHeight()); }
+            }
+
+            // notes
             for (int c = 0; c < kMaxArpSteps; ++c)
             {
                 const auto& s = pattern.steps[(size_t) c];
                 const bool inUse = c < active;
-                const float alpha = inUse ? 1.0f : 0.25f;
-
-                // column background, beat grouping and playhead
-                auto col = cell (RLock, c).withBottom (cell (RTie, c).getBottom());
-                g.setColour ((c / 4) % 2 == 0 ? colours::panel : colours::panelHi);
-                g.fillRoundedRectangle (col, 3.0f);
-                if (c == playing && inUse)
+                const int d = juce::jlimit (kBottom, kTop, s.degree.load());
+                const float x = (float) labelW + colW() * (float) c;
+                const bool tie = s.tie.load() && c + 1 < kMaxArpSteps;
+                const float len = tie ? colW() + 1.0f : juce::jmax (colW() * 0.3f, colW() * juce::jlimit (0.05f, 1.0f, s.gate.load()));
+                auto nb = juce::Rectangle<float> (x + 2.0f, rowY (d) + 1.0f, len - (tie ? 0.0f : 4.0f), rowH() - 2.0f);
+                if (! s.on.load())
                 {
-                    g.setColour (colours::accent.withAlpha (0.18f));
-                    g.fillRoundedRectangle (col, 3.0f);
+                    g.setColour (colours::textDim.withAlpha (inUse ? 0.35f : 0.15f));
+                    g.drawRoundedRectangle (nb, 2.0f, 1.0f);
+                    continue;
                 }
+                const float a = (inUse ? 1.0f : 0.3f) * (0.45f + 0.55f * s.velocity.load());
+                g.setGradientFill (juce::ColourGradient (juce::Colour (0xffffb27a).withMultipliedAlpha (a), nb.getX(), nb.getY(),
+                                                         juce::Colour (0xffd8360c).withMultipliedAlpha (a), nb.getX(), nb.getBottom(), false));
+                g.fillRoundedRectangle (nb, 2.5f);
+                g.setColour ((c == playing && inUse ? juce::Colours::white : juce::Colour (0xffffe0c8)).withMultipliedAlpha (inUse ? 0.9f : 0.3f));
+                g.drawRoundedRectangle (nb, 2.5f, c == playing && inUse ? 1.6f : 0.8f);
+            }
+            g.setColour (colours::edge);
+            g.drawRect (roll, 1.0f);
 
-                // lock
-                auto lk = cell (RLock, c).reduced (3.0f, 3.0f);
+            // lanes under the roll
+            const char* labels[] = { "LOCK", "", "VELOCITY", "GATE", "TIE" };
+            for (auto l : { LLock, LVel, LGate, LTie })
+                drawText (g, tr (labels[l]), laneBounds (l).withX (0).withWidth (labelW - 8), 11.0f, colours::textDim, juce::Justification::centredRight, true, 1);
+            for (int c = 0; c < kMaxArpSteps; ++c)
+            {
+                const auto& s = pattern.steps[(size_t) c];
+                const float alpha = c < active ? 1.0f : 0.25f;
+                auto lk = cell (LLock, c).reduced (3.0f, 3.0f);
                 g.setColour ((s.lock.load() ? colours::accent2 : colours::edge).withMultipliedAlpha (alpha));
                 g.fillRoundedRectangle (lk.withTrimmedTop (lk.getHeight() * 0.45f), 2.0f);
                 g.drawEllipse (lk.withTrimmedBottom (lk.getHeight() * 0.4f).reduced (lk.getWidth() * 0.22f, 1.0f), 1.5f);
-
-                // note degree (bipolar bar)
-                auto nb = cell (RNote, c);
-                const int d = s.degree.load();
-                const float mid = nb.getCentreY();
-                const float hgt = (float) d / 14.0f * nb.getHeight() * 0.5f;
-                g.setColour (colours::edge.withMultipliedAlpha (alpha));
-                g.drawHorizontalLine ((int) mid, nb.getX(), nb.getRight());
-                g.setColour ((s.on.load() ? colours::accent : colours::textDim).withMultipliedAlpha (alpha));
-                g.fillRect (juce::Rectangle<float> (nb.getX() + 2.0f, std::min (mid, mid - hgt), nb.getWidth() - 4.0f,
-                                                    std::max (2.0f, std::abs (hgt))));
-                g.setColour (colours::text.withMultipliedAlpha (alpha));
-                g.setFont (PyraLookAndFeel::font (10.0f));
-                g.drawText ((d > 0 ? "+" : "") + juce::String (d), nb.withHeight (14.0f).translated (0, nb.getHeight() - 14.0f),
-                            juce::Justification::centred);
-
-                // velocity + gate bars
-                for (auto rr : { RVel, RGate })
+                for (auto l : { LVel, LGate })
                 {
-                    auto bb = cell (rr, c);
-                    const float v = rr == RVel ? s.velocity.load() : s.gate.load();
+                    auto bb = cell (l, c);
                     g.setColour (juce::Colour (0xff0c0908));
                     g.fillRect (bb);
-                    // velocity = a column of lava, gate = a column of pale stone
+                    const float v = l == LVel ? s.velocity.load() : s.gate.load();
                     const float a = alpha * (s.on.load() ? 1.0f : 0.4f);
                     auto bar = bb.withTop (bb.getBottom() - bb.getHeight() * v);
-                    if (rr == RVel)
+                    if (l == LVel)
                         g.setGradientFill (juce::ColourGradient (juce::Colour (0xffff9a5a).withMultipliedAlpha (a), 0.0f, bb.getY(),
                                                                  juce::Colour (0xff8a0c06).withMultipliedAlpha (a), 0.0f, bb.getBottom(), false));
                     else
                         g.setGradientFill (juce::ColourGradient (juce::Colour (0xffa99b93).withMultipliedAlpha (a * 0.9f), 0.0f, bb.getY(),
                                                                  juce::Colour (0xff3e322e).withMultipliedAlpha (a), 0.0f, bb.getBottom(), false));
                     g.fillRect (bar);
-                    g.setColour ((rr == RVel ? juce::Colour (0xffffd0b0) : juce::Colour (0xfff0e6df)).withMultipliedAlpha (a * 0.9f));
-                    g.fillRect (bar.withHeight (1.5f));
                 }
-
-                // on / tie
-                for (auto rr : { ROn, RTie })
-                {
-                    auto bb = cell (rr, c).reduced (2.0f, 4.0f);
-                    const bool v = rr == ROn ? s.on.load() : s.tie.load();
-                    g.setColour ((v ? (rr == ROn ? colours::accent : colours::accent2) : colours::knobBody).withMultipliedAlpha (alpha));
-                    g.fillRoundedRectangle (bb, 3.0f);
-                }
-
+                auto tb = cell (LTie, c).reduced (2.0f, 3.0f);
+                g.setColour ((s.tie.load() ? colours::accent2 : colours::knobBody).withMultipliedAlpha (alpha));
+                g.fillRoundedRectangle (tb, 3.0f);
                 if (c % 4 == 0)
-                    drawText (g, juce::String (c + 1), cell (RTie, c).translated (0, 24).withHeight (14).toNearestInt(), 10.0f,
-                              colours::textDim, juce::Justification::centred, false, 1);
+                    drawText (g, juce::String (c + 1), cell (LTie, c).translated (0, 22).withHeight (14).toNearestInt(), 10.0f,
+                              colours::textDim, juce::Justification::centredLeft, false, 1);
             }
         }
 
         void mouseDown (const juce::MouseEvent& e) override
         {
-            dragRow = RCount;
-            for (int r = 0; r < RCount; ++r)
-                if (rowBounds ((Row) r).contains (e.getPosition())) dragRow = r;
-            if (dragRow == RCount) return;
+            lane = LCount;
+            for (int l = 0; l < LCount; ++l)
+                if (laneBounds ((Lane) l).contains (e.getPosition())) lane = l;
+            if (lane == LCount) return;
             const int c = columnAt (e.x);
             auto& s = pattern.steps[(size_t) c];
-            if (dragRow == RLock) { toggleValue = ! s.lock.load(); }
-            if (dragRow == ROn)   { toggleValue = ! s.on.load(); }
-            if (dragRow == RTie)  { toggleValue = ! s.tie.load(); }
-            if (e.mods.isPopupMenu() && dragRow == RNote) { s.degree = 0; changed(); return; }
+            lastCol = -1;
+            if (lane == LLock) toggleValue = ! s.lock.load();
+            if (lane == LTie)  toggleValue = ! s.tie.load();
+            if (lane == LRoll)
+            {
+                const int d = degreeAt (e.y);
+                // clicking the note that is already there silences the step; dragging then erases
+                if (e.mods.isPopupMenu()) rollMode = Erase;
+                else rollMode = (s.on.load() && s.degree.load() == d) ? Erase : Draw;
+            }
             apply (e);
         }
 
@@ -1018,48 +1160,59 @@ namespace
 
         void mouseDoubleClick (const juce::MouseEvent& e) override
         {
-            if (rowBounds (RNote).contains (e.getPosition())) { pattern.steps[(size_t) columnAt (e.x)].degree = 0; changed(); }
+            if (laneBounds (LRoll).contains (e.getPosition()))
+            {
+                auto& s = pattern.steps[(size_t) columnAt (e.x)];
+                s.degree = 0; s.on = true;
+                changed();
+            }
         }
 
         void apply (const juce::MouseEvent& e)
         {
-            if (dragRow == RCount) return;
+            if (lane == LCount) return;
             const int c = columnAt (e.x);
             auto& s = pattern.steps[(size_t) c];
-            const auto rb = rowBounds ((Row) dragRow).toFloat();
+            const auto rb = laneBounds ((Lane) lane).toFloat();
             const float rel = juce::jlimit (0.0f, 1.0f, (rb.getBottom() - (float) e.y) / rb.getHeight());
-            switch (dragRow)
+            switch (lane)
             {
-                case RLock: s.lock = toggleValue; break;
-                case RNote: s.degree = juce::jlimit (-14, 14, juce::roundToInt ((rel - 0.5f) * 2.0f * 14.0f)); break;
-                case RVel:  s.velocity = juce::jmax (0.05f, rel); break;
-                case RGate: s.gate = juce::jmax (0.05f, rel); break;
-                case ROn:   s.on = toggleValue; break;
-                case RTie:  s.tie = toggleValue; break;
+                case LLock: s.lock = toggleValue; break;
+                case LRoll:
+                    if (rollMode == Erase) { if (c != lastCol || ! e.mouseWasDraggedSinceMouseDown()) s.on = false; }
+                    else { s.degree = degreeAt (e.y); s.on = true; }
+                    break;
+                case LVel:  s.velocity = juce::jmax (0.05f, rel); break;
+                case LGate: s.gate = juce::jmax (0.05f, rel); break;
+                case LTie:  s.tie = toggleValue; break;
                 default: break;
             }
+            lastCol = c;
             changed();
         }
 
-        void changed() { ++pattern.changeCounter; repaint(); }
+        void changed() { ++pattern.changeCounter; proc.markArpEdited(); repaint(); }
 
         void tick()
         {
             const int cc = pattern.changeCounter.load(), ps = proc.arp.currentStep.load(), st = (int) std::lround (steps->load());
-            if (cc != lastCounter || ps != lastPlaying || st != lastSteps)
+            const int sk = (int) std::lround (scaleParam->load()) * 16 + (int) std::lround (keyParam->load());
+            if (cc != lastCounter || ps != lastPlaying || st != lastSteps || sk != lastScaleKey)
             {
-                lastCounter = cc; lastPlaying = ps; lastSteps = st;
+                lastCounter = cc; lastPlaying = ps; lastSteps = st; lastScaleKey = sk;
                 repaint();
             }
         }
 
         static constexpr int labelW = 78;
+        enum RollMode { Draw, Erase };
         PyraAudioProcessor& proc;
         ArpPattern& pattern;
-        std::atomic<float>* steps;
-        int dragRow = RCount;
+        std::atomic<float>* steps, *scaleParam, *keyParam;
+        int lane = LCount, lastCol = -1;
+        RollMode rollMode = Draw;
         bool toggleValue = false;
-        int lastCounter = -1, lastPlaying = -2, lastSteps = -1;
+        int lastCounter = -1, lastPlaying = -2, lastSteps = -1, lastScaleKey = -1;
     };
 
     /** Drag this onto a DAW track to get the arp pattern as MIDI; click to save a .mid file. */
@@ -1158,6 +1311,7 @@ namespace
             {
                 if (auto& hook = userActivityHook()) hook();
                 randomizer::randomize (*pr, randomizer::Arp, false, (uint32_t) juce::Random::getSystemRandom().nextInt());
+                pr->markArpEdited();
             };
             // a small die next to every control: rolls just that one
             const std::pair<juce::Component*, const char*> diceFor[] = { { mode, "arp_mode" }, { rate, "arp_rate" }, { scale, "arp_scale" },
@@ -1178,6 +1332,7 @@ namespace
                 if (auto& hook = userActivityHook()) hook();
                 const int n = (int) std::lround (pr->apvts.getRawParameterValue ("arp_steps")->load());
                 pr->arpPattern.randomize (n, (uint32_t) juce::Random::getSystemRandom().nextInt());
+                pr->markArpEdited();
                 // the random pattern is a melody: switch to Sequencer mode if a plain mode is selected
                 if (auto* m = pr->apvts.getParameter ("arp_mode"))
                     if ((int) std::lround (pr->apvts.getRawParameterValue ("arp_mode")->load()) < 6)
@@ -1188,6 +1343,7 @@ namespace
                 for (auto& s : pr->arpPattern.steps)
                     if (! s.lock.load()) { s.degree = 0; s.velocity = 0.8f; s.gate = 1.0f; s.on = true; s.tie = false; }
                 ++pr->arpPattern.changeCounter;
+                pr->markArpEdited();
             };
             unlockBtn.onClick = [pr] { for (auto& s : pr->arpPattern.steps) s.lock = false; ++pr->arpPattern.changeCounter; };
         }
@@ -1201,7 +1357,7 @@ namespace
                           colours::textDim, juce::Justification::centredLeft, true, 1);
             };
             lab (tr ("Mode"), mode); lab (tr ("Step Rate"), rate); lab (tr ("Scale"), scale); lab (tr ("Key"), key);
-            drawText (g, tr ("NOTE = scale steps added to the played note (Sequencer mode plays them as a melody). Drag to edit, double-click to reset. Locked steps survive RANDOM."),
+            drawText (g, tr ("Rows = notes of the scale from the key you hold (ROOT). In Sequencer mode the roll is the melody; in the other modes it moves each arpeggio note up or down. Locked steps survive RANDOM."),
                       editorPanel.getBounds().removeFromBottom (26).reduced (14, 2), 11.5f, colours::textDim,
                       juce::Justification::centredLeft, false, 1);
         }

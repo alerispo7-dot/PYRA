@@ -219,7 +219,28 @@ bool PresetManager::load (const juce::String& id)
     else data = juce::JSON::parse (info->file);
     if (! data.isObject()) return false;
 
+    // the ARP / CHORDS the user set up (and left on) stay: a new sound plays the same part
+    auto isOn = [this] (const char* id) { return proc.apvts.getRawParameterValue (id)->load() > 0.5f; };
+    const bool keepArp = proc.holdArp.load() && isOn ("arp_on");
+    const bool keepChords = proc.holdChords.load() && isOn ("chord_on");
+    std::vector<std::pair<juce::RangedAudioParameter*, float>> kept;
+    for (auto* ap : proc.getParameters())
+        if (auto* rp = dynamic_cast<juce::RangedAudioParameter*> (ap))
+            if ((keepArp && rp->getParameterID().startsWith ("arp_")) || (keepChords && rp->getParameterID().startsWith ("chord_")))
+                kept.push_back ({ rp, rp->getValue() });
+    const auto arpTree = proc.arpPattern.toTree();
+    const auto chordVar = proc.chordPattern.toVar();
+
+    ++proc.soundLoading;
     presetdata::apply (proc, data);
+    for (auto& [rp, v] : kept)
+        if (std::abs (rp->getValue() - v) > 1.0e-6f) rp->setValueNotifyingHost (v);
+    if (keepArp) proc.arpPattern.fromTree (arpTree);
+    if (keepChords) proc.chordPattern.fromVar (chordVar);
+    --proc.soundLoading;
+    proc.holdArp = keepArp;
+    proc.holdChords = keepChords;
+
     markLoaded (info->id, info->name);
     addRecent (info->id);
     return true;
@@ -250,7 +271,11 @@ void PresetManager::clearRecent()
 
 void PresetManager::loadInit()
 {
+    ++proc.soundLoading;
     presetdata::apply (proc, juce::var (new juce::DynamicObject()));
+    --proc.soundLoading;
+    proc.holdArp = false;
+    proc.holdChords = false;
     markLoaded ({}, "Init");
 }
 

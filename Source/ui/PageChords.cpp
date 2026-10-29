@@ -32,7 +32,8 @@ namespace
         {
             countParam = p.apvts.getParameter ("chord_count");
             setRepaintsOnMouseActivity (true);
-            setTooltip (tr ("Drag a chord onto another one to swap them, or onto an empty place to move it there (its old place becomes a rest)."));
+            setTooltip (tr ("Drag a chord onto another one to swap them, or onto an empty place to move it there (its old place becomes a rest).")
+                        + "\n" + tr ("The die on a card picks a new chord for that card only."));
         }
 
         juce::Rectangle<int> cardBounds (int k) const
@@ -42,6 +43,7 @@ namespace
             return { k * (w + gap), 0, w, cardH };
         }
         juce::Rectangle<int> lockRect (int k) const    { auto c = cardBounds (k); return { c.getRight() - 56, c.getY() + 4, 26, 22 }; }
+        juce::Rectangle<int> diceRect (int k) const    { auto c = cardBounds (k); return { c.getRight() - 84, c.getY() + 4, 26, 22 }; }
         juce::Rectangle<int> removeRect (int k) const  { auto c = cardBounds (k); return { c.getRight() - 28, c.getY() + 4, 24, 22 }; }
 
         juce::Rectangle<int> upRect (int k) const      { auto c = cardBounds (k); return { c.getCentreX() - 22, c.getY() + 32, 44, 22 }; }
@@ -73,7 +75,7 @@ namespace
                 countParam->setValueNotifyingHost (countParam->convertTo0to1 ((float) n));
                 countParam->endChangeGesture();
             }
-            ++pattern.changeCounter;
+            ++pattern.changeCounter; proc.markChordsEdited();
             repaint();
         }
 
@@ -125,7 +127,7 @@ namespace
         }
         bool onControl (int k, juce::Point<int> p) const
         {
-            return removeRect (k).contains (p) || lockRect (k).contains (p) || upRect (k).contains (p) || downRect (k).contains (p)
+            return removeRect (k).contains (p) || lockRect (k).contains (p) || diceRect (k).contains (p) || upRect (k).contains (p) || downRect (k).contains (p)
                 || qualityRect (k).contains (p) || lengthRect (k).contains (p) || playRect (k).contains (p);
         }
 
@@ -189,6 +191,19 @@ namespace
                 g.setColour ((slot.lock.load() ? colours::accent2 : colours::edge).withMultipliedAlpha (alpha));
                 g.fillRoundedRectangle (lk.withTrimmedTop (lk.getHeight() * 0.45f), 2.0f);
                 g.drawEllipse (lk.withTrimmedBottom (lk.getHeight() * 0.4f).reduced (lk.getWidth() * 0.22f, 1.0f), 1.5f);
+                }
+
+                // die: a new chord for this card only
+                if (used)
+                {
+                    auto dr = diceRect (k).toFloat().reduced (4.0f, 2.0f);
+                    const bool hot = over && diceRect (k).contains (mouse);
+                    dr = dr.withSizeKeepingCentre (dr.getHeight(), dr.getHeight());
+                    g.setColour (hot ? colours::accent2 : colours::textDim);
+                    g.drawRoundedRectangle (dr.reduced (0.75f), 3.5f, 1.5f);
+                    const float u = dr.getWidth() / 4.0f;
+                    for (auto [px, py] : { std::pair<float, float> { 1, 1 }, { 3, 1 }, { 2, 2 }, { 1, 3 }, { 3, 3 } })
+                        g.fillEllipse (dr.getX() + px * u - 1.6f, dr.getY() + py * u - 1.6f, 3.2f, 3.2f);
                 }
 
                 // remove (only when there is more than one chord)
@@ -358,17 +373,25 @@ namespace
                     countParam->beginChangeGesture();
                     countParam->setValueNotifyingHost (countParam->convertTo0to1 ((float) (k + 1)));
                     countParam->endChangeGesture();
-                    ++pattern.changeCounter;
+                    ++pattern.changeCounter; proc.markChordsEdited();
                     repaint();
                     return;
                 }
                 selected = k;
+                if (diceRect (k).contains (e.getPosition()))
+                {
+                    pattern.randomizeOne (k, count, s.scale, s.complexity, (uint32_t) juce::Random::getSystemRandom().nextInt());
+                    proc.markChordsEdited();
+                    proc.chords.preview (k);
+                    repaint();
+                    return;
+                }
                 if (removeRect (k).contains (e.getPosition()) && count > 1) { removeChord (k); return; }
                 if (slot.empty.load() && lengthRect (k).contains (e.getPosition())) { showLengthMenu (k); return; }
                 if (slot.empty.load())
                 {   // a hole: click puts a chord back in
                     resetSlot (slot, false);
-                    ++pattern.changeCounter;
+                    ++pattern.changeCounter; proc.markChordsEdited();
                     proc.chords.preview (k);
                     repaint();
                     return;
@@ -381,7 +404,7 @@ namespace
                 else if (lengthRect (k).contains (e.getPosition())) { showLengthMenu (k); return; }
                 else if (e.mods.isPopupMenu()) { showQualityMenu (k); return; }
                 else proc.chords.preview (k);
-                ++pattern.changeCounter;
+                ++pattern.changeCounter; proc.markChordsEdited();
                 repaint();
                 return;
             }
@@ -398,7 +421,7 @@ namespace
                     const int d = w.deltaY > 0 ? 1 : -1;
                     slot.degree = juce::jlimit (-7, 21, slot.degree.load() + d);
                     slot.shift = 0;
-                    ++pattern.changeCounter;
+                    ++pattern.changeCounter; proc.markChordsEdited();
                     repaint();
                     return;
                 }
@@ -421,7 +444,7 @@ namespace
                 if (r == 100) slot.shift = slot.shift.load() < 0 ? 0 : -1;
                 else if (r == 101) slot.shift = slot.shift.load() > 0 ? 0 : 1;
                 else slot.quality = r - 1;
-                ++safe->pattern.changeCounter;
+                ++safe->pattern.changeCounter; safe->proc.markChordsEdited();
                 safe->proc.chords.preview (k);
                 safe->repaint();
             });
@@ -442,7 +465,7 @@ namespace
             {
                 if (safe == nullptr || r == 0) return;
                 safe->pattern.slots[(size_t) k].length = r - 1;
-                ++safe->pattern.changeCounter;
+                ++safe->pattern.changeCounter; safe->proc.markChordsEdited();
                 safe->repaint();
             });
         }
@@ -580,13 +603,15 @@ namespace
             {
                 if (auto& hook = userActivityHook()) hook();
                 randomizer::randomize (*pr, randomizer::Chords, false, (uint32_t) juce::Random::getSystemRandom().nextInt());
+                pr->markChordsEdited();
             };
             randomAllBtn.onClick = [pr]
             {
                 if (auto& hook = userActivityHook()) hook();
                 randomizer::randomizeChordsAll (*pr, (uint32_t) juce::Random::getSystemRandom().nextInt());
+                pr->markChordsEdited();
             };
-            unlockBtn.onClick = [pr] { for (auto& s : pr->chordPattern.slots) s.lock = false; ++pr->chordPattern.changeCounter; };
+            unlockBtn.onClick = [pr] { for (auto& s : pr->chordPattern.slots) s.lock = false; ++pr->chordPattern.changeCounter; pr->markChordsEdited(); };
         }
 
         void paintOverChildren (juce::Graphics& g) override

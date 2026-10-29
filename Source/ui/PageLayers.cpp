@@ -188,8 +188,8 @@ namespace
             presetBtn.onClick = [this] { showPresetMenu(); };
             prevBtn.onClick = [this] { step (-1); };
             nextBtn.onClick = [this] { step (1); };
-            prevBtn.setTooltip (tr ("Previous preset (same category)"));
-            nextBtn.setTooltip (tr ("Next preset (same category)"));
+            prevBtn.setTooltip (tr ("Previous preset (same sub-category)"));
+            nextBtn.setTooltip (tr ("Next preset (same sub-category)"));
             editBtn.setTooltip (tr ("Edit this layer: every page (SYNTH, FX, ARP...) now shows this sound"));
             editBtn.onClick = [this] { if (onEdit) onEdit (k); };
             muteBtn.setTooltip (tr ("Mute"));
@@ -318,11 +318,11 @@ namespace
         void step (int delta)
         {
             auto& pm = master.getOrCreateLayer (k).getPresetManager();
-            juce::String cat;
-            if (auto* cur = pm.find (pm.getCurrentId())) cat = cur->category;
+            juce::String cat, sub;
+            if (auto* cur = pm.find (pm.getCurrentId())) { cat = cur->category; sub = cur->subCategory; }
             juce::StringArray ids;
             for (auto& p : pm.getAll())
-                if (cat.isEmpty() || p.category == cat) ids.add (p.id);
+                if (cat.isEmpty() || (p.category == cat && p.subCategory == sub)) ids.add (p.id);
             if (ids.isEmpty()) return;
             int i = ids.indexOf (pm.getCurrentId());
             i = i < 0 ? (delta > 0 ? 0 : ids.size() - 1) : (i + delta + ids.size()) % ids.size();
@@ -339,16 +339,30 @@ namespace
             juce::StringArray cats = PresetManager::getCategories();
             for (auto& p : pm.getAll())
                 if (! cats.contains (p.category) && p.category.isNotEmpty()) cats.add (p.category);
+            juce::String curCat, curSub;
+            if (auto* cur = pm.find (pm.getCurrentId())) { curCat = cur->category; curSub = cur->subCategory; }
             for (auto& cat : cats)
             {
-                juce::PopupMenu sub;
+                // category > sub-category > presets (like the sub-category chips in the PRESETS page)
+                juce::StringArray subs;
                 for (auto& p : pm.getAll())
-                    if (p.category == cat)
-                    {
-                        ids.push_back (p.id);
-                        sub.addItem ((int) ids.size(), p.name + (p.factory ? "" : "  (user)"), true, p.id == pm.getCurrentId());
-                    }
-                if (sub.getNumItems() > 0) menu.addSubMenu (tr (cat), sub);
+                    if (p.category == cat) subs.addIfNotAlreadyThere (p.subCategory);
+                juce::PopupMenu catMenu;
+                for (auto& sc : subs)
+                {
+                    juce::PopupMenu sub;
+                    for (auto& p : pm.getAll())
+                        if (p.category == cat && p.subCategory == sc)
+                        {
+                            ids.push_back (p.id);
+                            sub.addItem ((int) ids.size(), p.name + (p.factory ? "" : "  (" + tr ("user") + ")"), true, p.id == pm.getCurrentId());
+                        }
+                    if (sub.getNumItems() == 0) continue;
+                    const auto label = (sc.isNotEmpty() ? tr (sc) : tr ("User")) + "  (" + juce::String (sub.getNumItems()) + ")";
+                    if (subs.size() == 1) catMenu = sub;
+                    else catMenu.addSubMenu (label, sub, true, nullptr, cat == curCat && sc == curSub);
+                }
+                if (catMenu.getNumItems() > 0) menu.addSubMenu (tr (cat), catMenu, true, nullptr, cat == curCat);
             }
             juce::Component::SafePointer<LayerRow> safe (this);
             menu.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (&presetBtn).withMaximumNumColumns (3),

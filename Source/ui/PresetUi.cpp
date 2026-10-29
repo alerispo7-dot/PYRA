@@ -450,8 +450,24 @@ namespace
             saveBtn.onClick = [this] { if (onSave) onSave(); };
             openFolder.onClick = [] { auto d = PresetManager::getUserFolder().getChildFile ("Presets"); d.createDirectory(); d.startAsProcess(); };
             rescan.onClick = [this] { pm.rescan(); };
+
+            // the window opens where the sound you are playing lives: its category, its sub-category, its row
+            if (filter.category.isEmpty() && filter.search.isEmpty())
+                if (auto* cur = pm.find (pm.getCurrentId()))
+                {
+                    filter.category = cur->category;
+                    filter.subCategory = cur->subCategory;
+                }
             refresh();
         }
+
+        void scrollToCurrent()
+        {
+            for (int i = 0; i < rows.size(); ++i)
+                if (rows[i]->id == pm.getCurrentId()) { list.scrollToEnsureRowIsOnscreen (i); break; }
+        }
+
+        void visibilityChanged() override { if (isVisible()) scrollToCurrent(); }
 
         ~PresetPage() override { pm.removeChangeListener (this); }
 
@@ -622,6 +638,7 @@ namespace
             openFolder.setBounds (row3.removeFromLeft (row3.getWidth() / 2 - 3));
             row3.removeFromLeft (6);
             rescan.setBounds (row3);
+            scrollToCurrent();
         }
 
         void mouseUp (const juce::MouseEvent& e) override
@@ -768,6 +785,7 @@ namespace
             int idx = -1;
             for (int i = 0; i < rows.size(); ++i) if (rows[i]->id == pm.getCurrentId()) idx = i;
             if (idx >= 0) { list.selectRow (idx, true, true); }
+            if (pm.getCurrentId() != lastShownId) { lastShownId = pm.getCurrentId(); if (idx >= 0) list.scrollToEnsureRowIsOnscreen (idx); }
             const auto* sel = selectedPreset();
             rename.setEnabled (sel != nullptr && ! sel->factory);
             remove.setEnabled (sel != nullptr && ! sel->factory);
@@ -835,7 +853,7 @@ namespace
         juce::ListBox list;
         juce::TextButton addTag, rename, remove, saveBtn, openFolder, rescan;
         juce::Array<const PresetInfo*> rows;
-        juce::String selectedId;
+        juce::String selectedId, lastShownId;
         SampleLayerPanel sampleLayer;
     };
 }

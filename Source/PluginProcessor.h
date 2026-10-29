@@ -51,6 +51,15 @@ public:
     pyra::LfoDrawnSet lfoDrawn;   // the hand-drawn LFO shapes
     std::atomic<double> hostBpm { 120.0 };
 
+    /** ARP / CHORDS the user set up stay when another preset is loaded (until the user turns them off). */
+    std::atomic<bool> holdArp { false }, holdChords { false };
+    /** Concert pitch: the frequency of A4 (440 Hz standard; 432, 442... in SETTINGS). Belongs to the project, not to a preset. */
+    std::atomic<float> concertA { 440.0f };
+    /** > 0 while a preset, an undo step or a saved state is being applied (message thread). */
+    int soundLoading = 0;
+    void markArpEdited()    { if (soundLoading == 0) holdArp = true; }
+    void markChordsEdited() { if (soundLoading == 0) holdChords = true; }
+
     // current preset (message thread only); saved with the project
     juce::String presetId, presetName { "Init" };
     pyra::PresetManager& getPresetManager();
@@ -111,6 +120,17 @@ private:
     double preparedRate = 0.0;
     int preparedBlock = 0;
     juce::CriticalSection layerLock;
+
+    struct SectionWatch : juce::AudioProcessorValueTreeState::Listener
+    {
+        explicit SectionWatch (PyraAudioProcessor& p) : proc (p) {}
+        void parameterChanged (const juce::String& id, float) override
+        {
+            if (id.startsWith ("arp_")) proc.markArpEdited();
+            else if (id.startsWith ("chord_")) proc.markChordsEdited();
+        }
+        PyraAudioProcessor& proc;
+    } sectionWatch { *this };
 
     pyra::ParamRefs refs;
     pyra::Settings settings;
