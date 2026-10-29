@@ -152,7 +152,8 @@ jobs:
   release:
     name: Publish downloads
     needs: build
-    if: github.ref == 'refs/heads/main'
+    # publish what was built even if one system is missing (e.g. GitHub had no free Mac): the notes say so
+    if: ${{ !cancelled() && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     steps:
       - name: Get the version
@@ -173,7 +174,11 @@ jobs:
         run: |
           MM=$(sed -n 's/^project(PYRA VERSION \([0-9]*\.[0-9]*\).*/\1/p' CMakeLists.txt)
           VERSION="v${MM:-0.7}.${{ github.run_number }}"
+          ls dist/PYRA-*.zip >/dev/null 2>&1 || { echo "nothing was built"; exit 1; }
+          NOTES="Scarica PYRA-macOS.zip (Mac, Apple Silicon e Intel) oppure PYRA-Windows.zip. Dentro trovi le istruzioni di installazione (INSTALL_MAC.txt / INSTALL_WINDOWS.txt)."
+          [ -f dist/PYRA-macOS.zip ] || NOTES="$NOTES Questa versione e' solo per Windows: per il Mac usa la versione precedente (GitHub non aveva un Mac libero per compilarla)."
+          [ -f dist/PYRA-Windows.zip ] || NOTES="$NOTES Questa versione e' solo per Mac: per Windows usa la versione precedente."
           gh release create "$VERSION" dist/PYRA-*.zip \
             --repo "${{ github.repository }}" --target "${{ github.sha }}" --latest \
             --title "PYRA $VERSION" \
-            --notes "Scarica PYRA-macOS.zip (Mac, Apple Silicon e Intel) oppure PYRA-Windows.zip. Dentro trovi le istruzioni di installazione (INSTALL_MAC.txt / INSTALL_WINDOWS.txt)."
+            --notes "$NOTES"
