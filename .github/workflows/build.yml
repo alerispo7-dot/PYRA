@@ -17,7 +17,7 @@ jobs:
       matrix:
         include:
           - name: macOS
-            os: macos-14
+            os: macos-15-intel   # Intel runners have free places more often; the build is universal (Apple Silicon + Intel) anyway
           - name: Windows
             os: windows-latest
 
